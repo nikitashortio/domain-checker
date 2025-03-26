@@ -551,15 +551,25 @@ function checkDomain(updateType = 'all') {
             loadingElement.classList.add('d-none');
         }
 
-        // Show the first DNS resolver tab if we're on the DNS tab
+        // If we're on the DNS tab or updating DNS, ensure it's properly displayed
         const activeTab = document.querySelector('.tab-pane.active');
-        if (activeTab && activeTab.id === 'dns') {
+        if (activeTab && (activeTab.id === 'dns' || updateType === 'dns')) {
+            // Show DNS controls and resolvers
+            const dnsControls = document.querySelector('.dns-controls');
+            const dnsResolvers = document.querySelector('.dns-resolvers');
+            const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+            
+            if (dnsControls) dnsControls.style.display = 'block';
+            if (dnsResolvers) dnsResolvers.style.display = 'block';
+            if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+
+            // Activate the first DNS resolver tab
             const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
             if (firstDnsTab) {
                 const target = firstDnsTab.getAttribute('data-bs-target');
                 if (target) {
                     const tabId = target.replace('#', '');
-                    switchDNSResolver(tabId);
+                    activateDnsTab(tabId);
                 }
             }
         }
@@ -642,13 +652,23 @@ function updateDNSResults(data) {
         }
     });
 
-    // Show the first DNS resolver tab
-    const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
-    if (firstDnsTab) {
-        const target = firstDnsTab.getAttribute('data-bs-target');
+    // Ensure the active DNS resolver tab is visible
+    const activeDnsTab = document.querySelector('#dns .nav-pills .nav-link.active');
+    if (activeDnsTab) {
+        const target = activeDnsTab.getAttribute('data-bs-target');
         if (target) {
             const tabId = target.replace('#', '');
-            switchDNSResolver(tabId);
+            activateDnsTab(tabId);
+        }
+    } else {
+        // If no active tab, activate the first one
+        const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
+        if (firstDnsTab) {
+            const target = firstDnsTab.getAttribute('data-bs-target');
+            if (target) {
+                const tabId = target.replace('#', '');
+                activateDnsTab(tabId);
+            }
         }
     }
 }
