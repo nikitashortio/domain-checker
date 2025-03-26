@@ -112,6 +112,7 @@ body {
     display: none;
 }
 
+/* Only show DNS elements when DNS tab is active */
 #dns.active.show .dns-controls,
 #dns.active.show .dns-resolvers,
 #dns.active.show .dns-table-wrapper {

@@ -75,6 +75,7 @@ function activateTab(tabId) {
     // Hide all tab panes
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
     });
     
     // Remove active class from all nav links
@@ -86,12 +87,21 @@ function activateTab(tabId) {
     const selectedPane = document.getElementById(tabId);
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
+        selectedPane.style.display = 'block';
     }
     
     // Add active class to the clicked nav link
     const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
     if (selectedLink) {
         selectedLink.classList.add('active');
+    }
+
+    // Hide DNS elements if not on DNS tab
+    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper');
+    if (tabId !== 'dns') {
+        dnsElements.forEach(element => {
+            element.style.display = 'none';
+        });
     }
 }
 
@@ -118,11 +128,6 @@ function activateDnsTab(tabId) {
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
         selectedPane.style.display = 'block';
-        // Ensure the parent DNS tab is visible
-        const dnsTab = document.getElementById('dns');
-        if (dnsTab) {
-            dnsTab.style.display = 'block';
-        }
     }
     
     if (selectedLink) {
