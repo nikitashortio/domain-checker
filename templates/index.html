@@ -62,71 +62,84 @@
 
         <div class="tab-content mt-3" id="resultTabsContent">
             <div id="dns" class="tab-pane fade">
-                <div class="dns-controls">
-                    <select id="dnsRecordType" class="form-select">
-                        <option value="all">All Records</option>
-                        <option value="A">A</option>
-                        <option value="AAAA">AAAA</option>
-                        <option value="MX">MX</option>
-                        <option value="NS">NS</option>
-                        <option value="TXT">TXT</option>
-                        <option value="CNAME">CNAME</option>
-                        <option value="SOA">SOA</option>
-                        <option value="CAA">CAA</option>
-                    </select>
-                </div>
-                <div class="dns-resolvers">
-                    <ul class="nav nav-pills" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#cloudflare" type="button" role="tab">Cloudflare</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#google" type="button" role="tab">Google</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#quad9" type="button" role="tab">Quad9</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="tab-content dns-table-wrapper">
-                    <div class="tab-pane fade show active" id="cloudflare" role="tabpanel">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                                    <th>TTL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dns-results-cloudflare"></tbody>
-                        </table>
+                <div class="dns-controls mb-3">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <select class="form-select" id="dnsRecordType">
+                                <option value="all">All Records</option>
+                                <option value="A">A</option>
+                                <option value="AAAA">AAAA</option>
+                                <option value="MX">MX</option>
+                                <option value="NS">NS</option>
+                                <option value="TXT">TXT</option>
+                                <option value="CNAME">CNAME</option>
+                                <option value="SOA">SOA</option>
+                                <option value="CAA">CAA</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-dark" onclick="refreshDNS()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="tab-pane fade" id="google" role="tabpanel">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                                    <th>TTL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dns-results-google"></tbody>
-                        </table>
+                </div>
+                <ul class="nav nav-pills dns-resolvers mb-3" id="dnsResolvers" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#cloudflare" type="button">Cloudflare</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#google" type="button">Google</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#quad9" type="button">Quad9</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="dnsResolversContent">
+                    <div class="tab-pane fade show active" id="cloudflare">
+                        <div class="dns-table-wrapper">
+                            <table class="dns-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                        <th>TTL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dns-results-cloudflare"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="tab-pane fade" id="quad9" role="tabpanel">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                                    <th>TTL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dns-results-quad9"></tbody>
-                        </table>
+                    <div class="tab-pane fade" id="google">
+                        <div class="dns-table-wrapper">
+                            <table class="dns-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                        <th>TTL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dns-results-google"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="quad9">
+                        <div class="dns-table-wrapper">
+                            <table class="dns-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                        <th>TTL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dns-results-quad9"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

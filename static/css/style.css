@@ -1235,17 +1235,20 @@ body {
     display: block;
 }
 
-#dns .table {
+#dns .dns-table {
     margin-bottom: 0;
+    width: 100%;
 }
 
-#dns .table th {
+#dns .dns-table th {
     background-color: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem;
 }
 
-#dns .table td {
+#dns .dns-table td {
     vertical-align: middle;
+    padding: 0.75rem;
 }
 
 #dns .error-row td {
@@ -1260,4 +1263,4 @@ body {
 #dns .no-records td {
     text-align: center;
     color: #6c757d;
-} 
+}
