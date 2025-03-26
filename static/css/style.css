@@ -93,14 +93,78 @@ body {
 /* DNS Controls and Resolvers */
 .dns-controls,
 .dns-resolvers,
-.dns-table-wrapper {
+.dns-table-wrapper,
+.dns-table {
     display: none;
 }
 
 /* Only show DNS elements when DNS tab is active */
 #dns.active.show .dns-controls,
 #dns.active.show .dns-resolvers,
-#dns.active.show .dns-table-wrapper {
+#dns.active.show .dns-table-wrapper,
+#dns.active.show .dns-table {
+    display: block !important;
+}
+
+/* Hide DNS elements in other tabs */
+#iframe .dns-controls,
+#iframe .dns-resolvers,
+#iframe .dns-table-wrapper,
+#iframe .nav-pills,
+#iframe .dns-table,
+#whois .dns-controls,
+#whois .dns-resolvers,
+#whois .dns-table-wrapper,
+#whois .nav-pills,
+#whois .dns-table,
+#ssl .dns-controls,
+#ssl .dns-resolvers,
+#ssl .dns-table-wrapper,
+#ssl .nav-pills,
+#ssl .dns-table,
+#availability .dns-controls,
+#availability .dns-resolvers,
+#availability .dns-table-wrapper,
+#availability .nav-pills,
+#availability .dns-table,
+#referrer .dns-controls,
+#referrer .dns-resolvers,
+#referrer .dns-table-wrapper,
+#referrer .nav-pills,
+#referrer .dns-table,
+#redirects .dns-controls,
+#redirects .dns-resolvers,
+#redirects .dns-table-wrapper,
+#redirects .nav-pills,
+#redirects .dns-table,
+#headers .dns-controls,
+#headers .dns-resolvers,
+#headers .dns-table-wrapper,
+#headers .nav-pills,
+#headers .dns-table,
+#security .dns-controls,
+#security .dns-resolvers,
+#security .dns-table-wrapper,
+#security .nav-pills,
+#security .dns-table {
+    display: none !important;
+}
+
+/* Remove all domain-entered class styles that affect DNS visibility */
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper,
+.domain-entered .dns-table,
+.domain-entered #dns .nav-pills {
+    display: none;
+}
+
+/* Ensure DNS elements are only visible when DNS tab is active */
+#dns.active.show .dns-controls,
+#dns.active.show .dns-resolvers,
+#dns.active.show .dns-table-wrapper,
+#dns.active.show .dns-table,
+#dns.active.show .nav-pills {
     display: block !important;
 }
 
@@ -195,22 +259,6 @@ body {
 #iframe .results-container,
 #iframe .iframe-test-container {
     display: block;
-}
-
-/* Remove all domain-entered class styles that affect DNS visibility */
-.domain-entered .dns-controls,
-.domain-entered .dns-resolvers,
-.domain-entered .dns-table-wrapper,
-.domain-entered #dns .nav-pills {
-    display: none;
-}
-
-/* Ensure DNS elements are only visible when DNS tab is active */
-#dns.active.show .dns-controls,
-#dns.active.show .dns-resolvers,
-#dns.active.show .dns-table-wrapper,
-#dns.active.show .nav-pills {
-    display: block !important;
 }
 
 /* DNS Records */

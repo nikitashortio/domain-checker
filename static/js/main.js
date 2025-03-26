@@ -102,6 +102,10 @@ function activateTab(tabId) {
         dnsElements.forEach(element => {
             element.style.display = 'none';
         });
+        // Also hide any DNS results that might have been shown
+        document.querySelectorAll('.dns-table').forEach(table => {
+            table.style.display = 'none';
+        });
     } else {
         // Show DNS elements only when DNS tab is active
         dnsElements.forEach(element => {
@@ -121,6 +125,10 @@ function activateTab(tabId) {
         if (iframeTest) {
             iframeTest.style.display = 'block';
         }
+        // Hide any DNS elements that might be in the iframe tab
+        document.querySelectorAll('#iframe .dns-controls, #iframe .dns-resolvers, #iframe .dns-table-wrapper, #iframe .nav-pills, #iframe .dns-table').forEach(element => {
+            element.style.display = 'none';
+        });
     }
 }
 
