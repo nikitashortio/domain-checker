@@ -1004,11 +1004,11 @@ function getReferrerPolicyExplanation(policy) {
 }
 
 function updateIframeResults(data) {
-    const iframeTab = document.getElementById('iframe');
-    if (!iframeTab) return;
+    const iframeResults = document.getElementById('iframe-results');
+    if (!iframeResults) return;
 
     if (data.error) {
-        iframeTab.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        iframeResults.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
         return;
     }
 
@@ -1054,7 +1054,7 @@ function updateIframeResults(data) {
             <p>${getIframeExplanation(data)}</p>
         </div>`;
     
-    iframeTab.innerHTML = html;
+    iframeResults.innerHTML = html;
 }
 
 function getIframeExplanation(data) {
