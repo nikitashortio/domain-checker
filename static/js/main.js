@@ -96,23 +96,15 @@ function activateTab(tabId) {
         selectedLink.classList.add('active');
     }
 
-    // Hide DNS elements if not on DNS tab
-    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, #dns .nav-pills, .dns-table');
-    if (tabId !== 'dns') {
-        dnsElements.forEach(element => {
-            element.style.display = 'none';
-        });
-        // Also hide any DNS results that might have been shown
-        document.querySelectorAll('.dns-table').forEach(table => {
-            table.style.display = 'none';
-        });
-        // Remove active class from DNS tab button
-        const dnsTabButton = document.getElementById('dns-tab');
-        if (dnsTabButton) {
-            dnsTabButton.classList.remove('active');
-        }
-    } else {
-        // Show DNS elements only when DNS tab is active
+    // Hide all DNS elements first
+    const allDnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+    allDnsElements.forEach(element => {
+        element.style.display = 'none';
+    });
+
+    // Only show DNS elements if we're on the DNS tab
+    if (tabId === 'dns') {
+        const dnsElements = document.querySelectorAll('#dns .dns-controls, #dns .dns-resolvers, #dns .dns-table-wrapper, #dns .dns-table, #dns .nav-pills');
         dnsElements.forEach(element => {
             element.style.display = 'block';
         });
@@ -130,10 +122,6 @@ function activateTab(tabId) {
         if (iframeTest) {
             iframeTest.style.display = 'block';
         }
-        // Hide any DNS elements that might be in the iframe tab
-        document.querySelectorAll('#iframe .dns-controls, #iframe .dns-resolvers, #iframe .dns-table-wrapper, #iframe .nav-pills, #iframe .dns-table').forEach(element => {
-            element.style.display = 'none';
-        });
     }
 }
 
