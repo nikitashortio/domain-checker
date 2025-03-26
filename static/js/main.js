@@ -168,7 +168,6 @@ function switchDNSResolver(tabId) {
     // Remove active class from all tabs and panes
     dnsTabPanes.forEach(pane => {
         pane.classList.remove('active', 'show');
-        pane.style.display = 'none';
     });
     
     dnsNavLinks.forEach(link => {
@@ -187,6 +186,17 @@ function switchDNSResolver(tabId) {
     if (selectedLink) {
         selectedLink.classList.add('active');
     }
+
+    // Ensure parent DNS tab and its elements remain visible
+    const dnsTab = document.getElementById('dns');
+    const dnsControls = document.querySelector('.dns-controls');
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    
+    if (dnsTab) dnsTab.style.display = 'block';
+    if (dnsControls) dnsControls.style.display = 'block';
+    if (dnsResolvers) dnsResolvers.style.display = 'block';
+    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
 }
 
 // Add event listeners for tab clicks
