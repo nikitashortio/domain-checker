@@ -329,7 +329,7 @@ body {
 #dns .nav-pills .nav-link.active {
     background-color: #f8f9fa;
     color: #000;
-    border-bottom: 2px solid #000;
+    border: 1px solid #000;
 }
 
 /* Ensure DNS results tables are visible */
