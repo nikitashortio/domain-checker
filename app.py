@@ -9,10 +9,6 @@ import json
 from datetime import datetime, date
 import re
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 
@@ -436,55 +432,82 @@ def get_headers(domain):
 def check_web_risk(domain):
     try:
         # VirusTotal API configuration
-        vt_api_key = '7b4e00ad6eb1cea6c55c31af621a0b7647704712914c62b8e9a1f4302c007e78'
+        vt_api_key = '7b4e00ad6eb1cea6c55c31af621a0b7647704712914c62b8e9a1f4302c007e78'  # Hardcoded API key
         vt_base_url = 'https://www.virustotal.com/vtapi/v2'
+        
+        # Ensure domain has protocol
+        if not domain.startswith(('http://', 'https://')):
+            domain = f'https://{domain}'
         
         # First, submit the domain for scanning if it hasn't been scanned recently
         scan_url = f'{vt_base_url}/url/scan'
         scan_params = {'apikey': vt_api_key, 'url': domain}
-        scan_response = requests.post(scan_url, data=scan_params)
         
-        if scan_response.status_code == 200:
+        try:
+            scan_response = requests.post(scan_url, data=scan_params, timeout=10)
+            scan_response.raise_for_status()  # Raise an exception for bad status codes
+            
             scan_result = scan_response.json()
             resource = scan_result.get('resource')
             
             # Now get the report
             report_url = f'{vt_base_url}/url/report'
             report_params = {'apikey': vt_api_key, 'resource': resource}
-            report_response = requests.get(report_url, params=report_params)
             
-            if report_response.status_code == 200:
-                report = report_response.json()
-                
-                # Calculate score based on positives and total scanners
-                total_scanners = report.get('total', 0)
-                positives = report.get('positives', 0)
-                score = max(0, 100 - (positives / total_scanners * 100)) if total_scanners > 0 else 0
-                
-                # Get scan date
-                scan_date = report.get('scan_date')
-                if scan_date:
-                    scan_date = datetime.fromtimestamp(scan_date).isoformat()
-                
+            report_response = requests.get(report_url, params=report_params, timeout=10)
+            report_response.raise_for_status()  # Raise an exception for bad status codes
+            
+            report = report_response.json()
+            
+            # Check if the report indicates the resource was not found
+            if report.get('response_code') == 0:
                 return {
-                    'scan_date': scan_date,
+                    'scan_date': None,
                     'virustotal': {
-                        'status': 'Scanned',
-                        'score': round(score, 2),
-                        'positives': positives,
-                        'total_scanners': total_scanners,
-                        'url': f'https://www.virustotal.com/gui/domain/{domain}',
-                        'scans': report.get('scans', {})
+                        'status': 'Not found',
+                        'score': 100,  # Default to 100 if not found
+                        'positives': 0,
+                        'total_scanners': 0,
+                        'url': f'https://www.virustotal.com/gui/domain/{domain.replace("https://", "").replace("http://", "")}',
+                        'scans': {}
                     }
                 }
-        
-        # If we get here, something went wrong with the API calls
-        return {
-            'error': 'Failed to get VirusTotal report',
-            'scan_date': None,
-            'virustotal': None
-        }
-        
+            
+            # Calculate score based on positives and total scanners
+            total_scanners = report.get('total', 0)
+            positives = report.get('positives', 0)
+            score = max(0, 100 - (positives / total_scanners * 100)) if total_scanners > 0 else 100
+            
+            # Get scan date
+            scan_date = report.get('scan_date')
+            if scan_date:
+                try:
+                    scan_date = datetime.strptime(scan_date, '%Y-%m-%d %H:%M:%S').isoformat()
+                except ValueError:
+                    try:
+                        scan_date = datetime.fromtimestamp(scan_date).isoformat()
+                    except (ValueError, TypeError):
+                        scan_date = None
+            
+            return {
+                'scan_date': scan_date,
+                'virustotal': {
+                    'status': 'Scanned',
+                    'score': round(score, 2),
+                    'positives': positives,
+                    'total_scanners': total_scanners,
+                    'url': f'https://www.virustotal.com/gui/domain/{domain.replace("https://", "").replace("http://", "")}',
+                    'scans': report.get('scans', {})
+                }
+            }
+            
+        except requests.exceptions.RequestException as e:
+            return {
+                'error': f'VirusTotal API request failed: {str(e)}',
+                'scan_date': None,
+                'virustotal': None
+            }
+            
     except Exception as e:
         return {
             'error': f'Failed to check web risk: {str(e)}',
@@ -578,6 +601,9 @@ def index():
 def check_domain():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Invalid JSON data'}), 400
+            
         domain = data.get('domain', '').strip()
         update_type = data.get('update_type', 'all')
         
@@ -586,6 +612,7 @@ def check_domain():
             
         print(f"Starting check for domain: {domain}")
         
+        # Initialize result dictionary
         result = {
             'dns': {},
             'whois': {},
@@ -598,13 +625,18 @@ def check_domain():
             'security': {}
         }
         
+        # Clean domain input
+        if domain.startswith(('http://', 'https://')):
+            parsed = urlparse(domain)
+            domain = parsed.netloc
+        
         try:
             if update_type == 'all' or update_type == 'dns':
                 dns_record_type = data.get('dns_record_type', 'all')
                 result['dns'] = check_dns_records(domain, dns_record_type)
             
             if update_type == 'all' or update_type == 'whois':
-                result['whois'] = check_whois(domain)
+                result['whois'] = check_whois_info(domain)
             
             if update_type == 'all' or update_type == 'ssl':
                 result['ssl'] = check_ssl_certificate(domain)
@@ -625,13 +657,18 @@ def check_domain():
                 result['headers'] = get_headers(domain)
             
             if update_type == 'all' or update_type == 'security':
-                result['security'] = check_web_risk(domain)
+                security_result = check_web_risk(domain)
+                if isinstance(security_result, dict):
+                    result['security'] = security_result
+                else:
+                    result['security'] = {'error': 'Invalid security check result'}
             
             return jsonify(result)
             
         except Exception as e:
             print(f"Error checking domain: {str(e)}")
-            return jsonify({'error': str(e)}), 500
+            # If there's an error with a specific check, return what we have
+            return jsonify(result)
             
     except Exception as e:
         print(f"Error processing request: {str(e)}")
