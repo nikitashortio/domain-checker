@@ -125,6 +125,36 @@ function activateDnsTab(tabId) {
     }
 }
 
+// Add this function to handle DNS resolver tab switching
+function switchDNSResolver(tabId) {
+    // Get all DNS resolver tabs and panes
+    const dnsTabPanes = document.querySelectorAll('#dns .tab-pane');
+    const dnsNavLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
+    
+    // Remove active class from all tabs and panes
+    dnsTabPanes.forEach(pane => {
+        pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
+    });
+    
+    dnsNavLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Activate the selected tab and pane
+    const selectedPane = document.getElementById(tabId);
+    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    
+    if (selectedPane) {
+        selectedPane.classList.add('active', 'show');
+        selectedPane.style.display = 'block';
+    }
+    
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    }
+}
+
 // Add event listeners for tab clicks
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -288,26 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
-                const tabPane = document.getElementById(tabId);
-                const navLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
-                
-                // Remove active class from all tabs and panes
-                document.querySelectorAll('#dns .tab-pane').forEach(pane => {
-                    pane.classList.remove('active', 'show');
-                    pane.style.display = 'none';
-                });
-                
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                
-                // Activate the selected tab
-                if (tabPane) {
-                    tabPane.classList.add('active', 'show');
-                    tabPane.style.display = 'block';
-                }
-                
-                this.classList.add('active');
+                switchDNSResolver(tabId);
             }
         });
     });
@@ -494,9 +505,8 @@ function checkDomain(updateType = 'all') {
     if (resultTabs) resultTabs.style.display = 'block';
     if (resultTabsContent) resultTabsContent.style.display = 'block';
     
-    // Add domain-entered class and initialize DNS tab
+    // Add domain-entered class
     document.body.classList.add('domain-entered');
-    initializeDNSTab();
     
     // Update hint message
     const hintMessage = document.getElementById('hint-message');
@@ -541,10 +551,17 @@ function checkDomain(updateType = 'all') {
             loadingElement.classList.add('d-none');
         }
 
-        // Reinitialize DNS tab if we're on the DNS tab
+        // Show the first DNS resolver tab if we're on the DNS tab
         const activeTab = document.querySelector('.tab-pane.active');
         if (activeTab && activeTab.id === 'dns') {
-            initializeDNSTab();
+            const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
+            if (firstDnsTab) {
+                const target = firstDnsTab.getAttribute('data-bs-target');
+                if (target) {
+                    const tabId = target.replace('#', '');
+                    switchDNSResolver(tabId);
+                }
+            }
         }
     })
     .catch(error => {
@@ -631,26 +648,7 @@ function updateDNSResults(data) {
         const target = firstDnsTab.getAttribute('data-bs-target');
         if (target) {
             const tabId = target.replace('#', '');
-            const tabPane = document.getElementById(tabId);
-            const navLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
-            
-            // Remove active class from all tabs and panes
-            document.querySelectorAll('#dns .tab-pane').forEach(pane => {
-                pane.classList.remove('active', 'show');
-                pane.style.display = 'none';
-            });
-            
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Activate the first tab
-            if (tabPane) {
-                tabPane.classList.add('active', 'show');
-                tabPane.style.display = 'block';
-            }
-            
-            firstDnsTab.classList.add('active');
+            switchDNSResolver(tabId);
         }
     }
 }
