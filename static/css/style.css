@@ -1254,3 +1254,117 @@ body.domain-entered .hint-text {
     border-color: transparent;
     background-color: transparent;
 }
+
+/* VirusTotal Styles */
+.scan-results {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 1rem;
+    background-color: #f8f9fa;
+}
+
+.scan-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.scan-result-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.scanner-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.scanner-name {
+    font-weight: 500;
+    color: #495057;
+}
+
+.scanner-version {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.scanner-result {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.scanner-result i {
+    font-size: 1.1rem;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.vt-score {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.vt-score .score-value {
+    font-size: 2.5rem;
+}
+
+.vt-score .score-label {
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+
+.vt-details {
+    margin: 0.75rem 0;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.vt-link {
+    margin-top: 1rem;
+}
+
+.vt-link a {
+    color: #0d6efd;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.vt-link a:hover {
+    text-decoration: underline;
+}
+
+.scan-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}

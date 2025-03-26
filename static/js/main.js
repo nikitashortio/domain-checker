@@ -1219,13 +1219,20 @@ function updateSecurityResults(data) {
                 <div class="scan-results">
                     <h4>Scan Results</h4>`;
             
-            Object.entries(virusTotal.scans).forEach(([scanner, result]) => {
+            // Sort scanners alphabetically
+            const sortedScanners = Object.keys(virusTotal.scans).sort();
+            
+            sortedScanners.forEach(scanner => {
+                const result = virusTotal.scans[scanner];
                 const resultClass = result.detected ? 'text-danger' : 'text-success';
                 const resultIcon = result.detected ? 'fa-times-circle' : 'fa-check-circle';
                 
                 html += `
                     <div class="scan-result-item">
-                        <div class="scanner-name">${scanner}</div>
+                        <div class="scanner-info">
+                            <div class="scanner-name">${scanner}</div>
+                            ${result.version ? `<div class="scanner-version">v${result.version}</div>` : ''}
+                        </div>
                         <div class="scanner-result ${resultClass}">
                             <i class="fas ${resultIcon}"></i>
                             ${result.detected ? result.result : 'Clean'}

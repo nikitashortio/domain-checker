@@ -491,6 +491,17 @@ def check_web_risk(domain):
                     except (ValueError, TypeError):
                         scan_date = None
             
+            # Process scan results
+            scans = {}
+            for scanner, result in report.get('scans', {}).items():
+                if isinstance(result, dict):
+                    scans[scanner] = {
+                        'detected': result.get('detected', False),
+                        'result': result.get('result', 'Clean'),
+                        'version': result.get('version', ''),
+                        'update': result.get('update', '')
+                    }
+            
             return {
                 'scan_date': scan_date,
                 'virustotal': {
@@ -499,7 +510,7 @@ def check_web_risk(domain):
                     'positives': positives,
                     'total_scanners': total_scanners,
                     'url': f'https://www.virustotal.com/gui/domain/{domain.replace("https://", "").replace("http://", "")}',
-                    'scans': report.get('scans', {})
+                    'scans': scans
                 }
             }
             
