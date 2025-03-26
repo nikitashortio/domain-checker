@@ -540,7 +540,7 @@ def check_security(domain):
                     security_info['issues'].append(f'Missing {header} header')
                     security_info['recommendations'].append(recommendation)
         
-        # Check web risk - (30 points)
+        # Check web risk (30 points)
         web_risk = check_web_risk(domain)
         if 'error' not in web_risk:
             security_info['web_risk'] = web_risk
@@ -828,6 +828,7 @@ if __name__ == '__main__':
     # For local development
     if os.environ.get('PYTHONANYWHERE_SITE') is None:
         app.run(debug=True, port=3000)
-    # For PythonAnywhere deployment
+    # For production deployment
     else:
-        app.run(host='0.0.0.0', port=8080) 
+        port = int(os.environ.get('PORT', 8080))
+        app.run(host='0.0.0.0', port=port) 
