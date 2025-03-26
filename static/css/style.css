@@ -1,0 +1,757 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+.welcome-message {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.nav-tabs {
+    margin-bottom: 0;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1px;
+    justify-content: center;
+    display: flex;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.5rem 1rem;
+    margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    color: #000;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Update tab content to original style */
+.tab-content {
+    display: none;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 1rem;
+    background: white;
+    border-radius: 0 0 0.5rem 0.5rem;
+    margin-top: 1rem;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active.show {
+    display: block;
+}
+
+.input-group {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.input-group .form-control,
+.input-group .btn,
+.input-group-text {
+    border-radius: 12px;
+}
+
+.input-group .form-control {
+    border-radius: 12px 0 0 12px;
+    padding-left: 1rem;
+}
+
+.input-group .btn {
+    border-radius: 0 12px 12px 0;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.input-group-text {
+    border-radius: 12px 0 0 12px;
+    border-right: none;
+}
+
+.input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-top: 1rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.results-content {
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+/* DNS Records */
+.dns-info {
+    padding: 1rem;
+}
+
+.dns-section {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+}
+
+.dns-section h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+.dns-record {
+    font-family: monospace;
+    color: #495057;
+}
+
+.dns-controls,
+.dns-resolvers {
+    display: none;
+}
+
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers {
+    display: block;
+}
+
+.text-muted {
+    color: #6c757d;
+    font-style: italic;
+    padding: 0.5rem;
+}
+
+/* WHOIS Info */
+.whois-info {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.whois-field {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.whois-field:last-child {
+    margin-bottom: 0;
+}
+
+.whois-field strong {
+    color: #212529;
+}
+
+.whois-field .expired {
+    color: #dc3545;
+}
+
+.whois-field .valid {
+    color: #198754;
+}
+
+/* SSL Info */
+.ssl-info {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.ssl-field {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.ssl-field:last-child {
+    margin-bottom: 0;
+}
+
+.ssl-field .days-left {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.ssl-field .days-left.expired {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.ssl-field .days-left.warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.ssl-field .days-left.valid {
+    background-color: #198754;
+    color: #fff;
+}
+
+/* Availability Info */
+.availability-info {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.availability-field {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.availability-field:last-child {
+    margin-bottom: 0;
+}
+
+.availability-field strong {
+    color: #212529;
+}
+
+/* Referrer Info */
+.referrer-info .referrer-field {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.referrer-info .headers-pre {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Iframe Info */
+.iframe-info {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.iframe-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.iframe-field:last-child {
+    border-bottom: none;
+}
+
+.iframe-field strong {
+    color: #495057;
+    font-weight: 600;
+}
+
+.iframe-field span {
+    color: #6c757d;
+    font-family: monospace;
+}
+
+/* Redirects Info */
+.redirects-info {
+    padding: 1rem;
+}
+
+.redirects-info .redirect-step {
+    display: flex;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.redirects-info .redirect-step:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.redirects-info .step-number {
+    width: 2rem;
+    height: 2rem;
+    background-color: #212529;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.redirects-info .step-details {
+    flex: 1;
+}
+
+.redirects-info .step-url {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+}
+
+.redirects-info .step-url a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.redirects-info .step-url a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+.redirects-info .step-status {
+    font-size: 0.875rem;
+    font-family: monospace;
+    margin-bottom: 0.5rem;
+}
+
+.redirects-info .step-headers {
+    margin-top: 0.5rem;
+}
+
+.redirects-info .headers-pre {
+    margin: 0;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.redirect-summary {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #e7f5ff;
+    border: 1px solid #b8daff;
+    border-radius: 0.5rem;
+}
+
+.redirect-summary .alert {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.redirect-summary .alert i {
+    font-size: 1.25rem;
+}
+
+/* Headers Info */
+.headers-info .header-field {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.headers-info strong {
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+/* Web Risk Info */
+.webrisk-info .webrisk-field {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.webrisk-info strong {
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+/* Common styles */
+.text-success {
+    color: #198754 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.btn-primary {
+    padding: 0.5rem 2rem;
+}
+
+/* DNS Table */
+.dns-table-wrapper {
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #fff;
+    margin-bottom: 1rem;
+}
+
+.dns-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #fff;
+    border-collapse: collapse;
+}
+
+.dns-table th,
+.dns-table td {
+    padding: 0.75rem;
+    text-align: left;
+    vertical-align: middle;
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.dns-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #212529;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Column widths */
+.dns-table th:nth-child(1),
+.dns-table td:nth-child(1) {
+    width: 12%;
+    padding-left: 1rem;
+}
+
+.dns-table th:nth-child(2),
+.dns-table td:nth-child(2) {
+    width: 23%;
+}
+
+.dns-table th:nth-child(3),
+.dns-table td:nth-child(3) {
+    width: 50%;
+}
+
+.dns-table th:nth-child(4),
+.dns-table td:nth-child(4) {
+    width: 15%;
+    padding-right: 1rem;
+}
+
+/* Add monospace for better number alignment */
+.dns-table td {
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.dns-table td:last-child {
+    font-family: monospace;
+}
+
+.dns-table tbody tr td:first-child {
+    border-left: 3px solid transparent;
+}
+
+/* Record type colors */
+.dns-table tbody tr[data-type="A"] td:first-child {
+    border-left-color: #28a745;
+}
+
+.dns-table tbody tr[data-type="AAAA"] td:first-child {
+    border-left-color: #17a2b8;
+}
+
+.dns-table tbody tr[data-type="MX"] td:first-child {
+    border-left-color: #dc3545;
+}
+
+.dns-table tbody tr[data-type="NS"] td:first-child {
+    border-left-color: #fd7e14;
+}
+
+.dns-table tbody tr[data-type="TXT"] td:first-child {
+    border-left-color: #6f42c1;
+}
+
+.dns-table tbody tr[data-type="CNAME"] td:first-child {
+    border-left-color: #20c997;
+}
+
+.dns-table tbody tr[data-type="SOA"] td:first-child {
+    border-left-color: #e83e8c;
+}
+
+.dns-table tbody tr[data-type="CAA"] td:first-child {
+    color: #fd7e14;
+}
+
+/* Empty state */
+.dns-table tbody tr.no-records td {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem;
+    font-style: italic;
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .nav-tabs {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .redirects-info .redirect-step {
+        flex-direction: column;
+    }
+    
+    .redirects-info .step-number {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.domain-entered .tab-content {
+    display: block;
+}
+
+.domain-entered .nav-tabs {
+    display: flex;
+}
+
+/* Update hint text to match width */
+.hint-text {
+    text-align: center;
+    color: #6c757d;
+    padding: 3rem 2rem;
+    font-style: normal;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.hint-text i {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+
+.domain-entered .hint-text {
+    display: none;
+}
+
+.dns-resolvers {
+    display: none;
+    margin-bottom: 1.5rem;
+    border-bottom: none;
+    padding-bottom: 0.5rem;
+}
+
+.domain-entered .dns-resolvers {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.dns-resolvers .nav-link {
+    color: #212529;
+    background-color: transparent;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+    min-width: auto;
+}
+
+.dns-resolvers .nav-link:hover {
+    background-color: #f8f9fa;
+}
+
+.dns-resolvers .nav-link.active {
+    color: #fff;
+    background-color: #212529;
+    border-color: #212529;
+}
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(33, 37, 41, 0.1);
+    border-radius: 50%;
+    border-top-color: #212529;
+    position: relative;
+    animation: spin 1s linear infinite;
+}
+
+.loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 3px solid transparent;
+    border-top-color: rgba(33, 37, 41, 0.3);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sans-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.san-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: white;
+}
+
+.san-item i {
+    color: #198754;
+    font-size: 0.875rem;
+}
+
+.premium-reason {
+    font-size: 0.875rem;
+    padding: 0.25rem 0;
+    color: #6c757d;
+}
+
+.premium-reason i {
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
+}
+
+/* Iframe Test Styles */
+.iframe-test-container {
+    margin-top: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.iframe-header {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.iframe-header h4 {
+    margin: 0;
+    color: #212529;
+}
+
+.iframe-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.iframe-wrapper {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: #fff;
+    overflow: hidden;
+}
+
+#domain-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+} 
