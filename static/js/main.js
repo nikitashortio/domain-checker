@@ -497,12 +497,17 @@ function updateDNSResults(data) {
     const recordTypes = selectedType === 'all' ? ['a', 'aaaa', 'mx', 'ns', 'txt', 'cname', 'soa'] : [selectedType.toLowerCase()];
     const domain = document.getElementById('domain').value.trim();
     
-    console.log('Selected type:', selectedType);
-    console.log('Record types to process:', recordTypes);
+    // Show DNS controls and resolvers
+    const dnsControls = document.querySelector('.dns-controls');
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    
+    if (dnsControls) dnsControls.style.display = 'block';
+    if (dnsResolvers) dnsResolvers.style.display = 'block';
+    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
     
     // Handle error case
     if (data.error) {
-        console.log('Error in DNS data:', data.error);
         resolvers.forEach(resolver => {
             const container = document.getElementById(`dns-results-${resolver}`);
             if (container) {
@@ -525,18 +530,13 @@ function updateDNSResults(data) {
     
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
-        console.log(`Processing resolver: ${resolver}`);
         let tableContent = '';
         let hasRecords = false;
         
         recordTypes.forEach(type => {
-            console.log(`Processing record type: ${type}`);
             const records = data[type] || [];
-            console.log(`Found ${records.length} records for type ${type}`);
-            
             records.forEach(record => {
                 if (record.resolver === resolver) {
-                    console.log(`Adding record to table for ${resolver}:`, record);
                     hasRecords = true;
                     tableContent += `
                         <tr data-type="${type.toUpperCase()}">
@@ -550,13 +550,10 @@ function updateDNSResults(data) {
         });
 
         const container = document.getElementById(`dns-results-${resolver}`);
-        console.log(`Container for ${resolver}:`, container);
         if (container) {
             if (hasRecords) {
-                console.log(`Setting content for ${resolver}:`, tableContent);
                 container.innerHTML = tableContent;
             } else {
-                console.log(`No records found for ${resolver}`);
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
             }
         }

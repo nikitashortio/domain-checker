@@ -1189,4 +1189,75 @@ body {
 .security-field .text-danger {
     color: #dc3545 !important;
     font-weight: 600;
+}
+
+/* DNS Records Tab */
+.dns-controls {
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.dns-resolvers {
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.dns-table-wrapper {
+    display: none;
+}
+
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper {
+    display: block;
+}
+
+#dns .nav-pills {
+    margin-bottom: 1rem;
+}
+
+#dns .nav-pills .nav-link {
+    color: #333;
+    border: 1px solid #ddd;
+    margin-right: 0.5rem;
+}
+
+#dns .nav-pills .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+#dns .tab-pane {
+    display: none;
+}
+
+#dns .tab-pane.active {
+    display: block;
+}
+
+#dns .table {
+    margin-bottom: 0;
+}
+
+#dns .table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+#dns .table td {
+    vertical-align: middle;
+}
+
+#dns .error-row td {
+    padding: 0;
+}
+
+#dns .error-row .alert {
+    margin: 0;
+    border-radius: 0;
+}
+
+#dns .no-records td {
+    text-align: center;
+    color: #6c757d;
 } 
