@@ -187,6 +187,16 @@ body {
     margin: 0;
 }
 
+/* Iframe tab specific styles */
+#iframe .tab-content {
+    display: block;
+}
+
+#iframe .results-container,
+#iframe .iframe-test-container {
+    display: block;
+}
+
 /* Remove all domain-entered class styles that affect DNS visibility */
 .domain-entered .dns-controls,
 .domain-entered .dns-resolvers,

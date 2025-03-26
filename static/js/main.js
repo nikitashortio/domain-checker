@@ -108,6 +108,20 @@ function activateTab(tabId) {
             element.style.display = 'block';
         });
     }
+
+    // Handle nested tab content visibility
+    if (tabId === 'iframe') {
+        // Show iframe results container
+        const iframeResults = document.querySelector('#iframe .results-container');
+        if (iframeResults) {
+            iframeResults.style.display = 'block';
+        }
+        // Show iframe test container
+        const iframeTest = document.querySelector('#iframe .iframe-test-container');
+        if (iframeTest) {
+            iframeTest.style.display = 'block';
+        }
+    }
 }
 
 // Add this function to handle DNS resolver tab activation
