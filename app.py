@@ -431,7 +431,12 @@ def check_domain():
             'dns': {},
             'whois': {},
             'ssl': {},
-            'redirects': []
+            'availability': {},
+            'referrer': {},
+            'iframe': {},
+            'redirects': {},
+            'headers': {},
+            'security': {}
         }
         
         # Extract base domain for WHOIS and SSL checks
@@ -440,11 +445,6 @@ def check_domain():
         try:
             if update_type in ['all', 'dns']:
                 print(f"Checking DNS records for {base_domain}")
-                # Use a single DNS resolver for better reliability
-                resolver = dns.resolver.Resolver()
-                resolver.timeout = 5
-                resolver.lifetime = 5
-                
                 result['dns'] = {
                     'a': get_dns_records(base_domain, 'A'),
                     'aaaa': get_dns_records(base_domain, 'AAAA'),
@@ -463,12 +463,7 @@ def check_domain():
             if update_type in ['all', 'whois']:
                 print(f"Checking WHOIS for {base_domain}")
                 whois_info = get_whois_info(base_domain)
-                result['whois'] = {
-                    'registrar': whois_info.get('registrar'),
-                    'creation_date': whois_info.get('creation_date'),
-                    'expiration_date': whois_info.get('expiration_date'),
-                    'name_servers': whois_info.get('name_servers', [])
-                }
+                result['whois'] = whois_info
                 print("WHOIS check completed")
         except Exception as e:
             print(f"Error in WHOIS check: {str(e)}")
@@ -478,34 +473,83 @@ def check_domain():
             if update_type in ['all', 'ssl']:
                 print(f"Checking SSL for {base_domain}")
                 ssl_info = check_ssl_certificate(base_domain)
-                if 'error' in ssl_info:
-                    result['ssl'] = {'error': ssl_info['error']}
-                else:
-                    result['ssl'] = {
-                        'issuer': ssl_info['issuer'],
-                        'valid_from': ssl_info['valid_from'],
-                        'valid_until': ssl_info['valid_until'],
-                        'valid': ssl_info['valid'],
-                        'includes_www': ssl_info['includes_www'],
-                        'subject_alt_names': ssl_info['subject_alt_names'],
-                        'version': ssl_info['version'],
-                        'serial_number': ssl_info['serial_number']
-                    }
+                result['ssl'] = ssl_info
                 print("SSL check completed")
         except Exception as e:
             print(f"Error in SSL check: {str(e)}")
             result['ssl'] = {'error': str(e)}
         
         try:
+            if update_type in ['all', 'availability']:
+                print(f"Checking availability for {base_domain}")
+                availability_info = check_availability(base_domain)
+                result['availability'] = availability_info
+                print("Availability check completed")
+        except Exception as e:
+            print(f"Error in availability check: {str(e)}")
+            result['availability'] = {'error': str(e)}
+        
+        try:
+            if update_type in ['all', 'referrer']:
+                print(f"Checking referrer policy for {base_domain}")
+                referrer_info = check_referrer(base_domain)
+                headers = get_headers(base_domain)
+                if 'error' not in headers:
+                    referrer_info['headers'] = headers
+                result['referrer'] = referrer_info
+                print("Referrer check completed")
+        except Exception as e:
+            print(f"Error in referrer check: {str(e)}")
+            result['referrer'] = {'error': str(e)}
+        
+        try:
+            if update_type in ['all', 'iframe']:
+                print(f"Checking iframe policy for {base_domain}")
+                iframe_info = check_iframe(base_domain)
+                headers = get_headers(base_domain)
+                if 'error' not in headers:
+                    iframe_info['headers'] = headers
+                result['iframe'] = iframe_info
+                print("Iframe check completed")
+        except Exception as e:
+            print(f"Error in iframe check: {str(e)}")
+            result['iframe'] = {'error': str(e)}
+        
+        try:
             if update_type in ['all', 'redirects']:
                 print(f"Checking redirects for {domain}")
-                response = requests.get(f"https://{domain}", allow_redirects=True, timeout=5)  # Reduced timeout
-                result['redirects'] = [{'url': r.url, 'status_code': r.status_code} for r in response.history]
-                result['redirects'].append({'url': response.url, 'status_code': response.status_code})
+                redirect_info = check_domain_redirects(domain)
+                result['redirects'] = redirect_info
                 print("Redirects check completed")
         except Exception as e:
             print(f"Error in redirects check: {str(e)}")
-            result['redirects'] = [{'error': str(e)}]
+            result['redirects'] = {'error': str(e)}
+        
+        try:
+            if update_type in ['all', 'headers']:
+                print(f"Checking headers for {base_domain}")
+                headers_info = get_headers(base_domain)
+                result['headers'] = headers_info
+                print("Headers check completed")
+        except Exception as e:
+            print(f"Error in headers check: {str(e)}")
+            result['headers'] = {'error': str(e)}
+        
+        try:
+            if update_type in ['all', 'security']:
+                print(f"Checking security for {base_domain}")
+                security_info = check_security(base_domain)
+                headers = get_headers(base_domain)
+                if 'error' not in headers:
+                    security_info['headers'] = headers
+                ssl_info = check_ssl_certificate(base_domain)
+                if 'error' not in ssl_info:
+                    security_info['ssl'] = ssl_info
+                result['security'] = security_info
+                print("Security check completed")
+        except Exception as e:
+            print(f"Error in security check: {str(e)}")
+            result['security'] = {'error': str(e)}
         
         print("All checks completed successfully")
         return jsonify(result)
