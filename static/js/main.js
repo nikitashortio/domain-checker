@@ -952,6 +952,9 @@ function updateIframeResults(data) {
     const iframeResults = document.getElementById('iframe-results');
     if (!iframeResults) return;
 
+    const domain = document.getElementById('domain').value.trim();
+    const url = domain.startsWith('http') ? domain : `https://${domain}`;
+
     if (data.error) {
         iframeResults.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
         return;
@@ -998,13 +1001,48 @@ function updateIframeResults(data) {
             <h5>What does this mean?</h5>
             <p>${getIframeExplanation(data)}</p>
         </div>`;
+
+    // Add iframe test container with preview
+    html += `
+        <div class="iframe-test-container">
+            <h5>Link Preview</h5>
+            <div class="iframe-preview">
+                <div class="preview-url">${url}</div>
+                <iframe src="${url}" sandbox="allow-same-origin allow-scripts" class="preview-frame"></iframe>
+            </div>
+        </div>`;
     
     iframeResults.innerHTML = html;
 }
 
 function getIframeExplanation(data) {
-    // Implement the logic to generate a meaningful explanation based on the data
-    return 'This is a placeholder explanation. The actual implementation should be based on the data received from the API.';
+    if (!data) return 'Unable to determine iframe embedding status.';
+
+    let explanation = '';
+    const headers = data.headers || {};
+    const xFrameOptions = headers['X-Frame-Options'];
+    const csp = data.frame_ancestors_directive;
+
+    if (data.allowed) {
+        explanation = 'This domain allows embedding in iframes. ';
+    } else {
+        explanation = 'This domain restricts embedding in iframes. ';
+        
+        if (xFrameOptions) {
+            explanation += `The X-Frame-Options header is set to "${xFrameOptions}", which `;
+            if (xFrameOptions.toLowerCase() === 'deny') {
+                explanation += 'prevents the page from being displayed in any iframe.';
+            } else if (xFrameOptions.toLowerCase() === 'sameorigin') {
+                explanation += 'only allows the page to be displayed in iframes on the same domain.';
+            }
+        }
+
+        if (csp && csp !== 'Not Set') {
+            explanation += ` Additionally, the Content Security Policy frame-ancestors directive "${csp}" provides more granular control over which domains can embed this content.`;
+        }
+    }
+
+    return explanation;
 }
 
 function updateRedirectsResults(data) {
