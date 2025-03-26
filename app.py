@@ -617,13 +617,13 @@ def check_domain():
         if not data:
             return jsonify({'error': 'Invalid JSON data'}), 400
             
-        domain = data.get('domain', '').strip()
+        original_domain = data.get('domain', '').strip()
         update_type = data.get('update_type', 'all')
         
-        if not domain:
+        if not original_domain:
             return jsonify({'error': 'Domain is required'}), 400
             
-        print(f"Starting check for domain: {domain}")
+        print(f"Starting check for domain: {original_domain}")
         
         # Initialize result dictionary
         result = {
@@ -638,14 +638,15 @@ def check_domain():
             'security': {}
         }
         
-        # Clean domain input
+        # Clean domain input for DNS and other checks that need just the domain
+        domain = original_domain
         if domain.startswith(('http://', 'https://')):
             parsed = urlparse(domain)
             domain = parsed.netloc
         elif '/' in domain:  # Handle cases where URL is entered without protocol
             domain = domain.split('/')[0]
             
-        # Remove any remaining path components and query parameters
+        # Remove any remaining path components and query parameters for domain-only checks
         domain = domain.split('?')[0].split('#')[0].strip()
         
         try:
@@ -683,7 +684,8 @@ def check_domain():
                 result['iframe'] = check_iframe(domain)
             
             if update_type == 'all' or update_type == 'redirects':
-                result['redirects'] = check_domain_redirects(domain)
+                # Use original_domain for redirect checks to preserve the path
+                result['redirects'] = check_domain_redirects(original_domain)
             
             if update_type == 'all' or update_type == 'headers':
                 result['headers'] = get_headers(domain)
