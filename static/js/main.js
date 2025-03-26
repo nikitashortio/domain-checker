@@ -672,10 +672,13 @@ function updateWHOISResults(data) {
             // Skip empty values
             if (!value) continue;
             
+            // Display the value, using formatDate for date fields
+            const displayValue = (key === 'creation_date' || key === 'expiration_date' || key === 'updated_date') ? formatDate(value) : value;
+            
             html += `
                 <div class="whois-field">
                     <strong>${label}</strong>
-                    <span class="${valueClass}">${value}</span>
+                    <span class="${valueClass}">${displayValue}</span>
                 </div>`;
         }
     }
