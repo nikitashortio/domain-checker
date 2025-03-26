@@ -590,7 +590,12 @@ function checkDomain(updateType = 'all') {
             update_type: updateType
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Received data:', data);
         
@@ -611,11 +616,6 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Hide loading state
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
-
         // Only initialize DNS tab if we're on the DNS tab
         const activeTab = document.querySelector('.tab-pane.active');
         if (activeTab && activeTab.id === 'dns') {
@@ -624,7 +624,10 @@ function checkDomain(updateType = 'all') {
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('An error occurred while checking the domain', 'danger');
+        showAlert('An error occurred while checking the domain. Please try again.', 'danger');
+    })
+    .finally(() => {
+        // Hide loading state
         if (loadingElement) {
             loadingElement.classList.add('d-none');
         }
@@ -678,16 +681,22 @@ function updateDNSResults(data) {
         let hasRecords = false;
         
         recordTypes.forEach(type => {
-            const records = data[type] || [];
+            const records = data[type];
+            // Skip if records is not an array or is undefined
+            if (!Array.isArray(records)) {
+                console.log(`No records found for type ${type}`);
+                return;
+            }
+            
             records.forEach(record => {
-                if (record.resolver === resolver) {
+                if (record && record.resolver === resolver) {
                     hasRecords = true;
                     tableContent += `
                         <tr data-type="${type.toUpperCase()}">
                             <td>${type.toUpperCase()}</td>
                             <td>${domain}</td>
-                            <td>${record.value}</td>
-                            <td>${record.ttl}</td>
+                            <td>${record.value || ''}</td>
+                            <td>${record.ttl || ''}</td>
                         </tr>`;
                 }
             });
