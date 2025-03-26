@@ -556,28 +556,43 @@ function checkDomain(updateType = 'all') {
             loadingElement.classList.add('d-none');
         }
 
-        // If we're on the DNS tab or updating DNS, ensure it's properly displayed
-        const activeTab = document.querySelector('.tab-pane.active');
-        if (activeTab && (activeTab.id === 'dns' || updateType === 'dns')) {
+        // Ensure the DNS tab is properly initialized and shown
+        const dnsTab = document.getElementById('dns');
+        const dnsTabButton = document.getElementById('dns-tab');
+        
+        if (dnsTab && dnsTabButton) {
+            // Remove fade class to prevent animation issues
+            dnsTab.classList.remove('fade');
+            
+            // Add active and show classes
+            dnsTab.classList.add('active', 'show');
+            dnsTabButton.classList.add('active');
+            
             // Show DNS controls and resolvers
             const dnsControls = document.querySelector('.dns-controls');
             const dnsResolvers = document.querySelector('.dns-resolvers');
             const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
-            const dnsTab = document.getElementById('dns');
             
-            // Ensure all DNS-related elements are visible
             if (dnsControls) dnsControls.style.display = 'block';
             if (dnsResolvers) dnsResolvers.style.display = 'block';
             if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
-            if (dnsTab) dnsTab.style.display = 'block';
 
-            // Activate the first DNS resolver tab
+            // Initialize the first DNS resolver tab
             const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
             if (firstDnsTab) {
                 const target = firstDnsTab.getAttribute('data-bs-target');
                 if (target) {
                     const tabId = target.replace('#', '');
-                    activateDnsTab(tabId);
+                    const tabPane = document.getElementById(tabId);
+                    
+                    // Remove fade class from resolver tab pane
+                    if (tabPane) {
+                        tabPane.classList.remove('fade');
+                        tabPane.classList.add('active', 'show');
+                        tabPane.style.display = 'block';
+                    }
+                    
+                    firstDnsTab.classList.add('active');
                 }
             }
         }

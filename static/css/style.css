@@ -93,26 +93,19 @@ body {
 }
 
 .tab-pane.active.show {
-    display: block;
+    display: block !important;
 }
 
 /* DNS Records Tab */
 #dns {
-    display: block;
-}
-
-#dns .tab-content {
-    display: block;
-}
-
-#dns .tab-pane {
     display: none;
 }
 
-#dns .tab-pane.active.show {
-    display: block;
+#dns.active.show {
+    display: block !important;
 }
 
+/* DNS Controls and Resolvers */
 .dns-controls,
 .dns-resolvers,
 .dns-table-wrapper {
@@ -122,22 +115,76 @@ body {
 .domain-entered .dns-controls,
 .domain-entered .dns-resolvers,
 .domain-entered .dns-table-wrapper {
-    display: block;
+    display: block !important;
 }
 
+/* DNS Resolver Pills */
 #dns .nav-pills {
-    margin-bottom: 1rem;
     display: none;
+    margin-bottom: 1rem;
 }
 
 .domain-entered #dns .nav-pills {
-    display: flex;
+    display: flex !important;
+    gap: 10px;
 }
 
-/* Remove padding from tab content */
-.tab-content,
-.domain-entered .tab-content {
-    padding: 0;
+/* DNS Resolver Tab Content */
+#dns .tab-content .tab-pane {
+    display: none;
+}
+
+#dns .tab-content .tab-pane.active.show {
+    display: block !important;
+}
+
+/* DNS Table */
+.dns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.dns-table th,
+.dns-table td {
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.dns-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Remove any flex properties that might affect layout */
+.tab-pane {
+    width: 100%;
+}
+
+/* Results content */
+.results-content {
+    padding: 1rem;
+    margin: 0;
+}
+
+/* Remove extra spacing from card */
+.card {
+    margin: 0;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* DNS Records */
+.dns-info {
+    padding: 1rem;
+    margin: 0;
+}
+
+/* Remove any margin from tab panes */
+.tab-pane {
     margin: 0;
 }
 
@@ -151,80 +198,10 @@ body {
 .headers-info,
 .security-info {
     padding: 1rem;
-    margin-top: 0;
-}
-
-/* Remove any margin from tab panes */
-.tab-pane {
     margin: 0;
 }
 
-/* Ensure proper display of DNS resolver tabs */
-#dns .tab-content .tab-pane {
-    display: none;
-}
-
-#dns .tab-content .tab-pane.active.show {
-    display: block;
-}
-
-/* Remove any flex properties that might affect layout */
-.tab-pane {
-    width: 100%;
-}
-
-.input-group {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.input-group .form-control,
-.input-group .btn,
-.input-group-text {
-    border-radius: 12px;
-}
-
-.input-group .form-control {
-    border-radius: 12px 0 0 12px;
-    padding-left: 1rem;
-}
-
-.input-group .btn {
-    border-radius: 0 12px 12px 0;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-}
-
-.input-group-text {
-    border-radius: 12px 0 0 12px;
-    border-right: none;
-}
-
-.input-group .form-control:focus {
-    box-shadow: none;
-    border-color: #dee2e6;
-}
-
-.card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    margin-top: 0;
-}
-
-.card-body {
-    padding: 1rem;
-}
-
-.results-content {
-    padding: 1rem;
-    margin-top: 0;
-}
-
 /* DNS Records */
-.dns-info {
-    padding: 1rem;
-}
-
 .dns-section {
     display: grid;
     grid-template-columns: 120px 1fr;
