@@ -675,7 +675,7 @@ function updateWHOISResults(data) {
             html += `
                 <div class="whois-field">
                     <strong>${label}</strong>
-                    <span class="${valueClass}">${key === 'registrar' || key === 'status' || key === 'nameservers' || key.startsWith('ip') ? value : formatDate(value)}</span>
+                    <span class="${valueClass}">${value}</span>
                 </div>`;
         }
     }
