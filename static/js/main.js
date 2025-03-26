@@ -72,14 +72,14 @@ function clearRedirectResults() {
 
 // Add this function to handle tab activation
 function activateTab(tabId) {
-    // Hide all tab panes
-    document.querySelectorAll('.tab-pane').forEach(pane => {
+    // Hide all main tab panes
+    document.querySelectorAll('#resultTabsContent > .tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
         pane.style.display = 'none';
     });
     
-    // Remove active class from all nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
+    // Remove active class from all main nav links
+    document.querySelectorAll('#resultTabs .nav-link').forEach(link => {
         link.classList.remove('active');
     });
     
