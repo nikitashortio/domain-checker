@@ -655,8 +655,12 @@ function updateWHOISResults(data) {
             let value = data[key];
             
             // Special handling for different field types
-            if (key === 'status' && Array.isArray(value)) {
-                value = value.join(', ');
+            if (key === 'status') {
+                // Strip HTML from status values and get only the status text
+                value = Array.isArray(value) ? value.map(status => {
+                    // Extract just the status text before the link
+                    return status.split(' <a')[0].trim();
+                }).join(', ') : value;
             } else if (key === 'nameservers' && Array.isArray(value)) {
                 value = value.join(', ');
             } else if (key === 'ip_location' && typeof value === 'object') {
