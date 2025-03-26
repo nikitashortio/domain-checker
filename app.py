@@ -68,6 +68,9 @@ def get_dns_records(domain, record_type):
 
 def get_whois_info(domain):
     try:
+        # Set a default timeout for the entire function
+        socket.setdefaulttimeout(10)
+        
         w = whois.whois(domain)
         if not w.domain_name:
             return {'error': 'Domain not found in WHOIS database'}
@@ -80,8 +83,13 @@ def get_whois_info(domain):
             else:
                 info[key] = value
         return info
+    except socket.timeout:
+        return {'error': 'WHOIS request timed out'}
     except Exception as e:
         return {'error': f'Failed to get WHOIS info: {str(e)}'}
+    finally:
+        # Reset the default timeout
+        socket.setdefaulttimeout(None)
 
 def check_ssl_certificate(domain):
     """Check SSL certificate information."""
@@ -96,44 +104,61 @@ def check_ssl_certificate(domain):
         # Remove any protocol prefix if present
         domain = domain.replace('http://', '').replace('https://', '')
         
+        # Create SSL context
         context = ssl.create_default_context()
-        with context.wrap_socket(socket.socket(socket.AF_INET), server_hostname=domain) as sock:
-            sock.settimeout(5)  # Reduced from 10
-            sock.connect((domain, 443))
-            cert = sock.getpeercert()
-            
-            # Extract all SANs
-            alt_names = []
-            for type_id, value in cert.get('subjectAltName', []):
-                if type_id == 'DNS':
-                    alt_names.append(value)
-            
-            www_domain = f'www.{domain}'
-            includes_www = www_domain.lower() in [name.lower() for name in alt_names]
+        context.check_hostname = True
+        context.verify_mode = ssl.CERT_REQUIRED
+        
+        # Create socket and wrap with SSL
+        with socket.create_connection((domain, 443), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                cert = ssock.getpeercert()
+                
+                # Extract all SANs
+                alt_names = []
+                for type_id, value in cert.get('subjectAltName', []):
+                    if type_id == 'DNS':
+                        alt_names.append(value)
+                
+                www_domain = f'www.{domain}'
+                includes_www = www_domain.lower() in [name.lower() for name in alt_names]
 
-            # Extract issuer information
-            issuer = {}
-            if cert.get('issuer'):
-                for field in cert['issuer']:
-                    for key, value in field:
-                        # Map common SSL certificate field names to readable names
-                        field_map = {
-                            'organizationName': 'O',
-                            'commonName': 'CN',
-                            'organizationalUnitName': 'OU',
-                            'countryName': 'C'
-                        }
-                        # Use mapped name if available, otherwise use original
-                        issuer[field_map.get(key, key)] = value
+                # Extract issuer information
+                issuer = {}
+                if cert.get('issuer'):
+                    for field in cert['issuer']:
+                        for key, value in field:
+                            # Map common SSL certificate field names to readable names
+                            field_map = {
+                                'organizationName': 'Organization',
+                                'commonName': 'Common Name',
+                                'organizationalUnitName': 'Unit',
+                                'countryName': 'Country',
+                                'stateOrProvinceName': 'State',
+                                'localityName': 'City'
+                            }
+                            # Use mapped name if available, otherwise use original
+                            issuer[field_map.get(key, key)] = value
 
-            return {
-                'issuer': issuer,
-                'valid_from': cert.get('notBefore'),
-                'valid_until': cert.get('notAfter'),
-                'valid': True,
-                'includes_www': includes_www,
-                'subject_alt_names': sorted(alt_names)  # Sort SANs for consistent display
-            }
+                # Get validity dates
+                valid_from = datetime.strptime(cert['notBefore'], '%b %d %H:%M:%S %Y %Z')
+                valid_until = datetime.strptime(cert['notAfter'], '%b %d %H:%M:%S %Y %Z')
+                
+                # Check if certificate is valid
+                now = datetime.now()
+                is_valid = valid_from <= now <= valid_until
+
+                return {
+                    'issuer': issuer,
+                    'valid_from': valid_from.isoformat(),
+                    'valid_until': valid_until.isoformat(),
+                    'valid': is_valid,
+                    'includes_www': includes_www,
+                    'subject_alt_names': sorted(alt_names),  # Sort SANs for consistent display
+                    'version': cert.get('version', 'Unknown'),
+                    'serial_number': cert.get('serialNumber', 'Unknown')
+                }
+                
     except ssl.SSLError as e:
         return {
             'error': f'SSL Error: {str(e)}',
@@ -157,10 +182,20 @@ def check_ssl_certificate(domain):
 
 def check_availability(domain):
     try:
+        # Set a default timeout for the entire function
+        socket.setdefaulttimeout(10)
+        
         w = whois.whois(domain)
+        
+        # Check if domain exists
         if not w.domain_name:
             return {
-                'available': True
+                'available': True,
+                'message': 'Domain is available for registration',
+                'creation_date': None,
+                'expiration_date': None,
+                'registrar': None,
+                'name_servers': None
             }
             
         # Handle creation date formatting
@@ -170,15 +205,49 @@ def check_availability(domain):
                 creation_date = w.creation_date[0].isoformat() if w.creation_date and w.creation_date[0] else None
             elif w.creation_date:
                 creation_date = w.creation_date.isoformat()
-            
+        
+        # Handle expiration date formatting
+        expiration_date = None
+        if hasattr(w, 'expiration_date'):
+            if isinstance(w.expiration_date, list):
+                expiration_date = w.expiration_date[0].isoformat() if w.expiration_date and w.expiration_date[0] else None
+            elif w.expiration_date:
+                expiration_date = w.expiration_date.isoformat()
+        
+        # Handle registrar information
+        registrar = None
+        if hasattr(w, 'registrar'):
+            if isinstance(w.registrar, list):
+                registrar = w.registrar[0] if w.registrar else None
+            else:
+                registrar = w.registrar
+        
+        # Handle name servers
+        name_servers = None
+        if hasattr(w, 'name_servers'):
+            if isinstance(w.name_servers, list):
+                name_servers = w.name_servers
+            else:
+                name_servers = [w.name_servers]
+        
         return {
             'available': False,
+            'message': 'Domain is already registered',
             'creation_date': creation_date,
-            'registrar': w.registrar if hasattr(w, 'registrar') else None
+            'expiration_date': expiration_date,
+            'registrar': registrar,
+            'name_servers': name_servers,
+            'registrant': w.registrant_name if hasattr(w, 'registrant_name') else None,
+            'registrant_country': w.registrant_country if hasattr(w, 'registrant_country') else None
         }
+    except socket.timeout:
+        return {'error': 'Availability check timed out'}
     except Exception as e:
         print(f"Availability check error: {str(e)}")  # Debug log
         return {'error': f'Failed to check availability: {str(e)}'}
+    finally:
+        # Reset the default timeout
+        socket.setdefaulttimeout(None)
 
 def check_referrer(domain):
     try:
@@ -393,12 +462,12 @@ def check_domain():
         try:
             if update_type in ['all', 'whois']:
                 print(f"Checking WHOIS for {base_domain}")
-                whois_info = whois.whois(base_domain, timeout=5)  # Reduced timeout
+                whois_info = get_whois_info(base_domain)
                 result['whois'] = {
-                    'registrar': whois_info.registrar,
-                    'creation_date': whois_info.creation_date,
-                    'expiration_date': whois_info.expiration_date,
-                    'name_servers': whois_info.name_servers
+                    'registrar': whois_info.get('registrar'),
+                    'creation_date': whois_info.get('creation_date'),
+                    'expiration_date': whois_info.get('expiration_date'),
+                    'name_servers': whois_info.get('name_servers', [])
                 }
                 print("WHOIS check completed")
         except Exception as e:
@@ -408,16 +477,20 @@ def check_domain():
         try:
             if update_type in ['all', 'ssl']:
                 print(f"Checking SSL for {base_domain}")
-                context = ssl.create_default_context()
-                with socket.create_connection((base_domain, 443), timeout=5) as sock:  # Reduced timeout
-                    with context.wrap_socket(sock, server_hostname=base_domain) as ssock:
-                        cert = ssock.getpeercert()
-                        result['ssl'] = {
-                            'issuer': dict(x[0] for x in cert['issuer']),
-                            'expiry': datetime.strptime(cert['notAfter'], '%b %d %H:%M:%S %Y %Z').isoformat(),
-                            'version': cert['version'],
-                            'subject': dict(x[0] for x in cert['subject'])
-                        }
+                ssl_info = check_ssl_certificate(base_domain)
+                if 'error' in ssl_info:
+                    result['ssl'] = {'error': ssl_info['error']}
+                else:
+                    result['ssl'] = {
+                        'issuer': ssl_info['issuer'],
+                        'valid_from': ssl_info['valid_from'],
+                        'valid_until': ssl_info['valid_until'],
+                        'valid': ssl_info['valid'],
+                        'includes_www': ssl_info['includes_www'],
+                        'subject_alt_names': ssl_info['subject_alt_names'],
+                        'version': ssl_info['version'],
+                        'serial_number': ssl_info['serial_number']
+                    }
                 print("SSL check completed")
         except Exception as e:
             print(f"Error in SSL check: {str(e)}")
