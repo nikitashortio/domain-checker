@@ -349,28 +349,19 @@ def check_iframe(domain):
 def check_domain_redirects(domain):
     try:
         # Parse the input URL
-        parsed_url = urlparse(domain)
-        if not parsed_url.scheme:
+        if not domain.startswith(('http://', 'https://')):
             # If no scheme provided, assume https
             domain = f"https://{domain}"
-            parsed_url = urlparse(domain)
-        
-        # Extract base domain and path
-        base_domain = parsed_url.netloc
-        path = parsed_url.path
-        
-        # Construct the full URL for the request
-        full_url = f"{parsed_url.scheme}://{base_domain}{path}"
         
         # Make the request with history tracking
-        response = requests.get(full_url, allow_redirects=True, timeout=10)
+        response = requests.get(domain, allow_redirects=True, timeout=10)
         
         # Build redirect chain
         redirect_chain = []
         
         # Add initial request
         redirect_chain.append({
-            'url': full_url,
+            'url': domain,
             'status': f"{response.status_code} {response.reason}",
             'headers': dict(response.request.headers)
         })
