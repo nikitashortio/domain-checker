@@ -89,6 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listener for domain input changes
     const domainInput = document.getElementById('domain');
     domainInput.addEventListener('input', function() {
+        const domain = this.value.trim();
+        const hasDomain = domain.length > 0;
+        
+        // Show/hide DNS controls and resolvers based on domain input
+        document.body.classList.toggle('domain-entered', hasDomain);
+        
         // Clear DNS results cache when domain changes
         dnsResults = {
             cloudflare: null,
@@ -182,6 +188,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkDomain('iframe');
             }
         });
+    }
+
+    // Initialize DNS tables if there's a domain in the input
+    const initialDomain = domainInput.value.trim();
+    if (initialDomain) {
+        document.body.classList.add('domain-entered');
     }
 });
 
@@ -449,8 +461,7 @@ function updateDNSResults(data) {
                                 <td>${resolver}</td>
                                 <td>${record.value}</td>
                                 <td>${record.ttl}</td>
-                            </tr>
-                        `;
+                            </tr>`;
                     }
                 });
             }
@@ -461,13 +472,37 @@ function updateDNSResults(data) {
         if (container) {
             if (tableContent) {
                 console.log(`Setting content for ${resolver}:`, tableContent);
-                container.innerHTML = tableContent;
+                // Ensure the container is a tbody
+                if (container.tagName.toLowerCase() !== 'tbody') {
+                    console.log(`Container ${resolver} is not a tbody, creating new tbody`);
+                    const newTbody = document.createElement('tbody');
+                    newTbody.id = `dns-results-${resolver}`;
+                    container.parentNode.replaceChild(newTbody, container);
+                    newTbody.innerHTML = tableContent;
+                } else {
+                    container.innerHTML = tableContent;
+                }
             } else {
                 console.log(`No records found for ${resolver}`);
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
             }
         } else {
             console.log(`Container not found for resolver: ${resolver}`);
+            // Try to find the table and create the tbody if it doesn't exist
+            const table = document.querySelector(`#dns-results-table-${resolver}`);
+            if (table) {
+                console.log(`Found table for ${resolver}, creating tbody`);
+                const tbody = document.createElement('tbody');
+                tbody.id = `dns-results-${resolver}`;
+                table.appendChild(tbody);
+                if (tableContent) {
+                    tbody.innerHTML = tableContent;
+                } else {
+                    tbody.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
+                }
+            } else {
+                console.log(`Table not found for resolver: ${resolver}`);
+            }
         }
     });
 }
