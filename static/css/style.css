@@ -881,7 +881,7 @@ body {
 .nav-pills,
 .iframe-test-container,
 .iframe-info {
-    display: none;
+    display: none !important;
 }
 
 .domain-entered .dns-resolvers,
@@ -890,25 +890,33 @@ body {
 .domain-entered .nav-pills,
 .domain-entered .iframe-test-container,
 .domain-entered .iframe-info {
-    display: block;
+    display: flex !important;
 }
 
 .domain-entered .dns-resolvers {
-    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 20px;
 }
 
+.domain-entered .nav-pills {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
 /* Hide all tab content by default */
 .tab-pane {
-    display: none;
+    display: none !important;
 }
 
 /* Only show tab content when domain is entered and tab is active */
 .domain-entered .tab-pane.active.show {
-    display: block;
+    display: block !important;
 }
 
 /* Hide hint text when domain is entered */
