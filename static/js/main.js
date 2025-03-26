@@ -1350,15 +1350,8 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Activate DNS tab if no specific tab is active or if it's the first check
-        if (!activeTab || updateType === 'all') {
-            // Get the DNS tab link and activate it
-            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
-            if (dnsTab) {
-                activateTab('dns');
-                dnsTab.classList.add('active');
-            }
-            // Initialize DNS tab
+        // Initialize DNS tab if it's currently active
+        if (activeTab && activeTab.id === 'dns') {
             initializeDNSTab();
         }
 
@@ -1366,7 +1359,7 @@ function checkDomain(updateType = 'all') {
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('An error occurred while checking the domain. Please try again.', 'danger');
+        showAlert(error.message, 'danger');
         throw error;
     })
     .finally(() => {
