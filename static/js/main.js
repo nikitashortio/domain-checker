@@ -432,6 +432,48 @@ function updateTabResults(endpoint, data) {
     }
 }
 
+// Add this function to initialize DNS tab
+function initializeDNSTab() {
+    const dnsControls = document.querySelector('.dns-controls');
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    
+    // Show DNS controls and resolvers
+    if (dnsControls) dnsControls.style.display = 'block';
+    if (dnsResolvers) dnsResolvers.style.display = 'block';
+    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+    
+    // Initialize first DNS resolver tab
+    const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
+    if (firstDnsTab) {
+        const target = firstDnsTab.getAttribute('data-bs-target');
+        if (target) {
+            const tabId = target.replace('#', '');
+            const tabPane = document.getElementById(tabId);
+            const navLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+                pane.style.display = 'none';
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate the first tab
+            if (tabPane) {
+                tabPane.classList.add('active', 'show');
+                tabPane.style.display = 'block';
+            }
+            
+            firstDnsTab.classList.add('active');
+        }
+    }
+}
+
+// Update the checkDomain function to use initializeDNSTab
 function checkDomain(updateType = 'all') {
     const domain = document.getElementById('domain').value.trim();
     
@@ -452,12 +494,9 @@ function checkDomain(updateType = 'all') {
     if (resultTabs) resultTabs.style.display = 'block';
     if (resultTabsContent) resultTabsContent.style.display = 'block';
     
-    // Show DNS controls and add domain-entered class
-    const dnsControls = document.querySelector('.dns-controls');
-    const dnsResolvers = document.querySelector('.dns-resolvers');
-    if (dnsControls) dnsControls.style.display = 'block';
-    if (dnsResolvers) dnsResolvers.style.display = 'block';
+    // Add domain-entered class and initialize DNS tab
     document.body.classList.add('domain-entered');
+    initializeDNSTab();
     
     // Update hint message
     const hintMessage = document.getElementById('hint-message');
@@ -500,6 +539,12 @@ function checkDomain(updateType = 'all') {
         // Hide loading state
         if (loadingElement) {
             loadingElement.classList.add('d-none');
+        }
+
+        // Reinitialize DNS tab if we're on the DNS tab
+        const activeTab = document.querySelector('.tab-pane.active');
+        if (activeTab && activeTab.id === 'dns') {
+            initializeDNSTab();
         }
     })
     .catch(error => {
