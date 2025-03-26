@@ -112,9 +112,9 @@ body {
     display: none;
 }
 
-.domain-entered .dns-controls,
-.domain-entered .dns-resolvers,
-.domain-entered .dns-table-wrapper {
+#dns.active.show .dns-controls,
+#dns.active.show .dns-resolvers,
+#dns.active.show .dns-table-wrapper {
     display: block !important;
 }
 
@@ -124,7 +124,7 @@ body {
     margin-bottom: 1rem;
 }
 
-.domain-entered #dns .nav-pills {
+#dns.active.show .nav-pills {
     display: flex !important;
     gap: 10px;
 }
