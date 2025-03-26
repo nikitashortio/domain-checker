@@ -1205,6 +1205,7 @@ function updateSecurityResults(data) {
                     <div class="vt-details">
                         <div>Detections: ${virusTotal.positives}/${virusTotal.total_scanners} scanners</div>
                         <div>Status: ${virusTotal.status}</div>
+                        <div>Google Safe Browsing: ${virusTotal.scans['Google Safe Browsing']?.result || 'Not Available'}</div>
                     </div>
                 </div>
                 <div class="vt-link">

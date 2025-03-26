@@ -510,7 +510,8 @@ def check_web_risk(domain):
                     'positives': positives,
                     'total_scanners': total_scanners,
                     'url': f'https://www.virustotal.com/gui/domain/{domain.replace("https://", "").replace("http://", "")}',
-                    'scans': scans
+                    'scans': scans,
+                    'google_safebrowsing': report.get('google_safebrowsing', {}).get('status', 'Not Available')
                 }
             }
             
