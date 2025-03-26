@@ -96,47 +96,36 @@ function activateTab(tabId) {
         selectedLink.classList.add('active');
     }
 
-    // Hide all DNS elements first
-    const allDnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
-    allDnsElements.forEach(element => {
-        element.style.display = 'none';
-    });
+    // Get the domain value
+    const domain = document.getElementById('domain').value.trim();
+    const hasDomain = domain.length > 0;
 
-    // Only show DNS elements if we're on the DNS tab
+    // Handle DNS tab elements
     if (tabId === 'dns') {
-        const dnsElements = document.querySelectorAll('#dns .dns-controls, #dns .dns-resolvers, #dns .dns-table-wrapper, #dns .dns-table, #dns .nav-pills');
+        const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
         dnsElements.forEach(element => {
-            element.style.display = 'block';
+            element.style.display = hasDomain ? 'block' : 'none';
         });
     }
 
-    // Handle nested tab content visibility
+    // Handle iframe tab elements
     if (tabId === 'iframe') {
-        // Show iframe results container
-        const iframeResults = document.querySelector('#iframe .results-container');
-        if (iframeResults) {
-            iframeResults.style.display = 'block';
-        }
-        // Show iframe test container
-        const iframeTest = document.querySelector('#iframe .iframe-test-container');
-        if (iframeTest) {
-            iframeTest.style.display = 'block';
-        }
-        // Hide any DNS elements that might be in the iframe tab
-        document.querySelectorAll('#iframe .dns-controls, #iframe .dns-resolvers, #iframe .dns-table-wrapper, #iframe .nav-pills, #iframe .dns-table').forEach(element => {
-            element.style.display = 'none';
+        const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
+        iframeElements.forEach(element => {
+            element.style.display = hasDomain ? 'block' : 'none';
         });
     }
 
     // Update hint message visibility
     const hintMessage = document.getElementById('hint-message');
     if (hintMessage) {
-        const domain = document.getElementById('domain').value.trim();
-        if (domain) {
-            hintMessage.style.display = 'none';
-        } else {
-            hintMessage.style.display = 'block';
-        }
+        hintMessage.style.display = hasDomain ? 'none' : 'block';
+        updateHintText(tabId);
+    }
+
+    // Remove domain-entered class if no domain
+    if (!hasDomain) {
+        document.body.classList.remove('domain-entered');
     }
 }
 
@@ -573,10 +562,26 @@ function checkDomain(updateType = 'all') {
     // Add domain-entered class
     document.body.classList.add('domain-entered');
     
-    // Update hint message
+    // Hide hint message
     const hintMessage = document.getElementById('hint-message');
     if (hintMessage) {
-        hintMessage.textContent = `Checking domain: ${domain}`;
+        hintMessage.style.display = 'none';
+    }
+
+    // Show appropriate elements based on active tab
+    const activeTab = document.querySelector('.tab-pane.active');
+    if (activeTab) {
+        if (activeTab.id === 'dns') {
+            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+            dnsElements.forEach(element => {
+                element.style.display = 'block';
+            });
+        } else if (activeTab.id === 'iframe') {
+            const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
+            iframeElements.forEach(element => {
+                element.style.display = 'block';
+            });
+        }
     }
 
     // Make API request

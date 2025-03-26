@@ -1133,33 +1133,42 @@ body {
 
 /* Hint text styles */
 .hint-text {
+    display: block;
     text-align: center;
     color: #6c757d;
-    padding: 3rem 2rem;
-    font-style: normal;
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    margin-top: 1rem;
+    margin: 2rem 0;
     font-size: 1.1rem;
-    transition: all 0.3s ease;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+}
+
+/* Hide DNS elements by default */
+.dns-controls,
+.dns-resolvers,
+.dns-table-wrapper,
+.dns-table,
+#dns .nav-pills {
     display: none;
 }
 
-.hint-text i {
+/* Hide iframe elements by default */
+#iframe .results-container,
+#iframe .iframe-test-container {
+    display: none;
+}
+
+/* Show elements when domain is entered */
+body.domain-entered .dns-controls,
+body.domain-entered .dns-resolvers,
+body.domain-entered .dns-table-wrapper,
+body.domain-entered .dns-table,
+body.domain-entered #dns .nav-pills,
+body.domain-entered #iframe .results-container,
+body.domain-entered #iframe .iframe-test-container {
     display: block;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #adb5bd;
 }
 
 /* Hide hint text when domain is entered */
-.domain-entered .hint-text {
-    display: none !important;
+body.domain-entered .hint-text {
+    display: none;
 }
 
 /* DNS Records Tab */
