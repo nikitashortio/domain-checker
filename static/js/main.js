@@ -1175,7 +1175,7 @@ function updateSecurityResults(data) {
         return;
     }
 
-    let html = '<div class="security-info">';
+    let html = '<div class="results-container"><div class="security-info">';
 
     // Add overall security score
     if (data.score !== undefined) {
@@ -1278,7 +1278,7 @@ function updateSecurityResults(data) {
             </div>`;
     }
 
-    html += '</div>';
+    html += '</div></div>';
     securityTab.innerHTML = html;
 }
 
