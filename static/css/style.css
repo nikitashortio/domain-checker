@@ -876,8 +876,7 @@ body {
 .dns-resolvers,
 .dns-table-wrapper,
 .dns-controls,
-.nav-pills,
-.tab-pane {
+.nav-pills {
     display: none !important;
 }
 

@@ -97,27 +97,39 @@ function activateTab(tabId) {
 
 // Add this function to handle DNS resolver tab activation
 function activateDnsTab(tabId) {
-    // Hide all DNS tab panes
-    document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+    // Get all DNS resolver tabs
+    const dnsTabPanes = document.querySelectorAll('#dns .tab-pane');
+    const dnsNavLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
+    
+    // Remove active class from all tabs and panes
+    dnsTabPanes.forEach(pane => {
         pane.classList.remove('active', 'show');
     });
     
-    // Remove active class from all DNS nav links
-    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
+    dnsNavLinks.forEach(link => {
         link.classList.remove('active');
     });
     
-    // Show the selected DNS tab pane
+    // Activate the selected tab and pane
     const selectedPane = document.getElementById(tabId);
+    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
     }
     
-    // Add active class to the clicked nav link
-    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
     if (selectedLink) {
         selectedLink.classList.add('active');
     }
+    
+    // Make sure DNS resolvers and table stay visible
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    const dnsControls = document.querySelector('.dns-controls');
+    
+    if (dnsResolvers) dnsResolvers.style.display = 'flex';
+    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+    if (dnsControls) dnsControls.style.display = 'block';
 }
 
 // Add event listeners for tab clicks
@@ -278,12 +290,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation(); // Prevent event bubbling
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 activateDnsTab(target.replace('#', ''));
             }
         });
     });
+    
+    // Initialize first DNS resolver tab if domain is entered
+    if (domainInput && domainInput.value.trim()) {
+        const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
+        if (firstDnsTab) {
+            const target = firstDnsTab.getAttribute('data-bs-target');
+            if (target) {
+                activateDnsTab(target.replace('#', ''));
+            }
+        }
+    }
 });
 
 function updateHintText(tabId) {
