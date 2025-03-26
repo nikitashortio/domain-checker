@@ -287,125 +287,92 @@ function updateTabResults(endpoint, data) {
     }
 }
 
-async function checkDomain(updateType = 'all') {
+function checkDomain(updateType = 'all') {
     const domain = document.getElementById('domain').value.trim();
     if (!domain) {
-        showError('Please enter a domain name');
+        alert('Please enter a domain name');
         return;
     }
 
-    // Clear DNS results cache when making a new request
-    dnsResults = {};
-    
-    // Show loading spinner only for new requests
-    if (updateType === 'all' || updateType === 'dns') {
-        const loadingElement = document.getElementById('loading');
-        if (loadingElement) {
-            loadingElement.classList.remove('d-none');
-        }
+    // Show loading spinner
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('d-none');
     }
+
+    // Add domain-entered class to show DNS controls
+    document.body.classList.add('domain-entered');
+
+    // Make the API request
+    const endpoint = getEndpointForTab(updateType);
+    console.log('Making request to:', endpoint);
     
-    try {
-        // Determine the endpoint based on update_type
-        let endpoint = '/api/check';
-        if (updateType !== 'all' && updateType !== 'redirects') {
-            endpoint = `/api/check_${updateType}`;
-        }
-        
-        console.log('Making request to:', endpoint);
-        console.log('Request data:', { domain, update_type: updateType });
-        
-        // Add timeout to the fetch request
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const requestData = {
+        domain: domain,
+        update_type: updateType
+    };
+    console.log('Request data:', requestData);
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                domain: domain,
-                update_type: updateType
-            }),
-            signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
         console.log('Response data:', data);
         
-        // Handle errors in the response
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        // Update the UI based on the update type
-        if (updateType === 'all' || updateType === 'dns') {
-            console.log('Processing DNS data:', data.dns);
-            if (data.dns) {
-                updateDNSResults(data.dns);
-            }
-        }
-        
-        if (updateType === 'all' || updateType === 'whois') {
-            updateWHOISResults(data.whois);
-        }
-        
-        if (updateType === 'all' || updateType === 'ssl') {
-            updateSSLResults(data.ssl);
-        }
-        
-        if (updateType === 'all' || updateType === 'redirects') {
-            updateRedirectResults(data.redirects);
-        }
-        
-        // Cache the results for other tabs
-        if (updateType === 'all') {
-            dnsResults = data.dns;
-            tabResults.whois = data.whois;
-            tabResults.ssl = data.ssl;
-            tabResults.redirects = data.redirects;
-        }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        let errorMessage = error.message;
-        
-        // Handle specific error cases
-        if (error.name === 'AbortError') {
-            errorMessage = 'Request timed out after 30 seconds. Please try again.';
-        } else if (error.message.includes('Failed to fetch')) {
-            errorMessage = 'Network error. Please check your connection and try again.';
-        }
-        
-        showError(errorMessage);
-        
-        // Clear results for the failed check
-        if (updateType === 'all' || updateType === 'dns') {
-            clearDNSResults();
-        }
-        if (updateType === 'all' || updateType === 'whois') {
-            clearWHOISResults();
-        }
-        if (updateType === 'all' || updateType === 'ssl') {
-            clearSSLResults();
-        }
-        if (updateType === 'all' || updateType === 'redirects') {
-            clearRedirectResults();
-        }
-    } finally {
         // Hide loading spinner
-        const loadingElement = document.getElementById('loading');
         if (loadingElement) {
             loadingElement.classList.add('d-none');
         }
-    }
+
+        // Update results based on the update type
+        if (updateType === 'all' || updateType === 'dns') {
+            console.log('Processing DNS data:', data.dns);
+            updateDNSResults(data.dns);
+        }
+        if (updateType === 'all' || updateType === 'whois') {
+            updateWHOISResults(data.whois);
+        }
+        if (updateType === 'all' || updateType === 'ssl') {
+            updateSSLResults(data.ssl);
+        }
+        if (updateType === 'all' || updateType === 'availability') {
+            updateAvailabilityResults(data.availability);
+        }
+        if (updateType === 'all' || updateType === 'referrer') {
+            updateReferrerResults(data.referrer);
+        }
+        if (updateType === 'all' || updateType === 'iframe') {
+            updateIframeResults(data.iframe);
+        }
+        if (updateType === 'all' || updateType === 'redirects') {
+            updateRedirectsResults(data.redirects);
+        }
+        if (updateType === 'all' || updateType === 'headers') {
+            updateHeadersResults(data.headers);
+        }
+        if (updateType === 'all' || updateType === 'security') {
+            updateSecurityResults(data.security);
+        }
+
+        // Store results in cache
+        if (updateType === 'all') {
+            tabResults = data;
+        } else {
+            tabResults[updateType] = data[updateType];
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+        alert('An error occurred while checking the domain. Please try again.');
+    });
 }
 
 function updateDNSResults(data) {
@@ -413,6 +380,7 @@ function updateDNSResults(data) {
     const resolvers = ['cloudflare', 'google', 'quad9'];
     const selectedType = document.getElementById('dnsRecordType').value;
     const recordTypes = selectedType === 'all' ? ['a', 'aaaa', 'mx', 'ns', 'txt', 'cname', 'soa'] : [selectedType.toLowerCase()];
+    const domain = document.getElementById('domain').value.trim();
     
     console.log('Selected type:', selectedType);
     console.log('Record types to process:', recordTypes);
@@ -432,8 +400,6 @@ function updateDNSResults(data) {
                             </div>
                         </td>
                     </tr>`;
-            } else {
-                console.log(`Container not found for resolver: ${resolver}`);
             }
         });
         return;
@@ -446,62 +412,37 @@ function updateDNSResults(data) {
     resolvers.forEach(resolver => {
         console.log(`Processing resolver: ${resolver}`);
         let tableContent = '';
+        let hasRecords = false;
+        
         recordTypes.forEach(type => {
             console.log(`Processing record type: ${type}`);
             const records = data[type] || [];
             console.log(`Found ${records.length} records for type ${type}`);
-            if (records.length > 0) {
-                records.forEach(record => {
-                    console.log(`Processing record:`, record);
-                    if (record.resolver === resolver) {
-                        console.log(`Adding record to table for ${resolver}`);
-                        tableContent += `
-                            <tr data-type="${type}">
-                                <td>${type.toUpperCase()}</td>
-                                <td>${resolver}</td>
-                                <td>${record.value}</td>
-                                <td>${record.ttl}</td>
-                            </tr>`;
-                    }
-                });
-            }
+            
+            records.forEach(record => {
+                if (record.resolver === resolver) {
+                    console.log(`Adding record to table for ${resolver}:`, record);
+                    hasRecords = true;
+                    tableContent += `
+                        <tr data-type="${type.toUpperCase()}">
+                            <td>${type.toUpperCase()}</td>
+                            <td>${domain}</td>
+                            <td>${record.value}</td>
+                            <td>${record.ttl}</td>
+                        </tr>`;
+                }
+            });
         });
 
         const container = document.getElementById(`dns-results-${resolver}`);
         console.log(`Container for ${resolver}:`, container);
         if (container) {
-            if (tableContent) {
+            if (hasRecords) {
                 console.log(`Setting content for ${resolver}:`, tableContent);
-                // Ensure the container is a tbody
-                if (container.tagName.toLowerCase() !== 'tbody') {
-                    console.log(`Container ${resolver} is not a tbody, creating new tbody`);
-                    const newTbody = document.createElement('tbody');
-                    newTbody.id = `dns-results-${resolver}`;
-                    container.parentNode.replaceChild(newTbody, container);
-                    newTbody.innerHTML = tableContent;
-                } else {
-                    container.innerHTML = tableContent;
-                }
+                container.innerHTML = tableContent;
             } else {
                 console.log(`No records found for ${resolver}`);
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
-            }
-        } else {
-            console.log(`Container not found for resolver: ${resolver}`);
-            // Try to find the table and create the tbody if it doesn't exist
-            const table = document.querySelector(`#dns-results-table-${resolver}`);
-            if (table) {
-                console.log(`Found table for ${resolver}, creating tbody`);
-                const tbody = document.createElement('tbody');
-                tbody.id = `dns-results-${resolver}`;
-                table.appendChild(tbody);
-                if (tableContent) {
-                    tbody.innerHTML = tableContent;
-                } else {
-                    tbody.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
-                }
-            } else {
-                console.log(`Table not found for resolver: ${resolver}`);
             }
         }
     });
@@ -940,90 +881,4 @@ function showError(message) {
                 </div>`;
         }
     }
-}
-
-function updateRedirectResults(data) {
-    const redirectsInfo = document.getElementById('redirects-info');
-    if (!redirectsInfo) {
-        console.error('Redirects info container not found');
-        return;
-    }
-    
-    redirectsInfo.innerHTML = ''; // Clear existing content
-    
-    if (data.error) {
-        redirectsInfo.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-        return;
-    }
-    
-    if (!data.redirect_chain || data.redirect_chain.length === 0) {
-        redirectsInfo.innerHTML = `<div class="alert alert-info">No redirects found</div>`;
-        return;
-    }
-    
-    // Display redirect chain
-    data.redirect_chain.forEach((step, index) => {
-        const stepElement = document.createElement('div');
-        stepElement.className = 'redirect-step';
-        
-        const stepNumber = document.createElement('div');
-        stepNumber.className = 'step-number';
-        stepNumber.textContent = index + 1;
-        
-        const stepDetails = document.createElement('div');
-        stepDetails.className = 'step-details';
-        
-        // Add URL
-        const urlElement = document.createElement('div');
-        urlElement.className = 'step-url';
-        urlElement.innerHTML = `<strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong> <a href="${step.url}" target="_blank">${step.url}</a>`;
-        
-        // Add status with appropriate color
-        const statusElement = document.createElement('div');
-        statusElement.className = 'step-status';
-        const statusText = step.status;
-        let statusClass = '';
-        
-        if (statusText.includes('200')) {
-            statusClass = 'text-success';
-        } else if (statusText.includes('301') || statusText.includes('302')) {
-            statusClass = 'text-warning';
-        } else if (statusText.includes('404')) {
-            statusClass = 'text-danger';
-        }
-        
-        statusElement.innerHTML = `<span class="${statusClass}">${statusText}</span>`;
-        
-        // Add headers toggle button
-        const headersButton = document.createElement('button');
-        headersButton.className = 'btn btn-sm btn-outline-secondary mt-2';
-        headersButton.textContent = 'Show Headers';
-        headersButton.onclick = () => toggleHeaders(index);
-        
-        // Add headers content (hidden by default)
-        const headersElement = document.createElement('div');
-        headersElement.className = 'step-headers';
-        headersElement.style.display = 'none';
-        headersElement.innerHTML = `<pre class="headers-pre">${JSON.stringify(step.headers, null, 2)}</pre>`;
-        
-        stepDetails.appendChild(urlElement);
-        stepDetails.appendChild(statusElement);
-        stepDetails.appendChild(headersButton);
-        stepDetails.appendChild(headersElement);
-        
-        stepElement.appendChild(stepNumber);
-        stepElement.appendChild(stepDetails);
-        redirectsInfo.appendChild(stepElement);
-    });
-    
-    // Add summary
-    const summaryElement = document.createElement('div');
-    summaryElement.className = 'redirect-summary';
-    summaryElement.innerHTML = `
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
-            Total redirects: ${data.redirect_count}
-        </div>
-    `;
-    redirectsInfo.appendChild(summaryElement);
 }
