@@ -283,6 +283,9 @@ function updateTabResults(endpoint, data) {
 
     // Update results based on endpoint
     switch (endpoint) {
+        case 'dns':
+            updateDNSResults(data);
+            break;
         case 'whois':
             updateWHOISResults(data);
             break;
@@ -363,12 +366,20 @@ async function checkDomain(updateType = 'all') {
             // Update all results
             Object.entries(data).forEach(([endpoint, endpointData]) => {
                 if (endpoint !== 'error') {
-                    updateTabResults(endpoint, endpointData);
+                    if (endpoint === 'dns') {
+                        updateDNSResults(endpointData);
+                    } else {
+                        updateTabResults(endpoint, endpointData);
+                    }
                 }
             });
         } else {
             // Update specific tab
-            updateTabResults(updateType, data[updateType]);
+            if (updateType === 'dns') {
+                updateDNSResults(data[updateType]);
+            } else {
+                updateTabResults(updateType, data[updateType]);
+            }
         }
         
     } catch (error) {
@@ -610,7 +621,7 @@ function updateAvailabilityResults(data) {
         <div class="availability-info">
             <div class="availability-status ${data.available ? 'available' : 'unavailable'}">
                 <i class="fas ${data.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                ${data.message}
+                ${data.message || (data.available ? 'Domain is available for registration' : 'Domain is already registered')}
             </div>`;
     
     if (!data.available) {
@@ -619,15 +630,23 @@ function updateAvailabilityResults(data) {
                 <div class="detail-row">
                     <strong>Registrar:</strong>
                     <span>${data.registrar || 'Unknown'}</span>
-                </div>
+                </div>`;
+        
+        if (data.creation_date) {
+            html += `
                 <div class="detail-row">
                     <strong>Creation Date:</strong>
-                    <span>${data.creation_date ? new Date(data.creation_date).toLocaleDateString() : 'Unknown'}</span>
-                </div>
+                    <span>${formatDate(data.creation_date)}</span>
+                </div>`;
+        }
+        
+        if (data.expiration_date) {
+            html += `
                 <div class="detail-row">
                     <strong>Expiration Date:</strong>
-                    <span>${data.expiration_date ? new Date(data.expiration_date).toLocaleDateString() : 'Unknown'}</span>
+                    <span>${formatDate(data.expiration_date)}</span>
                 </div>`;
+        }
         
         if (data.registrant) {
             html += `
@@ -702,6 +721,27 @@ function updateReferrerResults(data) {
                     ${getReferrerPolicyExplanation(policyStatus)}
                 </div>
             </div>`;
+            
+        // Add test results if available
+        if (data.test_results) {
+            html += `
+                <div class="referrer-field">
+                    <strong>Test Results:</strong>
+                    <div class="test-results">`;
+            
+            Object.entries(data.test_results).forEach(([test, result]) => {
+                const resultClass = result.success ? 'text-success' : 'text-danger';
+                const resultIcon = result.success ? 'fa-check-circle' : 'fa-times-circle';
+                
+                html += `
+                    <div class="test-result-item">
+                        <i class="fas ${resultIcon} ${resultClass}"></i>
+                        <span>${test}: ${result.message}</span>
+                    </div>`;
+            });
+            
+            html += `</div></div>`;
+        }
     }
     
     html += '</div>';
@@ -733,57 +773,71 @@ function updateIframeResults(data) {
                 ${data.error}
             </div>`;
     } else {
-        // Format X-Frame-Options status
-        const xFrameStatus = data.x_frame_options || 'Not Set';
-        const xFrameClass = xFrameStatus === 'Not Set' ? 'text-warning' : 'text-success';
-        
-        // Format Content-Security-Policy status
-        const cspStatus = data.content_security_policy || 'Not Set';
-        const cspClass = cspStatus === 'Not Set' ? 'text-warning' : 'text-success';
-        
+        // Display iframe test results
         html += `
             <div class="iframe-field">
-                <strong>X-Frame-Options:</strong>
-                <span class="${xFrameClass}">${xFrameStatus}</span>
-            </div>
+                <strong>Iframe Test Results:</strong>
+                <div class="test-results">`;
+        
+        // Test if iframe is allowed
+        const iframeAllowed = data.allowed || false;
+        const iframeClass = iframeAllowed ? 'text-success' : 'text-danger';
+        const iframeIcon = iframeAllowed ? 'fa-check-circle' : 'fa-times-circle';
+        
+        html += `
+            <div class="test-result-item">
+                <i class="fas ${iframeIcon} ${iframeClass}"></i>
+                <span>Iframe ${iframeAllowed ? 'Allowed' : 'Not Allowed'}</span>
+            </div>`;
+        
+        // Display X-Frame-Options header if present
+        if (data.headers && data.headers['X-Frame-Options']) {
+            html += `
+                <div class="test-result-item">
+                    <i class="fas fa-info-circle text-info"></i>
+                    <span>X-Frame-Options: ${data.headers['X-Frame-Options']}</span>
+                </div>`;
+        }
+        
+        // Display Content-Security-Policy header if present
+        if (data.headers && data.headers['Content-Security-Policy']) {
+            html += `
+                <div class="test-result-item">
+                    <i class="fas fa-info-circle text-info"></i>
+                    <span>Content-Security-Policy: ${data.headers['Content-Security-Policy']}</span>
+                </div>`;
+        }
+        
+        html += `</div></div>`;
+        
+        // Add explanation of the results
+        html += `
             <div class="iframe-field">
-                <strong>Content-Security-Policy:</strong>
-                <span class="${cspClass}">${cspStatus}</span>
-            </div>
-            <div class="iframe-field">
-                <strong>Iframe Status:</strong>
-                <span class="${data.allows_iframe ? 'text-success' : 'text-danger'}">
-                    ${data.allows_iframe ? 'Allowed' : 'Blocked'}
-                </span>
+                <strong>Explanation:</strong>
+                <div class="explanation">
+                    ${getIframeExplanation(iframeAllowed)}
+                </div>
             </div>`;
     }
     
     html += '</div>';
     element.innerHTML = html;
-
-    // Update iframe preview
-    const domain = document.getElementById('domain').value.trim();
-    if (domain && !data.error) {
-        updateIframePreview(domain, data.allows_iframe);
-    }
 }
 
-function updateIframePreview(domain, allowsIframe) {
-    const iframe = document.getElementById('domain-iframe');
-    if (!iframe) return;
-
-    if (allowsIframe) {
-        iframe.src = `https://${domain}`;
-        iframe.style.display = 'block';
+function getIframeExplanation(allowed) {
+    if (allowed) {
+        return `
+            <p>This website allows itself to be embedded in iframes on other websites. This could potentially expose your website to clickjacking attacks.</p>
+            <p>Recommendations:</p>
+            <ul>
+                <li>Consider implementing X-Frame-Options header with DENY or SAMEORIGIN</li>
+                <li>Add Content-Security-Policy header with frame-ancestors directive</li>
+                <li>Only allow iframe embedding from trusted domains if necessary</li>
+            </ul>`;
     } else {
-        iframe.style.display = 'block';
-        iframe.srcdoc = `
-            <div style="padding: 20px; text-align: center; color: #dc3545;">
-                <h3>Iframe Blocked</h3>
-                <p>This website does not allow embedding in iframes.</p>
-                <p>X-Frame-Options header is set to prevent iframe embedding.</p>
-            </div>
-        `;
+        return `
+            <p>This website has proper security measures in place to prevent being embedded in iframes on other websites.</p>
+            <p>This is good for security as it protects against clickjacking attacks.</p>`;
     }
 }
 
@@ -876,40 +930,39 @@ function updateHeadersResults(data) {
                 'X-XSS-Protection',
                 'Content-Security-Policy',
                 'Strict-Transport-Security',
-                'Referrer-Policy',
-                'Permissions-Policy'
+                'Referrer-Policy'
             ],
-            'Caching Headers': [
-                'Cache-Control',
-                'Expires',
-                'ETag',
-                'Last-Modified'
-            ],
-            'Content Headers': [
-                'Content-Type',
-                'Content-Length',
-                'Content-Language',
-                'Content-Disposition'
-            ],
-            'Server Headers': [
+            'Server Information': [
                 'Server',
                 'X-Powered-By',
                 'X-AspNet-Version',
-                'X-Runtime'
+                'X-AspNetMvc-Version'
+            ],
+            'Content Information': [
+                'Content-Type',
+                'Content-Length',
+                'Content-Language',
+                'Content-Encoding'
+            ],
+            'Caching': [
+                'Cache-Control',
+                'Expires',
+                'Last-Modified',
+                'ETag'
             ],
             'Other Headers': [] // Will contain headers not in other categories
         };
-
+        
         // Sort headers into categories
         const sortedHeaders = {};
-        Object.entries(data.headers || {}).forEach(([key, value]) => {
+        Object.entries(data.headers || {}).forEach(([header, value]) => {
             let categorized = false;
             for (const [category, headerList] of Object.entries(categories)) {
-                if (headerList.includes(key)) {
+                if (headerList.includes(header)) {
                     if (!sortedHeaders[category]) {
                         sortedHeaders[category] = {};
                     }
-                    sortedHeaders[category][key] = value;
+                    sortedHeaders[category][header] = value;
                     categorized = true;
                     break;
                 }
@@ -918,35 +971,52 @@ function updateHeadersResults(data) {
                 if (!sortedHeaders['Other Headers']) {
                     sortedHeaders['Other Headers'] = {};
                 }
-                sortedHeaders['Other Headers'][key] = value;
+                sortedHeaders['Other Headers'][header] = value;
             }
         });
-
+        
         // Display headers by category
         Object.entries(sortedHeaders).forEach(([category, headers]) => {
             if (Object.keys(headers).length > 0) {
                 html += `
-                    <div class="header-category">
-                        <h5>${category}</h5>
-                        <div class="header-list">`;
+                    <div class="headers-category">
+                        <h4>${category}</h4>
+                        <div class="headers-list">`;
                 
-                Object.entries(headers).forEach(([key, value]) => {
+                Object.entries(headers).forEach(([header, value]) => {
+                    const headerClass = getHeaderClass(header);
                     html += `
-                        <div class="header-field">
-                            <strong>${key}:</strong>
-                            <span>${value}</span>
+                        <div class="header-item ${headerClass}">
+                            <div class="header-name">${header}</div>
+                            <div class="header-value">${value}</div>
                         </div>`;
                 });
                 
-                html += `
-                        </div>
-                    </div>`;
+                html += `</div></div>`;
             }
         });
     }
     
     html += '</div>';
     element.innerHTML = html;
+}
+
+function getHeaderClass(header) {
+    // Add specific classes for security-related headers
+    const securityHeaders = [
+        'X-Frame-Options',
+        'X-Content-Type-Options',
+        'X-XSS-Protection',
+        'Content-Security-Policy',
+        'Strict-Transport-Security',
+        'Referrer-Policy'
+    ];
+    
+    if (securityHeaders.includes(header)) {
+        return 'security-header';
+    }
+    
+    return '';
 }
 
 function updateSecurityResults(data) {
