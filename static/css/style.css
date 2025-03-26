@@ -204,6 +204,24 @@ body {
     width: 100%;
 }
 
+/* Override any domain-entered class styles for DNS visibility */
+.domain-entered #dns.active.show .dns-controls,
+.domain-entered #dns.active.show .dns-resolvers,
+.domain-entered #dns.active.show .dns-table-wrapper,
+.domain-entered #dns.active.show .dns-table,
+.domain-entered #dns.active.show .nav-pills {
+    display: block !important;
+}
+
+/* Ensure DNS elements are hidden in iframe tab */
+#iframe .dns-controls,
+#iframe .dns-resolvers,
+#iframe .dns-table-wrapper,
+#iframe .nav-pills,
+#iframe .dns-table {
+    display: none !important;
+}
+
 /* DNS Records */
 .dns-info {
     padding: 1rem;

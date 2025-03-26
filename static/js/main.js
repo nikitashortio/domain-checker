@@ -122,6 +122,20 @@ function activateTab(tabId) {
         if (iframeTest) {
             iframeTest.style.display = 'block';
         }
+        // Hide any DNS elements that might be in the iframe tab
+        document.querySelectorAll('#iframe .dns-controls, #iframe .dns-resolvers, #iframe .dns-table-wrapper, #iframe .nav-pills, #iframe .dns-table').forEach(element => {
+            element.style.display = 'none';
+        });
+    }
+
+    // Ensure proper tab selection state
+    const dnsTabButton = document.getElementById('dns-tab');
+    if (dnsTabButton) {
+        if (tabId === 'dns') {
+            dnsTabButton.classList.add('active');
+        } else {
+            dnsTabButton.classList.remove('active');
+        }
     }
 }
 
