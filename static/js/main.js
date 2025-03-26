@@ -1000,15 +1000,8 @@ function updateIframeResults(data) {
     // Update the existing iframe preview
     const previewContainer = document.querySelector('.iframe-test-container');
     if (previewContainer) {
-        // Update preview URL
-        const previewUrl = previewContainer.querySelector('.preview-url');
-        if (previewUrl) {
-            previewUrl.textContent = url;
-        }
-
         // Create and append iframe
         const previewContent = `
-            <div class="preview-url">${url}</div>
             <div class="preview-frame">
                 <iframe src="${url}" 
                         style="width: 100%; height: 500px; border: 1px solid #dee2e6; border-radius: 4px;"
