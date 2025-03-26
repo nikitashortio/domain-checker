@@ -70,7 +70,43 @@ function clearRedirectResults() {
     }
 }
 
+// Add this function to handle tab activation
+function activateTab(tabId) {
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active', 'show');
+    });
+    
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Show the selected tab pane
+    const selectedPane = document.getElementById(tabId);
+    if (selectedPane) {
+        selectedPane.classList.add('active', 'show');
+    }
+    
+    // Add active class to the clicked nav link
+    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    }
+}
+
+// Add event listeners for tab clicks
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-bs-target');
+            if (target) {
+                activateTab(target.replace('#', ''));
+            }
+        });
+    });
+
     // Initialize tab change handler
     const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
     tabs.forEach(tab => {
