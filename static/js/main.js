@@ -1288,8 +1288,11 @@ function checkDomain(updateType = 'all') {
         hintMessage.style.display = 'none';
     }
 
-    // Show appropriate elements based on active tab
+    // Get current active tab
     const activeTab = document.querySelector('.tab-pane.active');
+    const isFirstCheck = !activeTab;
+
+    // Show appropriate elements based on active tab
     if (activeTab) {
         if (activeTab.id === 'dns') {
             const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
@@ -1350,8 +1353,13 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Initialize DNS tab if it's currently active
-        if (activeTab && activeTab.id === 'dns') {
+        // If this is the first check, activate the DNS tab after loading
+        if (isFirstCheck) {
+            activateTab('dns');
+            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
+            if (dnsTab) {
+                dnsTab.classList.add('active');
+            }
             initializeDNSTab();
         }
 
