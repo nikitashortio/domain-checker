@@ -83,7 +83,7 @@ body {
 .tab-content,
 .domain-entered .tab-content {
     display: block;
-    padding: 20px;
+    padding: 0;
 }
 
 .tab-pane {
