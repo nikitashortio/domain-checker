@@ -1167,7 +1167,7 @@ function getHeaderClass(header) {
 }
 
 function updateSecurityResults(data) {
-    const securityTab = document.getElementById('security-tab');
+    const securityTab = document.getElementById('security');
     if (!securityTab) return;
 
     if (data.error) {
