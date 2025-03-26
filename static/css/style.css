@@ -83,10 +83,13 @@ body {
 .tab-content {
     display: block;
     padding: 0;
+    margin: 0;
 }
 
 .tab-pane {
     display: none;
+    padding: 0;
+    margin: 0;
 }
 
 .tab-pane.active.show {
@@ -135,6 +138,7 @@ body {
 .tab-content,
 .domain-entered .tab-content {
     padding: 0;
+    margin: 0;
 }
 
 /* Add padding only to specific content areas */
@@ -147,6 +151,7 @@ body {
 .headers-info,
 .security-info {
     padding: 1rem;
+    margin-top: 0;
 }
 
 /* Remove any margin from tab panes */
@@ -203,7 +208,7 @@ body {
 .card {
     border: none;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    margin-top: 1rem;
+    margin-top: 0;
 }
 
 .card-body {
@@ -212,7 +217,7 @@ body {
 
 .results-content {
     padding: 1rem;
-    margin-top: 1rem;
+    margin-top: 0;
 }
 
 /* DNS Records */
