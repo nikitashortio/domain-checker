@@ -490,55 +490,52 @@ body {
 
 /* Headers Info */
 .headers-info {
+    padding: 20px;
     background: #fff;
-    padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.header-category {
-    margin-bottom: 2rem;
+.headers-category {
+    margin-bottom: 24px;
 }
 
-.header-category:last-child {
-    margin-bottom: 0;
+.headers-category h4 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eee;
 }
 
-.header-category h5 {
-    color: #212529;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e9ecef;
-}
-
-.header-list {
+.headers-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 8px;
 }
 
-.header-field {
+.header-item {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem;
+    padding: 12px;
     background: #f8f9fa;
     border-radius: 6px;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #dee2e6;
 }
 
-.header-field strong {
+.header-item.security-header {
+    background: #f8f9fa;
+    border-left-color: #28a745;
+}
+
+.header-name {
+    font-weight: 600;
     color: #495057;
-    font-size: 0.9rem;
-    font-family: monospace;
+    min-width: 200px;
+    padding-right: 16px;
 }
 
-.header-field span {
-    color: #212529;
-    font-size: 0.95rem;
+.header-value {
+    color: #6c757d;
     word-break: break-all;
-    line-height: 1.4;
 }
 
 /* Security Headers */
@@ -826,10 +823,14 @@ body {
     gap: 0.5rem;
     justify-content: flex-start;
     margin-bottom: 1rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
 }
 
 .dns-resolvers .nav-item {
     flex: 0 0 auto;
+    margin: 0;
 }
 
 .dns-resolvers .nav-link {
@@ -839,12 +840,33 @@ body {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     white-space: nowrap;
+    text-align: center;
+    min-width: 100px;
 }
 
 .dns-resolvers .nav-link.active {
     background-color: #212529;
     color: white;
     border-color: #212529;
+}
+
+/* Add scrollbar styling for the nav-pills */
+.dns-resolvers .nav-pills::-webkit-scrollbar {
+    height: 6px;
+}
+
+.dns-resolvers .nav-pills::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.dns-resolvers .nav-pills::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.dns-resolvers .nav-pills::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .loading {
