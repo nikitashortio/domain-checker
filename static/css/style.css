@@ -177,6 +177,7 @@ body {
     color: #495057;
 }
 
+/* Update DNS controls and resolvers visibility */
 .dns-controls,
 .dns-resolvers {
     display: none;
@@ -191,20 +192,96 @@ body {
     margin-bottom: 20px;
 }
 
-.dns-resolver {
-    flex: 1;
-    min-width: 250px;
-    max-width: calc(33.33% - 10px);
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* Add styles for DNS tab content */
+#dns {
+    display: none;
 }
 
-.text-muted {
+#dns.active.show {
+    display: block;
+}
+
+/* Add styles for DNS resolver tabs */
+#dns .tab-pane {
+    display: none;
+}
+
+#dns .tab-pane.active.show {
+    display: block;
+}
+
+/* Ensure DNS table wrapper is visible */
+.dns-table-wrapper {
+    display: none;
+}
+
+.domain-entered .dns-table-wrapper {
+    display: block;
+}
+
+/* Add styles for DNS resolver pills */
+#dns .nav-pills {
+    display: none;
+}
+
+.domain-entered #dns .nav-pills {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#dns .nav-pills .nav-link {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: #495057;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+#dns .nav-pills .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+/* Ensure DNS results tables are visible */
+.dns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.dns-table th,
+.dns-table td {
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.dns-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.dns-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.dns-table tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* Add styles for no records message */
+.no-records {
+    text-align: center;
     color: #6c757d;
-    font-style: italic;
-    padding: 0.5rem;
+    padding: 1rem;
+}
+
+/* Add styles for error messages */
+.error-row td {
+    padding: 1rem;
+    color: #dc3545;
 }
 
 /* WHOIS Info */
@@ -680,218 +757,6 @@ body {
 
 .btn-primary {
     padding: 0.5rem 2rem;
-}
-
-/* DNS Table */
-.dns-table-wrapper {
-    margin-top: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.dns-table {
-    width: 100%;
-    margin-bottom: 0;
-    background-color: #fff;
-    border-collapse: collapse;
-}
-
-.dns-table th,
-.dns-table td {
-    padding: 0.75rem;
-    text-align: left;
-    vertical-align: middle;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.dns-table thead th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #212529;
-    border-bottom: 2px solid #dee2e6;
-}
-
-/* Column widths */
-.dns-table th:nth-child(1),
-.dns-table td:nth-child(1) {
-    width: 12%;
-    padding-left: 1rem;
-}
-
-.dns-table th:nth-child(2),
-.dns-table td:nth-child(2) {
-    width: 23%;
-}
-
-.dns-table th:nth-child(3),
-.dns-table td:nth-child(3) {
-    width: 50%;
-}
-
-.dns-table th:nth-child(4),
-.dns-table td:nth-child(4) {
-    width: 15%;
-    padding-right: 1rem;
-}
-
-/* Add monospace for better number alignment */
-.dns-table td {
-    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-.dns-table td:last-child {
-    font-family: monospace;
-}
-
-/* Record type colors */
-.dns-table tbody tr td:first-child {
-    border-left: 3px solid transparent;
-}
-
-.dns-table tbody tr[data-type="A"] td:first-child {
-    border-left: 3px solid #28a745;
-}
-
-.dns-table tbody tr[data-type="AAAA"] td:first-child {
-    border-left: 3px solid #17a2b8;
-}
-
-.dns-table tbody tr[data-type="MX"] td:first-child {
-    border-left: 3px solid #dc3545;
-}
-
-.dns-table tbody tr[data-type="NS"] td:first-child {
-    border-left: 3px solid #fd7e14;
-}
-
-.dns-table tbody tr[data-type="TXT"] td:first-child {
-    border-left: 3px solid #6f42c1;
-}
-
-.dns-table tbody tr[data-type="CNAME"] td:first-child {
-    border-left: 3px solid #20c997;
-}
-
-.dns-table tbody tr[data-type="SOA"] td:first-child {
-    border-left: 3px solid #e83e8c;
-}
-
-.dns-table tbody tr[data-type="CAA"] td:first-child {
-    border-left: 3px solid #fd7e14;
-}
-
-/* Empty state */
-.dns-table tbody tr.no-records td {
-    text-align: center;
-    color: #6c757d;
-    padding: 2rem;
-    font-style: italic;
-    border-bottom: none;
-}
-
-/* Error state */
-.dns-table tbody tr.error-row td {
-    padding: 1rem;
-}
-
-.dns-table tbody tr.error-row .alert {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.dns-table tbody tr.error-row .alert i {
-    font-size: 1.25rem;
-}
-
-@media (max-width: 768px) {
-    .nav-tabs {
-        margin-bottom: 1rem;
-    }
-    
-    .nav-tabs .nav-link {
-        padding: 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .redirects-info .redirect-step {
-        flex-direction: column;
-    }
-    
-    .redirects-info .step-number {
-        margin-bottom: 0.5rem;
-    }
-    
-    .dns-resolver {
-        max-width: 100%;
-    }
-}
-
-.domain-entered .tab-content {
-    display: block;
-}
-
-.domain-entered .nav-tabs {
-    flex-wrap: nowrap !important;
-    justify-content: flex-start !important;
-    gap: 0.5rem;
-}
-
-.nav-tabs .nav-link {
-    white-space: nowrap;
-    margin: 0;
-}
-
-/* Update hint text to match width */
-.hint-text {
-    text-align: center;
-    color: #6c757d;
-    padding: 3rem 2rem;
-    font-style: normal;
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    margin-top: 1rem;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
-}
-
-.hint-text i {
-    display: block;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #adb5bd;
-}
-
-.domain-entered .hint-text {
-    display: none;
-}
-
-.dns-resolvers,
-.dns-table-wrapper,
-.dns-controls,
-.nav-pills {
-    display: none !important;
-}
-
-/* Show DNS elements when domain is entered */
-.domain-entered .dns-resolvers {
-    display: flex !important;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.domain-entered .dns-table-wrapper,
-.domain-entered .dns-controls {
-    display: block !important;
 }
 
 /* DNS Pills Navigation */
