@@ -128,16 +128,6 @@ function activateTab(tabId) {
         });
     }
 
-    // Ensure proper tab selection state
-    const dnsTabButton = document.getElementById('dns-tab');
-    if (dnsTabButton) {
-        if (tabId === 'dns') {
-            dnsTabButton.classList.add('active');
-        } else {
-            dnsTabButton.classList.remove('active');
-        }
-    }
-
     // Update hint message visibility
     const hintMessage = document.getElementById('hint-message');
     if (hintMessage) {
@@ -212,12 +202,32 @@ function switchDNSResolver(tabId) {
 
 // Add event listeners for tab clicks
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize with no active tab
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
+    });
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add event listeners for tab clicks
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('data-bs-target');
             if (target) {
-                activateTab(target.replace('#', ''));
+                const tabId = target.replace('#', '');
+                activateTab(tabId);
+                
+                // Only check domain for iframe tab if we have a domain
+                if (tabId === 'iframe') {
+                    const domain = document.getElementById('domain').value.trim();
+                    if (domain) {
+                        checkDomain('iframe');
+                    }
+                }
             }
         });
     });
@@ -606,45 +616,10 @@ function checkDomain(updateType = 'all') {
             loadingElement.classList.add('d-none');
         }
 
-        // Ensure the DNS tab is properly initialized and shown
-        const dnsTab = document.getElementById('dns');
-        const dnsTabButton = document.getElementById('dns-tab');
-        
-        if (dnsTab && dnsTabButton) {
-            // Remove fade class to prevent animation issues
-            dnsTab.classList.remove('fade');
-            
-            // Add active and show classes
-            dnsTab.classList.add('active', 'show');
-            dnsTabButton.classList.add('active');
-            
-            // Show DNS controls and resolvers
-            const dnsControls = document.querySelector('.dns-controls');
-            const dnsResolvers = document.querySelector('.dns-resolvers');
-            const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
-            
-            if (dnsControls) dnsControls.style.display = 'block';
-            if (dnsResolvers) dnsResolvers.style.display = 'block';
-            if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
-
-            // Initialize the first DNS resolver tab
-            const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
-            if (firstDnsTab) {
-                const target = firstDnsTab.getAttribute('data-bs-target');
-                if (target) {
-                    const tabId = target.replace('#', '');
-                    const tabPane = document.getElementById(tabId);
-                    
-                    // Remove fade class from resolver tab pane
-                    if (tabPane) {
-                        tabPane.classList.remove('fade');
-                        tabPane.classList.add('active', 'show');
-                        tabPane.style.display = 'block';
-                    }
-                    
-                    firstDnsTab.classList.add('active');
-                }
-            }
+        // Only initialize DNS tab if we're on the DNS tab
+        const activeTab = document.querySelector('.tab-pane.active');
+        if (activeTab && activeTab.id === 'dns') {
+            initializeDNSTab();
         }
     })
     .catch(error => {

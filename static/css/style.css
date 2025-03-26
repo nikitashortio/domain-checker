@@ -89,7 +89,7 @@ body {
 
 /* DNS Records Tab */
 #dns {
-    display: none;
+    display: none !important;
 }
 
 #dns.active.show {
@@ -220,12 +220,6 @@ body {
 #iframe .nav-pills,
 #iframe .dns-table {
     display: none !important;
-}
-
-/* DNS Records */
-.dns-info {
-    padding: 1rem;
-    margin: 0;
 }
 
 /* Remove any margin from tab panes */
