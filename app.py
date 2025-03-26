@@ -475,10 +475,6 @@ def check_web_risk(domain):
                         'total_scanners': total_scanners,
                         'url': f'https://www.virustotal.com/gui/domain/{domain}',
                         'scans': report.get('scans', {})
-                    },
-                    'google_web_risk': {
-                        'status': 'SAFE',  # In production, use actual Google Safe Browsing API
-                        'score': 100
                     }
                 }
         
@@ -486,16 +482,14 @@ def check_web_risk(domain):
         return {
             'error': 'Failed to get VirusTotal report',
             'scan_date': None,
-            'virustotal': None,
-            'google_web_risk': None
+            'virustotal': None
         }
         
     except Exception as e:
         return {
             'error': f'Failed to check web risk: {str(e)}',
             'scan_date': None,
-            'virustotal': None,
-            'google_web_risk': None
+            'virustotal': None
         }
 
 def check_security(domain):
@@ -604,109 +598,43 @@ def check_domain():
             'security': {}
         }
         
-        # Extract base domain for WHOIS and SSL checks
-        base_domain = domain.split('/')[0]
-        
         try:
-            if update_type in ['all', 'dns']:
-                print(f"Checking DNS records for {base_domain}")
-                result['dns'] = {
-                    'a': get_dns_records(base_domain, 'A'),
-                    'aaaa': get_dns_records(base_domain, 'AAAA'),
-                    'mx': get_dns_records(base_domain, 'MX'),
-                    'ns': get_dns_records(base_domain, 'NS'),
-                    'txt': get_dns_records(base_domain, 'TXT'),
-                    'cname': get_dns_records(base_domain, 'CNAME'),
-                    'soa': get_dns_records(base_domain, 'SOA')
-                }
-                print("DNS check completed")
-        except Exception as e:
-            print(f"Error in DNS check: {str(e)}")
-            result['dns'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'whois']:
-                print(f"Checking WHOIS for {base_domain}")
-                result['whois'] = get_whois_info(base_domain)
-                print("WHOIS check completed")
-        except Exception as e:
-            print(f"Error in WHOIS check: {str(e)}")
-            result['whois'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'ssl']:
-                print(f"Checking SSL for {base_domain}")
-                result['ssl'] = check_ssl_certificate(base_domain)
-                print("SSL check completed")
-        except Exception as e:
-            print(f"Error in SSL check: {str(e)}")
-            result['ssl'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'availability']:
-                print(f"Checking availability for {base_domain}")
-                result['availability'] = check_availability(base_domain)
-                print("Availability check completed")
-        except Exception as e:
-            print(f"Error in availability check: {str(e)}")
-            result['availability'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'referrer']:
-                print(f"Checking referrer policy for {base_domain}")
-                result['referrer'] = check_referrer(base_domain)
-                print("Referrer check completed")
-        except Exception as e:
-            print(f"Error in referrer check: {str(e)}")
-            result['referrer'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'iframe']:
-                print(f"Checking iframe policy for {base_domain}")
-                result['iframe'] = check_iframe(base_domain)
-                print("Iframe check completed")
-        except Exception as e:
-            print(f"Error in iframe check: {str(e)}")
-            result['iframe'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'redirects']:
-                print(f"Checking redirects for {domain}")
+            if update_type == 'all' or update_type == 'dns':
+                dns_record_type = data.get('dns_record_type', 'all')
+                result['dns'] = check_dns_records(domain, dns_record_type)
+            
+            if update_type == 'all' or update_type == 'whois':
+                result['whois'] = check_whois(domain)
+            
+            if update_type == 'all' or update_type == 'ssl':
+                result['ssl'] = check_ssl_certificate(domain)
+            
+            if update_type == 'all' or update_type == 'availability':
+                result['availability'] = check_availability(domain)
+            
+            if update_type == 'all' or update_type == 'referrer':
+                result['referrer'] = check_referrer(domain)
+            
+            if update_type == 'all' or update_type == 'iframe':
+                result['iframe'] = check_iframe(domain)
+            
+            if update_type == 'all' or update_type == 'redirects':
                 result['redirects'] = check_domain_redirects(domain)
-                print("Redirects check completed")
+            
+            if update_type == 'all' or update_type == 'headers':
+                result['headers'] = get_headers(domain)
+            
+            if update_type == 'all' or update_type == 'security':
+                result['security'] = check_web_risk(domain)
+            
+            return jsonify(result)
+            
         except Exception as e:
-            print(f"Error in redirects check: {str(e)}")
-            result['redirects'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'headers']:
-                print(f"Checking headers for {base_domain}")
-                result['headers'] = get_headers(base_domain)
-                print("Headers check completed")
-        except Exception as e:
-            print(f"Error in headers check: {str(e)}")
-            result['headers'] = {'error': str(e)}
-        
-        try:
-            if update_type in ['all', 'security']:
-                print(f"Checking security for {base_domain}")
-                security_info = check_security(base_domain)
-                # Add web risk data to security info
-                web_risk = check_web_risk(base_domain)
-                if 'error' not in web_risk:
-                    security_info['virustotal'] = web_risk.get('virustotal')
-                    security_info['scan_date'] = web_risk.get('scan_date')
-                result['security'] = security_info
-                print("Security check completed")
-        except Exception as e:
-            print(f"Error in security check: {str(e)}")
-            result['security'] = {'error': str(e)}
-        
-        print("All checks completed successfully")
-        return jsonify(result)
-        
+            print(f"Error checking domain: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+            
     except Exception as e:
-        print(f"Error in check_domain: {str(e)}")
+        print(f"Error processing request: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/check_dns', methods=['POST'])
