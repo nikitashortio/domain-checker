@@ -875,14 +875,10 @@ body {
 
 .dns-resolvers,
 .dns-table-wrapper,
-.dns-controls {
+.dns-controls,
+.nav-pills,
+.tab-pane {
     display: none !important;
-}
-
-.domain-entered .dns-resolvers,
-.domain-entered .dns-table-wrapper,
-.domain-entered .dns-controls {
-    display: block !important;
 }
 
 .domain-entered .dns-resolvers {
@@ -893,9 +889,9 @@ body {
     margin-bottom: 20px;
 }
 
-/* DNS Resolver Pills Navigation */
-.nav-pills {
-    display: none;
+.domain-entered .dns-table-wrapper,
+.domain-entered .dns-controls {
+    display: block !important;
 }
 
 .domain-entered .nav-pills {
@@ -906,6 +902,10 @@ body {
     padding: 0;
     margin: 0 0 15px 0;
     list-style: none;
+}
+
+.domain-entered .tab-pane.active.show {
+    display: block !important;
 }
 
 .nav-pills .nav-link {
