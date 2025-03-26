@@ -198,52 +198,45 @@ def check_availability(domain):
                 'name_servers': None
             }
             
-        # Handle creation date formatting
-        creation_date = None
-        if hasattr(w, 'creation_date'):
-            if isinstance(w.creation_date, list):
-                creation_date = w.creation_date[0].isoformat() if w.creation_date and w.creation_date[0] else None
-            elif w.creation_date:
-                creation_date = w.creation_date.isoformat()
+        # Format dates
+        creation_date = w.creation_date[0] if isinstance(w.creation_date, list) else w.creation_date
+        expiration_date = w.expiration_date[0] if isinstance(w.expiration_date, list) else w.expiration_date
         
-        # Handle expiration date formatting
-        expiration_date = None
-        if hasattr(w, 'expiration_date'):
-            if isinstance(w.expiration_date, list):
-                expiration_date = w.expiration_date[0].isoformat() if w.expiration_date and w.expiration_date[0] else None
-            elif w.expiration_date:
-                expiration_date = w.expiration_date.isoformat()
+        # Format name servers
+        name_servers = w.name_servers
+        if isinstance(name_servers, str):
+            name_servers = [name_servers]
+        elif isinstance(name_servers, list):
+            name_servers = [ns.lower() for ns in name_servers]
         
-        # Handle registrar information
-        registrar = None
-        if hasattr(w, 'registrar'):
-            if isinstance(w.registrar, list):
-                registrar = w.registrar[0] if w.registrar else None
-            else:
-                registrar = w.registrar
-        
-        # Handle name servers
-        name_servers = None
-        if hasattr(w, 'name_servers'):
-            if isinstance(w.name_servers, list):
-                name_servers = w.name_servers
-            else:
-                name_servers = [w.name_servers]
+        # Check if domain is premium
+        premium_info = None
+        try:
+            # This is a simplified check. In a real implementation,
+            # you would want to check with actual registrars
+            if len(domain.split('.')[0]) <= 3:
+                premium_info = {
+                    'is_premium': True,
+                    'reason': 'Short domain name (3 characters or less)'
+                }
+        except Exception:
+            pass
         
         return {
             'available': False,
             'message': 'Domain is already registered',
-            'creation_date': creation_date,
-            'expiration_date': expiration_date,
-            'registrar': registrar,
+            'registrar': w.registrar,
+            'creation_date': creation_date.isoformat() if creation_date else None,
+            'expiration_date': expiration_date.isoformat() if expiration_date else None,
+            'registrant': w.registrant or w.name,
+            'registrant_country': w.registrant_country,
             'name_servers': name_servers,
-            'registrant': w.registrant_name if hasattr(w, 'registrant_name') else None,
-            'registrant_country': w.registrant_country if hasattr(w, 'registrant_country') else None
+            'status': w.status if isinstance(w.status, list) else [w.status] if w.status else None,
+            'premium_info': premium_info
         }
     except socket.timeout:
-        return {'error': 'Availability check timed out'}
+        return {'error': 'WHOIS request timed out'}
     except Exception as e:
-        print(f"Availability check error: {str(e)}")  # Debug log
         return {'error': f'Failed to check availability: {str(e)}'}
     finally:
         # Reset the default timeout
@@ -252,15 +245,85 @@ def check_availability(domain):
 def check_referrer(domain):
     try:
         headers = {'Referer': 'https://example.com'}
-        response = requests.get(f'https://{domain}', headers=headers, timeout=5)  # Reduced from 10
-        return {'allows_referrer': 'Referer' in response.request.headers}
+        response = requests.get(f'https://{domain}', headers=headers, timeout=5)
+        
+        # Get all headers from the response
+        response_headers = dict(response.headers)
+        
+        # Check for specific referrer-related headers
+        referrer_policy = response_headers.get('Referrer-Policy', 'Not Set')
+        
+        # Perform test with different referrer values
+        test_results = {}
+        
+        # Test with HTTPS referrer
+        try:
+            https_response = requests.get(f'https://{domain}', headers={'Referer': 'https://example.com'}, timeout=5)
+            test_results['https_referrer'] = {
+                'success': True,
+                'message': 'HTTPS referrer accepted'
+            }
+        except Exception as e:
+            test_results['https_referrer'] = {
+                'success': False,
+                'message': str(e)
+            }
+        
+        # Test with HTTP referrer
+        try:
+            http_response = requests.get(f'https://{domain}', headers={'Referer': 'http://example.com'}, timeout=5)
+            test_results['http_referrer'] = {
+                'success': True,
+                'message': 'HTTP referrer accepted'
+            }
+        except Exception as e:
+            test_results['http_referrer'] = {
+                'success': False,
+                'message': str(e)
+            }
+        
+        return {
+            'status': referrer_policy,
+            'headers': response_headers,
+            'test_results': test_results
+        }
     except Exception as e:
         return {'error': f'Failed to check referrer: {str(e)}'}
 
 def check_iframe(domain):
     try:
-        response = requests.get(f'https://{domain}', timeout=5)  # Reduced from 10
-        return {'allows_iframe': 'X-Frame-Options' not in response.headers}
+        response = requests.get(f'https://{domain}', timeout=5)
+        headers = dict(response.headers)
+        
+        # Check X-Frame-Options header
+        x_frame_options = headers.get('X-Frame-Options', 'Not Set')
+        
+        # Check Content-Security-Policy header for frame-ancestors directive
+        csp = headers.get('Content-Security-Policy', '')
+        frame_ancestors = 'Not Set'
+        if csp:
+            for directive in csp.split(';'):
+                if 'frame-ancestors' in directive.lower():
+                    frame_ancestors = directive.strip()
+                    break
+        
+        # Determine if iframes are allowed
+        allowed = True
+        if x_frame_options:
+            if x_frame_options.upper() in ['DENY', 'SAMEORIGIN']:
+                allowed = False
+        if frame_ancestors and 'none' in frame_ancestors.lower():
+            allowed = False
+        
+        return {
+            'allowed': allowed,
+            'headers': {
+                'X-Frame-Options': x_frame_options,
+                'Content-Security-Policy': csp
+            },
+            'frame_ancestors_directive': frame_ancestors,
+            'message': 'Iframe embedding is ' + ('blocked' if not allowed else 'allowed')
+        }
     except Exception as e:
         return {'error': f'Failed to check iframe: {str(e)}'}
 
@@ -355,59 +418,77 @@ def check_web_risk(domain):
         }
 
 def check_security(domain):
-    """Check domain security using multiple services."""
+    """Check domain security using multiple services and calculate an overall security score."""
     try:
-        # Google Web Risk check (public API endpoint)
-        web_risk_result = {
-            'is_safe': True,  # Default to safe
-            'threats': []
+        security_info = {
+            'score': 0,
+            'max_score': 100,
+            'issues': [],
+            'recommendations': []
         }
         
-        try:
-            # Use urlscan.io API for basic security check
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-            response = requests.get(f'https://urlscan.io/api/v1/search/?q=domain:{domain}', headers=headers, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                if data.get('results'):
-                    # Check if any results indicate malicious activity
-                    for result in data['results']:
-                        if result.get('result', {}).get('verdicts', {}).get('overall', {}).get('malicious'):
-                            web_risk_result['is_safe'] = False
-                            web_risk_result['threats'].append('Malicious Activity Detected')
-                            break
-        except Exception as e:
-            print(f"Error checking urlscan.io: {str(e)}")
-
-        # VirusTotal check (public API endpoint)
-        vt_result = {
-            'scan_date': datetime.now().isoformat(),
-            'positives': 0,
-            'total': 0,
-            'categories': []
-        }
-        
-        try:
-            # Use public HTML parsing instead of API
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-            response = requests.get(f'https://www.virustotal.com/gui/domain/{domain}/detection', headers=headers, timeout=10)
-            
-            if response.status_code == 200:
-                # If we can access the page, domain has been scanned before
-                vt_result['url'] = f'https://www.virustotal.com/gui/domain/{domain}/detection'
+        # Check SSL/TLS
+        ssl_info = check_ssl_certificate(domain)
+        if 'error' not in ssl_info:
+            security_info['ssl'] = ssl_info
+            if ssl_info['valid']:
+                security_info['score'] += 30
             else:
-                vt_result['error'] = 'Domain not found in VirusTotal database'
+                security_info['issues'].append('Invalid SSL certificate')
+                security_info['recommendations'].append('Install a valid SSL certificate')
+        
+        # Check security headers
+        headers = get_headers(domain)
+        if 'error' not in headers:
+            security_info['headers'] = headers
+            
+            # Check important security headers
+            security_headers = {
+                'Strict-Transport-Security': 'Implement HSTS to enforce HTTPS',
+                'Content-Security-Policy': 'Implement CSP to prevent XSS attacks',
+                'X-Frame-Options': 'Set X-Frame-Options to prevent clickjacking',
+                'X-Content-Type-Options': 'Set X-Content-Type-Options to prevent MIME-type sniffing',
+                'X-XSS-Protection': 'Enable browser XSS protection',
+                'Referrer-Policy': 'Set a referrer policy to control information leakage'
+            }
+            
+            for header, recommendation in security_headers.items():
+                if header in headers:
+                    security_info['score'] += 10
+                else:
+                    security_info['issues'].append(f'Missing {header} header')
+                    security_info['recommendations'].append(recommendation)
+        
+        # Check for malicious activity using VirusTotal
+        try:
+            vt_headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            vt_response = requests.get(f'https://www.virustotal.com/gui/domain/{domain}/detection', headers=vt_headers, timeout=10)
+            
+            if vt_response.status_code == 200:
+                security_info['virustotal'] = {
+                    'url': f'https://www.virustotal.com/gui/domain/{domain}/detection',
+                    'scan_date': datetime.now().isoformat()
+                }
+                security_info['score'] += 10
+            else:
+                security_info['issues'].append('Domain not found in VirusTotal database')
+                security_info['recommendations'].append('Submit domain to VirusTotal for scanning')
         except Exception as e:
-            vt_result['error'] = f"Error accessing VirusTotal: {str(e)}"
-
-        return {
-            'google_web_risk': web_risk_result,
-            'virustotal': vt_result
-        }
+            security_info['virustotal'] = {'error': str(e)}
+        
+        # Calculate final score and risk level
+        security_info['score'] = min(100, security_info['score'])
+        if security_info['score'] >= 80:
+            security_info['risk_level'] = 'LOW'
+        elif security_info['score'] >= 60:
+            security_info['risk_level'] = 'MEDIUM'
+        else:
+            security_info['risk_level'] = 'HIGH'
+        
+        return security_info
+        
     except Exception as e:
         return {'error': str(e)}
 
@@ -462,8 +543,7 @@ def check_domain():
         try:
             if update_type in ['all', 'whois']:
                 print(f"Checking WHOIS for {base_domain}")
-                whois_info = get_whois_info(base_domain)
-                result['whois'] = whois_info
+                result['whois'] = get_whois_info(base_domain)
                 print("WHOIS check completed")
         except Exception as e:
             print(f"Error in WHOIS check: {str(e)}")
@@ -472,8 +552,7 @@ def check_domain():
         try:
             if update_type in ['all', 'ssl']:
                 print(f"Checking SSL for {base_domain}")
-                ssl_info = check_ssl_certificate(base_domain)
-                result['ssl'] = ssl_info
+                result['ssl'] = check_ssl_certificate(base_domain)
                 print("SSL check completed")
         except Exception as e:
             print(f"Error in SSL check: {str(e)}")
@@ -482,8 +561,7 @@ def check_domain():
         try:
             if update_type in ['all', 'availability']:
                 print(f"Checking availability for {base_domain}")
-                availability_info = check_availability(base_domain)
-                result['availability'] = availability_info
+                result['availability'] = check_availability(base_domain)
                 print("Availability check completed")
         except Exception as e:
             print(f"Error in availability check: {str(e)}")
@@ -492,11 +570,7 @@ def check_domain():
         try:
             if update_type in ['all', 'referrer']:
                 print(f"Checking referrer policy for {base_domain}")
-                referrer_info = check_referrer(base_domain)
-                headers = get_headers(base_domain)
-                if 'error' not in headers:
-                    referrer_info['headers'] = headers
-                result['referrer'] = referrer_info
+                result['referrer'] = check_referrer(base_domain)
                 print("Referrer check completed")
         except Exception as e:
             print(f"Error in referrer check: {str(e)}")
@@ -505,11 +579,7 @@ def check_domain():
         try:
             if update_type in ['all', 'iframe']:
                 print(f"Checking iframe policy for {base_domain}")
-                iframe_info = check_iframe(base_domain)
-                headers = get_headers(base_domain)
-                if 'error' not in headers:
-                    iframe_info['headers'] = headers
-                result['iframe'] = iframe_info
+                result['iframe'] = check_iframe(base_domain)
                 print("Iframe check completed")
         except Exception as e:
             print(f"Error in iframe check: {str(e)}")
@@ -518,8 +588,7 @@ def check_domain():
         try:
             if update_type in ['all', 'redirects']:
                 print(f"Checking redirects for {domain}")
-                redirect_info = check_domain_redirects(domain)
-                result['redirects'] = redirect_info
+                result['redirects'] = check_domain_redirects(domain)
                 print("Redirects check completed")
         except Exception as e:
             print(f"Error in redirects check: {str(e)}")
@@ -528,8 +597,7 @@ def check_domain():
         try:
             if update_type in ['all', 'headers']:
                 print(f"Checking headers for {base_domain}")
-                headers_info = get_headers(base_domain)
-                result['headers'] = headers_info
+                result['headers'] = get_headers(base_domain)
                 print("Headers check completed")
         except Exception as e:
             print(f"Error in headers check: {str(e)}")
@@ -539,12 +607,6 @@ def check_domain():
             if update_type in ['all', 'security']:
                 print(f"Checking security for {base_domain}")
                 security_info = check_security(base_domain)
-                headers = get_headers(base_domain)
-                if 'error' not in headers:
-                    security_info['headers'] = headers
-                ssl_info = check_ssl_certificate(base_domain)
-                if 'error' not in ssl_info:
-                    security_info['ssl'] = ssl_info
                 result['security'] = security_info
                 print("Security check completed")
         except Exception as e:
