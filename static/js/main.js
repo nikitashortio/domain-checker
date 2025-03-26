@@ -210,10 +210,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tabId = target.replace('#', '');
                 activateTab(tabId);
                 
-                // Only check domain for iframe tab if we have a domain
+                // Only check domain for iframe tab if we have a domain and no cached results
                 if (tabId === 'iframe') {
                     const domain = document.getElementById('domain').value.trim();
-                    if (domain) {
+                    if (domain && !tabResults.iframe) {
                         checkDomain('iframe');
                     }
                 }
@@ -256,6 +256,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Remove the separate iframe tab event listener since we handle it in the main tab click handler
+    const iframeTab = document.querySelector('[data-bs-target="#iframe"]');
+    if (iframeTab) {
+        const oldListener = iframeTab.getAttribute('data-listener');
+        if (oldListener) {
+            iframeTab.removeEventListener('shown.bs.tab', window[oldListener]);
+        }
+    }
+
+    // Update the checkDomain function to store results in cache
+    const originalCheckDomain = checkDomain;
+    window.checkDomain = function(updateType = 'all') {
+        return originalCheckDomain(updateType).then(data => {
+            if (data && !data.error) {
+                if (updateType === 'all') {
+                    Object.entries(data).forEach(([endpoint, endpointData]) => {
+                        if (endpointData && typeof endpointData === 'object') {
+                            tabResults[endpoint] = endpointData;
+                        }
+                    });
+                } else if (data[updateType]) {
+                    tabResults[updateType] = data[updateType];
+                }
+            }
+            return data;
+        });
+    };
 
     // Add event listener for domain input changes
     const domainInput = document.getElementById('domain');
@@ -342,17 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     quad9: null
                 };
                 checkDomain('dns');
-            }
-        });
-    }
-
-    // Add event listener for iframe tab
-    const iframeTab = document.querySelector('[data-bs-target="#iframe"]');
-    if (iframeTab) {
-        iframeTab.addEventListener('shown.bs.tab', function() {
-            const domain = document.getElementById('domain').value.trim();
-            if (domain) {
-                checkDomain('iframe');
             }
         });
     }
@@ -536,114 +553,6 @@ function initializeDNSTab() {
             firstDnsTab.classList.add('active');
         }
     }
-}
-
-// Update the checkDomain function to use initializeDNSTab
-function checkDomain(updateType = 'all') {
-    const domain = document.getElementById('domain').value.trim();
-    
-    if (!domain) {
-        showAlert('Please enter a domain name', 'danger');
-        return;
-    }
-
-    // Show loading state
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.classList.remove('d-none');
-    }
-
-    // Show results containers if they exist
-    const resultTabs = document.getElementById('resultTabs');
-    const resultTabsContent = document.getElementById('resultTabsContent');
-    if (resultTabs) resultTabs.style.display = 'block';
-    if (resultTabsContent) resultTabsContent.style.display = 'block';
-    
-    // Add domain-entered class
-    document.body.classList.add('domain-entered');
-    
-    // Hide hint message
-    const hintMessage = document.getElementById('hint-message');
-    if (hintMessage) {
-        hintMessage.style.display = 'none';
-    }
-
-    // Show appropriate elements based on active tab
-    const activeTab = document.querySelector('.tab-pane.active');
-    if (activeTab) {
-        if (activeTab.id === 'dns') {
-            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
-            dnsElements.forEach(element => {
-                element.style.display = 'block';
-            });
-        } else if (activeTab.id === 'iframe') {
-            const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
-            iframeElements.forEach(element => {
-                element.style.display = 'block';
-            });
-        }
-    }
-
-    // Make API request
-    fetch('/api/check', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            domain: domain,
-            update_type: updateType
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Received data:', data);
-        
-        if (data.error) {
-            showAlert(data.error, 'danger');
-            return;
-        }
-
-        // Update all tabs if updateType is 'all'
-        if (updateType === 'all') {
-            Object.entries(data).forEach(([endpoint, endpointData]) => {
-                if (endpointData && typeof endpointData === 'object') {
-                    updateTabResults(endpoint, endpointData);
-                }
-            });
-        } else if (data[updateType]) {
-            // Update specific tab
-            updateTabResults(updateType, data[updateType]);
-        }
-
-        // Activate DNS tab if no specific tab is active or if it's the first check
-        const activeTab = document.querySelector('.tab-pane.active');
-        if (!activeTab || updateType === 'all') {
-            // Get the DNS tab link and activate it
-            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
-            if (dnsTab) {
-                activateTab('dns');
-                dnsTab.classList.add('active');
-            }
-            // Initialize DNS tab
-            initializeDNSTab();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while checking the domain. Please try again.', 'danger');
-    })
-    .finally(() => {
-        // Hide loading state
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
-    });
 }
 
 function updateDNSResults(data) {
@@ -1304,4 +1213,122 @@ function updateSecurityResults(data) {
 
     html += '</div>';
     securityTab.innerHTML = html;
+}
+
+function checkDomain(updateType = 'all') {
+    const domain = document.getElementById('domain').value.trim();
+    
+    if (!domain) {
+        showAlert('Please enter a domain name', 'danger');
+        return Promise.reject('No domain provided');
+    }
+
+    // Show loading state
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('d-none');
+    }
+
+    // Show results containers if they exist
+    const resultTabs = document.getElementById('resultTabs');
+    const resultTabsContent = document.getElementById('resultTabsContent');
+    if (resultTabs) resultTabs.style.display = 'block';
+    if (resultTabsContent) resultTabsContent.style.display = 'block';
+    
+    // Add domain-entered class
+    document.body.classList.add('domain-entered');
+    
+    // Hide hint message
+    const hintMessage = document.getElementById('hint-message');
+    if (hintMessage) {
+        hintMessage.style.display = 'none';
+    }
+
+    // Show appropriate elements based on active tab
+    const activeTab = document.querySelector('.tab-pane.active');
+    if (activeTab) {
+        if (activeTab.id === 'dns') {
+            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+            dnsElements.forEach(element => {
+                element.style.display = 'block';
+            });
+        } else if (activeTab.id === 'iframe') {
+            const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
+            iframeElements.forEach(element => {
+                element.style.display = 'block';
+            });
+        }
+    }
+
+    // Check if we have cached results for the requested update type
+    if (updateType !== 'all' && tabResults[updateType]) {
+        updateTabResults(updateType, tabResults[updateType]);
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+        return Promise.resolve({ [updateType]: tabResults[updateType] });
+    }
+
+    // Make API request
+    return fetch('/api/check', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            domain: domain,
+            update_type: updateType
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received data:', data);
+        
+        if (data.error) {
+            showAlert(data.error, 'danger');
+            return data;
+        }
+
+        // Update all tabs if updateType is 'all'
+        if (updateType === 'all') {
+            Object.entries(data).forEach(([endpoint, endpointData]) => {
+                if (endpointData && typeof endpointData === 'object') {
+                    updateTabResults(endpoint, endpointData);
+                }
+            });
+        } else if (data[updateType]) {
+            // Update specific tab
+            updateTabResults(updateType, data[updateType]);
+        }
+
+        // Activate DNS tab if no specific tab is active or if it's the first check
+        if (!activeTab || updateType === 'all') {
+            // Get the DNS tab link and activate it
+            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
+            if (dnsTab) {
+                activateTab('dns');
+                dnsTab.classList.add('active');
+            }
+            // Initialize DNS tab
+            initializeDNSTab();
+        }
+
+        return data;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while checking the domain. Please try again.', 'danger');
+        throw error;
+    })
+    .finally(() => {
+        // Hide loading state
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+    });
 }
