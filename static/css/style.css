@@ -932,11 +932,28 @@ body {
     color: white;
 }
 
-/* DNS Records Table */
-.dns-table-wrapper {
-    margin-top: 1rem;
+/* DNS Records Tab Content */
+.domain-entered #dns .tab-pane {
+    display: none !important;
 }
 
+.domain-entered #dns .tab-pane.active.show {
+    display: block !important;
+}
+
+/* Keep DNS resolvers visible */
+.domain-entered .dns-resolvers,
+.domain-entered .dns-controls,
+.domain-entered .nav-pills {
+    display: flex !important;
+}
+
+/* Keep DNS table visible */
+.domain-entered .dns-table-wrapper {
+    display: block !important;
+}
+
+/* General tab panes */
 .tab-pane {
     display: none !important;
 }
