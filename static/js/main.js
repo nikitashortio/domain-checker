@@ -1001,18 +1001,20 @@ function updateIframeResults(data) {
             <h5>What does this mean?</h5>
             <p>${getIframeExplanation(data)}</p>
         </div>`;
-
-    // Add iframe test container with preview
-    html += `
-        <div class="iframe-test-container">
-            <h5>Link Preview</h5>
-            <div class="iframe-preview">
-                <div class="preview-url">${url}</div>
-                <iframe src="${url}" sandbox="allow-same-origin allow-scripts" class="preview-frame"></iframe>
-            </div>
-        </div>`;
     
     iframeResults.innerHTML = html;
+
+    // Update the existing iframe preview
+    const previewUrl = document.querySelector('.preview-url');
+    const previewFrame = document.querySelector('.preview-frame');
+    
+    if (previewUrl) {
+        previewUrl.textContent = url;
+    }
+    
+    if (previewFrame) {
+        previewFrame.src = url;
+    }
 }
 
 function getIframeExplanation(data) {
