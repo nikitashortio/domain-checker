@@ -185,7 +185,21 @@ body {
 
 .domain-entered .dns-controls,
 .domain-entered .dns-resolvers {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.dns-resolver {
+    flex: 1;
+    min-width: 250px;
+    max-width: calc(33.33% - 10px);
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .text-muted {
@@ -810,6 +824,10 @@ body {
     .redirects-info .step-number {
         margin-bottom: 0.5rem;
     }
+    
+    .dns-resolver {
+        max-width: 100%;
+    }
 }
 
 .domain-entered .tab-content {
@@ -819,7 +837,7 @@ body {
 .domain-entered .nav-tabs {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
 }
 
