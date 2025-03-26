@@ -800,43 +800,40 @@ function updateIframeResults(data) {
                 <span>Iframe ${iframeAllowed ? 'Allowed' : 'Not Allowed'}</span>
             </div>`;
         
-        // Display X-Frame-Options header if present
-        if (data.headers && data.headers['X-Frame-Options']) {
-            html += `
-                <div class="test-result-item">
-                    <i class="fas fa-info-circle text-info"></i>
-                    <span>X-Frame-Options: ${data.headers['X-Frame-Options']}</span>
-                </div>`;
-        }
-        
-        // Display Content-Security-Policy header if present
-        if (data.headers && data.headers['Content-Security-Policy']) {
-            html += `
-                <div class="test-result-item">
-                    <i class="fas fa-info-circle text-info"></i>
-                    <span>Content-Security-Policy: ${data.headers['Content-Security-Policy']}</span>
-                </div>`;
+        // Display relevant headers
+        const relevantHeaders = {
+            'X-Frame-Options': 'Controls whether the page can be displayed in an iframe',
+            'Content-Security-Policy': 'frame-ancestors directive controls iframe permissions',
+        };
+
+        if (data.headers) {
+            Object.entries(relevantHeaders).forEach(([header, description]) => {
+                if (data.headers[header]) {
+                    html += `
+                        <div class="test-result-item">
+                            <i class="fas fa-info-circle text-info"></i>
+                            <div class="header-info">
+                                <strong>${header}:</strong>
+                                <code>${data.headers[header]}</code>
+                                <small class="text-muted d-block">${description}</small>
+                            </div>
+                        </div>`;
+                }
+            });
         }
         
         html += `</div></div>`;
-        
-        // Add explanation of the results
-        html += `
-            <div class="iframe-field">
-                <strong>Explanation:</strong>
-                <div class="explanation">
-                    ${getIframeExplanation(iframeAllowed)}
-                </div>
-            </div>`;
 
         // Add live preview
         const domain = document.getElementById('domain').value.trim();
         if (domain) {
             html += `
-                <div class="iframe-field">
-                    <strong>Live Preview:</strong>
-                    <div class="iframe-preview">
-                        <iframe src="https://${domain}" frameborder="0" width="100%" height="400px"></iframe>
+                <div class="iframe-test-container">
+                    <div class="iframe-header">
+                        <h4>Live Preview</h4>
+                    </div>
+                    <div class="iframe-wrapper">
+                        <iframe src="https://${domain}" id="domain-iframe" sandbox="allow-same-origin allow-scripts"></iframe>
                     </div>
                 </div>`;
         }
@@ -846,83 +843,50 @@ function updateIframeResults(data) {
     element.innerHTML = html;
 }
 
-function getIframeExplanation(allowed) {
-    if (allowed) {
-        return `
-            <p>This website allows itself to be embedded in iframes on other websites. This could potentially expose your website to clickjacking attacks.</p>
-            <p>Recommendations:</p>
-            <ul>
-                <li>Consider implementing X-Frame-Options header with DENY or SAMEORIGIN</li>
-                <li>Add Content-Security-Policy header with frame-ancestors directive</li>
-                <li>Only allow iframe embedding from trusted domains if necessary</li>
-            </ul>`;
-    } else {
-        return `
-            <p>This website has proper security measures in place to prevent being embedded in iframes on other websites.</p>
-            <p>This is good for security as it protects against clickjacking attacks.</p>`;
-    }
-}
-
 function updateRedirectsResults(data) {
-    const redirectsInfo = document.getElementById('redirects-info');
-    if (!redirectsInfo) {
-        console.error('Redirects info container not found');
-        return;
-    }
-    
-    redirectsInfo.innerHTML = ''; // Clear existing content
+    const element = document.getElementById('redirects-results');
+    let html = '<div class="redirects-info">';
     
     if (data.error) {
-        redirectsInfo.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-        return;
-    }
-    
-    if (!data.redirect_chain || data.redirect_chain.length === 0) {
-        redirectsInfo.innerHTML = `<div class="alert alert-info">No redirects found</div>`;
-        return;
-    }
-    
-    // Display redirect chain
-    data.redirect_chain.forEach((step, index) => {
-        const stepElement = document.createElement('div');
-        stepElement.className = 'redirect-step';
-        
-        const stepNumber = document.createElement('div');
-        stepNumber.className = 'step-number';
-        stepNumber.textContent = index + 1;
-        
-        const stepDetails = document.createElement('div');
-        stepDetails.className = 'step-details';
-        
-        // Add URL
-        const urlElement = document.createElement('div');
-        urlElement.className = 'step-url';
-        urlElement.innerHTML = `<strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong> <a href="${step.url}" target="_blank">${step.url}</a>`;
-        
-        // Add status
-        const statusElement = document.createElement('div');
-        statusElement.className = 'step-status';
-        statusElement.textContent = step.status;
-        
-        // Assemble the step
-        stepDetails.appendChild(urlElement);
-        stepDetails.appendChild(statusElement);
-        stepElement.appendChild(stepNumber);
-        stepElement.appendChild(stepDetails);
-        redirectsInfo.appendChild(stepElement);
-    });
-    
-    // Add redirect summary
-    if (data.redirect_count > 0) {
-        const summaryElement = document.createElement('div');
-        summaryElement.className = 'redirect-summary';
-        summaryElement.innerHTML = `
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i>
-                Found ${data.redirect_count} redirect${data.redirect_count === 1 ? '' : 's'} in the chain
+        html += `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                ${data.error}
             </div>`;
-        redirectsInfo.appendChild(summaryElement);
+    } else {
+        if (!data.redirect_chain || data.redirect_chain.length === 0) {
+            html += `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No redirects found
+                </div>`;
+        } else {
+            data.redirect_chain.forEach((step, index) => {
+                html += `
+                    <div class="redirect-step">
+                        <div class="step-number">${index + 1}</div>
+                        <div class="step-details">
+                            <div class="step-url">
+                                <strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong>
+                                <a href="${step.url}" target="_blank">${step.url}</a>
+                            </div>
+                            <div class="step-status">Status: ${step.status}</div>
+                        </div>
+                    </div>`;
+            });
+
+            html += `
+                <div class="redirect-summary">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Found ${data.redirect_chain.length} redirect${data.redirect_chain.length === 1 ? '' : 's'} in the chain
+                    </div>
+                </div>`;
+        }
     }
+    
+    html += '</div>';
+    element.innerHTML = html;
 }
 
 function updateHeadersResults(data) {
@@ -1044,16 +1008,6 @@ function updateSecurityResults(data) {
                 ${data.error}
             </div>`;
     } else {
-        // Security Score
-        const score = data.security_score || 0;
-        const scoreClass = score >= 80 ? 'text-success' : score >= 60 ? 'text-warning' : 'text-danger';
-        
-        html += `
-            <div class="security-field">
-                <strong>Security Score:</strong>
-                <span class="${scoreClass}">${score}/100</span>
-            </div>`;
-
         // Google Web Risk Score
         if (data.web_risk) {
             const webRiskClass = data.web_risk.score === 'LOW' ? 'text-success' : 
@@ -1062,13 +1016,19 @@ function updateSecurityResults(data) {
             html += `
                 <div class="security-field">
                     <strong>Google Web Risk Score:</strong>
-                    <span class="${webRiskClass}">${data.web_risk.score}</span>
+                    <div class="risk-score ${webRiskClass}">
+                        <i class="fas ${data.web_risk.score === 'LOW' ? 'fa-shield-alt' : 'fa-exclamation-triangle'}"></i>
+                        ${data.web_risk.score}
+                    </div>
                     ${data.web_risk.threats ? `
                         <div class="threats-list">
                             <strong>Threats detected:</strong>
                             <ul>
                                 ${data.web_risk.threats.map(threat => `
-                                    <li class="text-danger">${threat}</li>
+                                    <li class="text-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        ${threat}
+                                    </li>
                                 `).join('')}
                             </ul>
                         </div>
@@ -1080,18 +1040,25 @@ function updateSecurityResults(data) {
         if (data.virus_total) {
             const vtScore = data.virus_total.positives || 0;
             const vtTotal = data.virus_total.total || 0;
-            const vtClass = vtScore === 0 ? 'text-success' : 'text-danger';
+            const vtClass = vtScore === 0 ? 'text-success' : 
+                          vtScore <= 2 ? 'text-warning' : 'text-danger';
             
             html += `
                 <div class="security-field">
                     <strong>VirusTotal Score:</strong>
-                    <span class="${vtClass}">${vtScore}/${vtTotal} engines detected threats</span>
-                    ${vtScore > 0 ? `
+                    <div class="vt-score ${vtClass}">
+                        <i class="fas ${vtScore === 0 ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                        ${vtScore}/${vtTotal} engines detected threats
+                    </div>
+                    ${vtScore > 0 && data.virus_total.threats ? `
                         <div class="threats-list">
                             <strong>Threats detected:</strong>
                             <ul>
                                 ${data.virus_total.threats.map(threat => `
-                                    <li class="text-danger">${threat}</li>
+                                    <li class="text-danger">
+                                        <i class="fas fa-virus"></i>
+                                        ${threat}
+                                    </li>
                                 `).join('')}
                             </ul>
                         </div>
@@ -1128,6 +1095,7 @@ function updateSecurityResults(data) {
                             <span>${header}</span>
                         </div>
                         <div class="header-description">${description}</div>
+                        ${isSet ? `<div class="header-value"><code>${data.headers[header]}</code></div>` : ''}
                     </div>`;
             });
 
@@ -1144,33 +1112,27 @@ function updateSecurityResults(data) {
             html += `
                 <div class="security-field">
                     <strong>SSL/TLS Status:</strong>
-                    <span class="${sslClass}">${sslStatus}</span>
+                    <div class="ssl-status ${sslClass}">
+                        <i class="fas ${data.ssl.valid ? 'fa-lock' : 'fa-lock-open'}"></i>
+                        ${sslStatus}
+                    </div>
                     ${data.ssl.valid ? `
                         <div class="ssl-details">
-                            <div>Valid until: ${formatDate(data.ssl.valid_until)}</div>
-                            <div>Issuer: ${data.ssl.issuer || 'Unknown'}</div>
+                            <div><strong>Valid until:</strong> ${formatDate(data.ssl.valid_until)}</div>
+                            <div><strong>Issuer:</strong> ${data.ssl.issuer || 'Unknown'}</div>
+                            ${data.ssl.subject_alt_names ? `
+                                <div class="sans-list">
+                                    <strong>Subject Alternative Names:</strong>
+                                    ${data.ssl.subject_alt_names.map(san => `
+                                        <div class="san-item">
+                                            <i class="fas fa-check"></i>
+                                            ${san}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
-                </div>`;
-        }
-
-        // Recommendations
-        if (data.recommendations && data.recommendations.length > 0) {
-            html += `
-                <div class="security-field">
-                    <strong>Security Recommendations:</strong>
-                    <div class="security-recommendations">`;
-            
-            data.recommendations.forEach(rec => {
-                html += `
-                    <div class="recommendation-item">
-                        <i class="fas fa-exclamation-triangle text-warning"></i>
-                        <span>${rec}</span>
-                    </div>`;
-            });
-
-            html += `
-                    </div>
                 </div>`;
         }
     }
