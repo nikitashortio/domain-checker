@@ -174,8 +174,8 @@ function switchDNSResolver(resolver) {
         selectedTab.style.borderBottom = '2px solid #000';
     }
     
-    // Update DNS results
-    updateDNSResults(resolver);
+    // Update DNS results with the cached data
+    updateDNSResults(dnsResults);
 }
 
 // Add event listeners for tab clicks
