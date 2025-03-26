@@ -284,9 +284,30 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation(); // Prevent event bubbling
+            
             const target = this.getAttribute('data-bs-target');
             if (target) {
-                activateDnsTab(target.replace('#', ''));
+                const tabId = target.replace('#', '');
+                const tabPane = document.getElementById(tabId);
+                const navLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
+                
+                // Remove active class from all tabs and panes
+                document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+                    pane.classList.remove('active', 'show');
+                    pane.style.display = 'none';
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Activate the selected tab
+                if (tabPane) {
+                    tabPane.classList.add('active', 'show');
+                    tabPane.style.display = 'block';
+                }
+                
+                this.classList.add('active');
             }
         });
     });
@@ -559,12 +580,32 @@ function updateDNSResults(data) {
         }
     });
 
-    // Activate the first DNS resolver tab
+    // Show the first DNS resolver tab
     const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
     if (firstDnsTab) {
         const target = firstDnsTab.getAttribute('data-bs-target');
         if (target) {
-            activateDnsTab(target.replace('#', ''));
+            const tabId = target.replace('#', '');
+            const tabPane = document.getElementById(tabId);
+            const navLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+                pane.style.display = 'none';
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate the first tab
+            if (tabPane) {
+                tabPane.classList.add('active', 'show');
+                tabPane.style.display = 'block';
+            }
+            
+            firstDnsTab.classList.add('active');
         }
     }
 }
