@@ -1005,15 +1005,47 @@ function updateIframeResults(data) {
     iframeResults.innerHTML = html;
 
     // Update the existing iframe preview
-    const previewUrl = document.querySelector('.preview-url');
-    const previewFrame = document.querySelector('.preview-frame');
-    
-    if (previewUrl) {
-        previewUrl.textContent = url;
-    }
-    
-    if (previewFrame) {
-        previewFrame.src = url;
+    const previewContainer = document.querySelector('.iframe-test-container');
+    if (previewContainer) {
+        const previewUrl = previewContainer.querySelector('.preview-url');
+        const previewFrame = previewContainer.querySelector('.preview-frame');
+        
+        if (previewUrl) {
+            previewUrl.textContent = url;
+        }
+        
+        if (previewFrame) {
+            // Remove any existing iframe
+            previewFrame.innerHTML = '';
+            
+            // Create a new iframe with proper attributes
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
+            iframe.style.width = '100%';
+            iframe.style.height = '500px';
+            iframe.style.border = '1px solid #dee2e6';
+            iframe.style.borderRadius = '4px';
+            
+            // Add error handling
+            iframe.onerror = () => {
+                previewFrame.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load preview for ${url}
+                    </div>`;
+            };
+            
+            // Add load event handler
+            iframe.onload = () => {
+                // If the iframe loads successfully, we might want to adjust its height
+                // based on content or add additional functionality
+                console.log('Iframe loaded successfully');
+            };
+            
+            // Append the new iframe
+            previewFrame.appendChild(iframe);
+        }
     }
 }
 
