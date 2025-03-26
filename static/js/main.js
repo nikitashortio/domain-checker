@@ -430,14 +430,16 @@ function updateDNSResults(data) {
             const records = data[type] || [];
             if (records.length > 0) {
                 records.forEach(record => {
-                    tableContent += `
-                        <tr data-type="${type}">
-                            <td>${type.toUpperCase()}</td>
-                            <td>${record.resolver}</td>
-                            <td>${record.value}</td>
-                            <td>${record.ttl}</td>
-                        </tr>
-                    `;
+                    if (record.resolver === resolver) {
+                        tableContent += `
+                            <tr data-type="${type}">
+                                <td>${type.toUpperCase()}</td>
+                                <td>${resolver}</td>
+                                <td>${record.value}</td>
+                                <td>${record.ttl}</td>
+                            </tr>
+                        `;
+                    }
                 });
             }
         });
