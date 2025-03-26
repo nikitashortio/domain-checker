@@ -80,8 +80,7 @@ body {
 }
 
 /* Tab content styles */
-.tab-content,
-.domain-entered .tab-content {
+.tab-content {
     display: block;
     padding: 0;
 }
@@ -90,14 +89,82 @@ body {
     display: none;
 }
 
-.tab-pane.active.show,
-.domain-entered .tab-pane.active.show {
-    display: block !important;
+.tab-pane.active.show {
+    display: block;
 }
 
-/* Remove any flex properties from tab panes */
-.tab-pane,
-.domain-entered .tab-pane {
+/* DNS Records Tab */
+#dns {
+    display: block;
+}
+
+#dns .tab-content {
+    display: block;
+}
+
+#dns .tab-pane {
+    display: none;
+}
+
+#dns .tab-pane.active.show {
+    display: block;
+}
+
+.dns-controls,
+.dns-resolvers,
+.dns-table-wrapper {
+    display: none;
+}
+
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper {
+    display: block;
+}
+
+#dns .nav-pills {
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.domain-entered #dns .nav-pills {
+    display: flex;
+}
+
+/* Remove padding from tab content */
+.tab-content,
+.domain-entered .tab-content {
+    padding: 0;
+}
+
+/* Add padding only to specific content areas */
+.whois-info,
+.ssl-info,
+.availability-info,
+.referrer-info,
+.iframe-info,
+.redirects-info,
+.headers-info,
+.security-info {
+    padding: 1rem;
+}
+
+/* Remove any margin from tab panes */
+.tab-pane {
+    margin: 0;
+}
+
+/* Ensure proper display of DNS resolver tabs */
+#dns .tab-content .tab-pane {
+    display: none;
+}
+
+#dns .tab-content .tab-pane.active.show {
+    display: block;
+}
+
+/* Remove any flex properties that might affect layout */
+.tab-pane {
     width: 100%;
 }
 
@@ -770,19 +837,6 @@ body {
     list-style: none;
 }
 
-/* DNS Records Tab Content */
-#dns .tab-content {
-    display: block !important;
-}
-
-#dns .tab-pane {
-    display: none !important;
-}
-
-#dns .tab-pane.active.show {
-    display: block !important;
-}
-
 /* DNS Pills Styling */
 .nav-pills .nav-link {
     display: inline-flex;
@@ -1054,93 +1108,6 @@ body {
 .security-field .text-danger {
     color: #dc3545 !important;
     font-weight: 600;
-}
-
-/* DNS Records Tab */
-.dns-controls {
-    margin-bottom: 1rem;
-    display: none;
-}
-
-.dns-resolvers {
-    margin-bottom: 1rem;
-    display: none;
-}
-
-.dns-table-wrapper {
-    display: none;
-}
-
-.domain-entered .dns-controls,
-.domain-entered .dns-resolvers,
-.domain-entered .dns-table-wrapper {
-    display: block !important;
-}
-
-#dns {
-    display: none;
-}
-
-#dns.active.show {
-    display: block !important;
-}
-
-#dns .nav-pills {
-    margin-bottom: 1rem;
-    display: none;
-}
-
-.domain-entered #dns .nav-pills {
-    display: flex !important;
-}
-
-#dns .nav-pills .nav-link {
-    color: #333;
-    border: 1px solid #ddd;
-    margin-right: 0.5rem;
-}
-
-#dns .nav-pills .nav-link.active {
-    background-color: #007bff;
-    color: white;
-}
-
-#dns .tab-pane {
-    display: none !important;
-}
-
-#dns .tab-pane.active.show {
-    display: block !important;
-}
-
-#dns .dns-table {
-    margin-bottom: 0;
-    width: 100%;
-}
-
-#dns .dns-table th {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-    padding: 0.75rem;
-}
-
-#dns .dns-table td {
-    vertical-align: middle;
-    padding: 0.75rem;
-}
-
-#dns .error-row td {
-    padding: 0;
-}
-
-#dns .error-row .alert {
-    margin: 0;
-    border-radius: 0;
-}
-
-#dns .no-records td {
-    text-align: center;
-    color: #6c757d;
 }
 
 /* Hint text styles */
