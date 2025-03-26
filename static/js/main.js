@@ -322,7 +322,9 @@ function updateTabResults(endpoint, data) {
     }
 }
 
-function checkDomain(domain, updateType = 'all') {
+function checkDomain(updateType = 'all') {
+    const domain = document.getElementById('domain').value.trim();
+    
     if (!domain) {
         showAlert('Please enter a domain name', 'danger');
         return;
@@ -332,6 +334,14 @@ function checkDomain(domain, updateType = 'all') {
     document.getElementById('results').style.display = 'block';
     document.getElementById('loading').style.display = 'block';
     document.getElementById('error').style.display = 'none';
+
+    // Show DNS controls and add domain-entered class
+    document.querySelector('.dns-controls').style.display = 'block';
+    document.querySelector('.dns-resolvers').style.display = 'block';
+    document.body.classList.add('domain-entered');
+    
+    // Update hint message
+    document.getElementById('hint-message').textContent = `Checking domain: ${domain}`;
 
     // Make API request
     fetch('/api/check', {
