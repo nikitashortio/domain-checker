@@ -12,8 +12,31 @@ body {
 }
 
 .nav-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     border-bottom: 1px solid #dee2e6;
     margin-bottom: 1rem;
+    padding-bottom: 1px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.nav-tabs::-webkit-scrollbar {
+    height: 6px;
+}
+
+.nav-tabs::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.nav-tabs::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.nav-tabs::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .nav-tabs .nav-link {
@@ -24,6 +47,7 @@ body {
     border-top-right-radius: 0.25rem;
     padding: 0.5rem 1rem;
     margin-bottom: -1px;
+    white-space: nowrap;
 }
 
 .nav-tabs .nav-link:hover {
