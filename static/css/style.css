@@ -92,7 +92,7 @@ body {
 
 .tab-pane.active.show,
 .domain-entered .tab-pane.active.show {
-    display: block;
+    display: block !important;
 }
 
 /* Remove any flex properties from tab panes */
@@ -1074,11 +1074,24 @@ body {
 .domain-entered .dns-controls,
 .domain-entered .dns-resolvers,
 .domain-entered .dns-table-wrapper {
-    display: block;
+    display: block !important;
+}
+
+#dns {
+    display: none;
+}
+
+#dns.active.show {
+    display: block !important;
 }
 
 #dns .nav-pills {
     margin-bottom: 1rem;
+    display: none;
+}
+
+.domain-entered #dns .nav-pills {
+    display: flex !important;
 }
 
 #dns .nav-pills .nav-link {
@@ -1093,11 +1106,11 @@ body {
 }
 
 #dns .tab-pane {
-    display: none;
+    display: none !important;
 }
 
-#dns .tab-pane.active {
-    display: block;
+#dns .tab-pane.active.show {
+    display: block !important;
 }
 
 #dns .dns-table {
@@ -1128,4 +1141,33 @@ body {
 #dns .no-records td {
     text-align: center;
     color: #6c757d;
+}
+
+/* Hint text styles */
+.hint-text {
+    text-align: center;
+    color: #6c757d;
+    padding: 3rem 2rem;
+    font-style: normal;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.hint-text i {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+
+.domain-entered .hint-text {
+    display: none;
 }
