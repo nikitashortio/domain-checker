@@ -633,10 +633,10 @@ def check_domain():
         try:
             if update_type == 'all' or update_type == 'dns':
                 dns_record_type = data.get('dns_record_type', 'all')
-                result['dns'] = check_dns_records(domain, dns_record_type)
+                result['dns'] = get_dns_records(domain, dns_record_type)
             
             if update_type == 'all' or update_type == 'whois':
-                result['whois'] = check_whois_info(domain)
+                result['whois'] = get_whois_info(domain)
             
             if update_type == 'all' or update_type == 'ssl':
                 result['ssl'] = check_ssl_certificate(domain)
@@ -657,11 +657,7 @@ def check_domain():
                 result['headers'] = get_headers(domain)
             
             if update_type == 'all' or update_type == 'security':
-                security_result = check_web_risk(domain)
-                if isinstance(security_result, dict):
-                    result['security'] = security_result
-                else:
-                    result['security'] = {'error': 'Invalid security check result'}
+                result['security'] = check_web_risk(domain)
             
             return jsonify(result)
             
