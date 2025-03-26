@@ -97,7 +97,7 @@ function activateTab(tabId) {
 
 // Add this function to handle DNS resolver tab activation
 function activateDnsTab(tabId) {
-    // Get all DNS resolver tabs
+    // Get all DNS resolver tabs and panes
     const dnsTabPanes = document.querySelectorAll('#dns .tab-pane');
     const dnsNavLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
     
@@ -118,6 +118,11 @@ function activateDnsTab(tabId) {
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
         selectedPane.style.display = 'block';
+        // Ensure the parent DNS tab is visible
+        const dnsTab = document.getElementById('dns');
+        if (dnsTab) {
+            dnsTab.style.display = 'block';
+        }
     }
     
     if (selectedLink) {
@@ -318,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
-                switchDNSResolver(tabId);
+                activateDnsTab(tabId);
             }
         });
     });
@@ -558,10 +563,13 @@ function checkDomain(updateType = 'all') {
             const dnsControls = document.querySelector('.dns-controls');
             const dnsResolvers = document.querySelector('.dns-resolvers');
             const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+            const dnsTab = document.getElementById('dns');
             
+            // Ensure all DNS-related elements are visible
             if (dnsControls) dnsControls.style.display = 'block';
             if (dnsResolvers) dnsResolvers.style.display = 'block';
             if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+            if (dnsTab) dnsTab.style.display = 'block';
 
             // Activate the first DNS resolver tab
             const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
@@ -594,10 +602,13 @@ function updateDNSResults(data) {
     const dnsControls = document.querySelector('.dns-controls');
     const dnsResolvers = document.querySelector('.dns-resolvers');
     const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    const dnsTab = document.getElementById('dns');
     
+    // Ensure all DNS-related elements are visible
     if (dnsControls) dnsControls.style.display = 'block';
     if (dnsResolvers) dnsResolvers.style.display = 'block';
     if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+    if (dnsTab) dnsTab.style.display = 'block';
     
     // Handle error case
     if (data.error) {
