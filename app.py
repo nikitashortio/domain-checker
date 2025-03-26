@@ -540,7 +540,7 @@ def check_security(domain):
                     security_info['issues'].append(f'Missing {header} header')
                     security_info['recommendations'].append(recommendation)
         
-        # Check web risk (30 points)
+        # Check web risk - (30 points)
         web_risk = check_web_risk(domain)
         if 'error' not in web_risk:
             security_info['web_risk'] = web_risk

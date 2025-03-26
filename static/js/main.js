@@ -1332,7 +1332,7 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Activate DNS tab if no specific tab is active or if it's the first check
+        // Activate DNS tab if no specific tab is active or if it is the first check
         if (!activeTab || updateType === 'all') {
             // Get the DNS tab link and activate it
             const dnsTab = document.querySelector('[data-bs-target="#dns"]');
