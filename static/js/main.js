@@ -266,6 +266,7 @@ function getEndpointForTab(tabId) {
 }
 
 function updateTabResults(endpoint, data) {
+    console.log(`Updating ${endpoint} results with data:`, data);
     const updateFunctions = {
         'dns': () => updateDNSResults(data),
         'whois': () => updateWHOISResults(data),
@@ -331,55 +332,58 @@ async function checkDomain() {
         const data = await response.json();
         console.log('Response data:', data);
         
-        // Update DNS results
+        // Store results in cache
+        tabResults = data;
+        
+        // Update all results
         if (data.dns) {
             console.log('Updating DNS results with data:', data.dns);
             updateDNSResults(data.dns);
         }
         
-        // Update WHOIS results
         if (data.whois) {
+            console.log('Updating WHOIS results with data:', data.whois);
             updateWHOISResults(data.whois);
         }
         
-        // Update SSL results
         if (data.ssl) {
+            console.log('Updating SSL results with data:', data.ssl);
             updateSSLResults(data.ssl);
         }
         
-        // Update availability results
         if (data.availability) {
+            console.log('Updating availability results with data:', data.availability);
             updateAvailabilityResults(data.availability);
         }
         
-        // Update referrer results
         if (data.referrer) {
+            console.log('Updating referrer results with data:', data.referrer);
             updateReferrerResults(data.referrer);
         }
         
-        // Update iframe results
         if (data.iframe) {
+            console.log('Updating iframe results with data:', data.iframe);
             updateIframeResults(data.iframe);
         }
         
-        // Update redirects results
         if (data.redirects) {
+            console.log('Updating redirects results with data:', data.redirects);
             updateRedirectsResults(data.redirects);
         }
         
-        // Update headers results
         if (data.headers) {
+            console.log('Updating headers results with data:', data.headers);
             updateHeadersResults(data.headers);
         }
         
-        // Update security results
         if (data.security) {
+            console.log('Updating security results with data:', data.security);
             updateSecurityResults(data.security);
         }
         
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while checking the domain. Please try again.');
+        showError(error.message);
     } finally {
         // Hide loading spinner
         document.getElementById('loading').classList.add('d-none');
