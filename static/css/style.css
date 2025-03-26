@@ -875,7 +875,19 @@ body {
     display: none;
 }
 
-.dns-resolvers {
+.dns-resolvers,
+.dns-table-wrapper,
+.dns-controls {
+    display: none;
+}
+
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper,
+.domain-entered .dns-controls {
+    display: block;
+}
+
+.domain-entered .dns-resolvers {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -886,6 +898,7 @@ body {
 .dns-resolver {
     flex: 1;
     min-width: 250px;
+    max-width: calc(33.33% - 10px);
     background: #f8f9fa;
     padding: 15px;
     border-radius: 8px;
