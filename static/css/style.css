@@ -1153,6 +1153,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+    display: none;
 }
 
 .hint-text i {
@@ -1162,8 +1163,80 @@ body {
     color: #adb5bd;
 }
 
+/* Hide hint text when domain is entered */
 .domain-entered .hint-text {
+    display: none !important;
+}
+
+/* DNS Records Tab */
+#dns {
     display: none;
+}
+
+#dns.active.show {
+    display: block !important;
+}
+
+/* DNS Controls and Resolvers */
+.dns-controls,
+.dns-resolvers,
+.dns-table-wrapper,
+.dns-table,
+#dns .nav-pills {
+    display: none !important;
+}
+
+/* Only show DNS elements when DNS tab is active */
+#dns.active.show .dns-controls,
+#dns.active.show .dns-resolvers,
+#dns.active.show .dns-table-wrapper,
+#dns.active.show .dns-table,
+#dns.active.show .nav-pills {
+    display: block !important;
+}
+
+/* Hide DNS elements in all other tabs */
+#iframe .dns-controls,
+#iframe .dns-resolvers,
+#iframe .dns-table-wrapper,
+#iframe .nav-pills,
+#iframe .dns-table,
+#whois .dns-controls,
+#whois .dns-resolvers,
+#whois .dns-table-wrapper,
+#whois .nav-pills,
+#whois .dns-table,
+#ssl .dns-controls,
+#ssl .dns-resolvers,
+#ssl .dns-table-wrapper,
+#ssl .nav-pills,
+#ssl .dns-table,
+#availability .dns-controls,
+#availability .dns-resolvers,
+#availability .dns-table-wrapper,
+#availability .nav-pills,
+#availability .dns-table,
+#referrer .dns-controls,
+#referrer .dns-resolvers,
+#referrer .dns-table-wrapper,
+#referrer .nav-pills,
+#referrer .dns-table,
+#redirects .dns-controls,
+#redirects .dns-resolvers,
+#redirects .dns-table-wrapper,
+#redirects .nav-pills,
+#redirects .dns-table,
+#headers .dns-controls,
+#headers .dns-resolvers,
+#headers .dns-table-wrapper,
+#headers .nav-pills,
+#headers .dns-table,
+#security .dns-controls,
+#security .dns-resolvers,
+#security .dns-table-wrapper,
+#security .nav-pills,
+#security .dns-table {
+    display: none !important;
 }
 
 /* Ensure proper tab selection state */
@@ -1177,4 +1250,9 @@ body {
 #dns-tab:not(.active) {
     border-color: transparent;
     background-color: transparent;
+}
+
+/* Remove any flex properties that might affect layout */
+.tab-pane {
+    width: 100%;
 }

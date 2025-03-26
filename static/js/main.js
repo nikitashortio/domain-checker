@@ -138,9 +138,15 @@ function activateTab(tabId) {
         }
     }
 
-    // Remove domain-entered class from body if not on DNS tab
-    if (tabId !== 'dns') {
-        document.body.classList.remove('domain-entered');
+    // Update hint message visibility
+    const hintMessage = document.getElementById('hint-message');
+    if (hintMessage) {
+        const domain = document.getElementById('domain').value.trim();
+        if (domain) {
+            hintMessage.style.display = 'none';
+        } else {
+            hintMessage.style.display = 'block';
+        }
     }
 }
 
