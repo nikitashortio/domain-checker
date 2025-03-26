@@ -773,74 +773,62 @@ function getReferrerPolicyExplanation(policy) {
 }
 
 function updateIframeResults(data) {
-    const element = document.getElementById('iframe-results');
+    const iframeTab = document.getElementById('iframe');
+    if (!iframeTab) return;
+
+    if (data.error) {
+        iframeTab.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        return;
+    }
+
+    const headers = data.headers || {};
+    const connectionStatus = headers.Connection || 'Not Set';
+    
     let html = '<div class="iframe-info">';
     
-    if (data.error) {
-        html += `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                ${data.error}
-            </div>`;
-    } else {
-        // Display iframe test results
-        html += `
-            <div class="iframe-field">
-                <strong>Iframe Test Results:</strong>
-                <div class="test-results">`;
-        
-        // Test if iframe is allowed
-        const iframeAllowed = data.allowed || false;
-        const iframeClass = iframeAllowed ? 'text-success' : 'text-danger';
-        const iframeIcon = iframeAllowed ? 'fa-check-circle' : 'fa-times-circle';
-        
-        html += `
-            <div class="test-result-item">
-                <i class="fas ${iframeIcon} ${iframeClass}"></i>
-                <span>Iframe ${iframeAllowed ? 'Allowed' : 'Not Allowed'}</span>
-            </div>`;
-        
-        // Display relevant headers
-        const relevantHeaders = {
-            'X-Frame-Options': 'Controls whether the page can be displayed in an iframe',
-            'Content-Security-Policy': 'frame-ancestors directive controls iframe permissions',
-        };
-
-        if (data.headers) {
-            Object.entries(relevantHeaders).forEach(([header, description]) => {
-                if (data.headers[header]) {
-                    html += `
-                        <div class="test-result-item">
-                            <i class="fas fa-info-circle text-info"></i>
-                            <div class="header-info">
-                                <strong>${header}:</strong>
-                                <code>${data.headers[header]}</code>
-                                <small class="text-muted d-block">${description}</small>
-                            </div>
-                        </div>`;
-                }
-            });
-        }
-        
-        html += `</div></div>`;
-
-        // Add live preview
-        const domain = document.getElementById('domain').value.trim();
-        if (domain) {
-            html += `
-                <div class="iframe-test-container">
-                    <div class="iframe-header">
-                        <h4>Live Preview</h4>
-                    </div>
-                    <div class="iframe-wrapper">
-                        <iframe src="https://${domain}" id="domain-iframe" sandbox="allow-same-origin allow-scripts"></iframe>
-                    </div>
-                </div>`;
-        }
-    }
+    // Add X-Frame-Options status
+    html += `
+        <div class="iframe-field">
+            <strong>X-Frame-Options:</strong>
+            <span>${headers['X-Frame-Options'] || 'Not Set'}</span>
+        </div>`;
+    
+    // Add CSP frame-ancestors
+    html += `
+        <div class="iframe-field">
+            <strong>CSP frame-ancestors:</strong>
+            <span>${data.frame_ancestors_directive || 'Not Set'}</span>
+        </div>`;
+    
+    // Add Connection header
+    html += `
+        <div class="iframe-field">
+            <strong>Connection:</strong>
+            <span>${connectionStatus}</span>
+        </div>`;
+    
+    // Add iframe status message
+    html += `
+        <div class="iframe-field">
+            <strong>Status:</strong>
+            <span class="${data.allowed ? 'text-success' : 'text-danger'}">${data.message}</span>
+        </div>`;
     
     html += '</div>';
-    element.innerHTML = html;
+    
+    // Add explanation section
+    html += `
+        <div class="policy-explanation">
+            <h5>What does this mean?</h5>
+            <p>${getIframeExplanation(data)}</p>
+        </div>`;
+    
+    iframeTab.innerHTML = html;
+}
+
+function getIframeExplanation(data) {
+    // Implement the logic to generate a meaningful explanation based on the data
+    return 'This is a placeholder explanation. The actual implementation should be based on the data received from the API.';
 }
 
 function updateRedirectsResults(data) {
@@ -998,145 +986,55 @@ function getHeaderClass(header) {
 }
 
 function updateSecurityResults(data) {
-    const element = document.getElementById('security-results');
-    let html = '<div class="security-info">';
-    
+    const securityTab = document.getElementById('security');
+    if (!securityTab) return;
+
     if (data.error) {
-        html += `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                ${data.error}
-            </div>`;
-    } else {
+        securityTab.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        return;
+    }
+
+    let html = '<div class="security-info">';
+
+    // Add Web Risk Information
+    if (data.web_risk) {
+        const webRisk = data.web_risk;
+        const googleWebRisk = webRisk.google_web_risk || {};
+        const virusTotal = webRisk.virustotal || {};
+
         // Google Web Risk Score
-        if (data.web_risk) {
-            const webRiskClass = data.web_risk.score === 'LOW' ? 'text-success' : 
-                               data.web_risk.score === 'MEDIUM' ? 'text-warning' : 'text-danger';
-            
+        html += `
+            <div class="security-field">
+                <strong>Google Web Risk Status</strong>
+                <div class="security-score ${googleWebRisk.status === 'SAFE' ? 'text-success' : 'text-danger'}">
+                    Status: ${googleWebRisk.status || 'N/A'}<br>
+                    Score: ${googleWebRisk.score || 0}/100
+                </div>
+            </div>`;
+
+        // VirusTotal Information
+        html += `
+            <div class="security-field">
+                <strong>VirusTotal Report</strong>
+                <div class="security-score">
+                    Status: ${virusTotal.status || 'N/A'}<br>
+                    Score: ${virusTotal.score || 0}/100<br>
+                    <a href="${virusTotal.url || '#'}" target="_blank" rel="noopener noreferrer">
+                        View Full Report <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>`;
+
+        // Last Scan Date
+        if (webRisk.scan_date) {
             html += `
                 <div class="security-field">
-                    <strong>Google Web Risk Score:</strong>
-                    <div class="risk-score ${webRiskClass}">
-                        <i class="fas ${data.web_risk.score === 'LOW' ? 'fa-shield-alt' : 'fa-exclamation-triangle'}"></i>
-                        ${data.web_risk.score}
-                    </div>
-                    ${data.web_risk.threats ? `
-                        <div class="threats-list">
-                            <strong>Threats detected:</strong>
-                            <ul>
-                                ${data.web_risk.threats.map(threat => `
-                                    <li class="text-danger">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        ${threat}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                </div>`;
-        }
-
-        // VirusTotal Score
-        if (data.virus_total) {
-            const vtScore = data.virus_total.positives || 0;
-            const vtTotal = data.virus_total.total || 0;
-            const vtClass = vtScore === 0 ? 'text-success' : 
-                          vtScore <= 2 ? 'text-warning' : 'text-danger';
-            
-            html += `
-                <div class="security-field">
-                    <strong>VirusTotal Score:</strong>
-                    <div class="vt-score ${vtClass}">
-                        <i class="fas ${vtScore === 0 ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
-                        ${vtScore}/${vtTotal} engines detected threats
-                    </div>
-                    ${vtScore > 0 && data.virus_total.threats ? `
-                        <div class="threats-list">
-                            <strong>Threats detected:</strong>
-                            <ul>
-                                ${data.virus_total.threats.map(threat => `
-                                    <li class="text-danger">
-                                        <i class="fas fa-virus"></i>
-                                        ${threat}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                </div>`;
-        }
-
-        // Security Headers Status
-        if (data.headers) {
-            const securityHeaders = {
-                'X-Frame-Options': 'Protects against clickjacking attacks',
-                'X-Content-Type-Options': 'Prevents MIME type sniffing',
-                'X-XSS-Protection': 'Enables browser XSS protection',
-                'Content-Security-Policy': 'Controls resource loading',
-                'Strict-Transport-Security': 'Enforces HTTPS connections',
-                'Referrer-Policy': 'Controls referrer information',
-                'Permissions-Policy': 'Controls browser features'
-            };
-
-            html += `
-                <div class="security-field">
-                    <strong>Security Headers:</strong>
-                    <div class="security-headers">`;
-
-            Object.entries(securityHeaders).forEach(([header, description]) => {
-                const isSet = data.headers[header] !== undefined;
-                const statusClass = isSet ? 'text-success' : 'text-danger';
-                const statusIcon = isSet ? 'fa-check-circle' : 'fa-times-circle';
-                
-                html += `
-                    <div class="security-header-item">
-                        <div class="header-status">
-                            <i class="fas ${statusIcon} ${statusClass}"></i>
-                            <span>${header}</span>
-                        </div>
-                        <div class="header-description">${description}</div>
-                        ${isSet ? `<div class="header-value"><code>${data.headers[header]}</code></div>` : ''}
-                    </div>`;
-            });
-
-            html += `
-                    </div>
-                </div>`;
-        }
-
-        // SSL/TLS Status
-        if (data.ssl) {
-            const sslStatus = data.ssl.valid ? 'Valid' : 'Invalid';
-            const sslClass = data.ssl.valid ? 'text-success' : 'text-danger';
-            
-            html += `
-                <div class="security-field">
-                    <strong>SSL/TLS Status:</strong>
-                    <div class="ssl-status ${sslClass}">
-                        <i class="fas ${data.ssl.valid ? 'fa-lock' : 'fa-lock-open'}"></i>
-                        ${sslStatus}
-                    </div>
-                    ${data.ssl.valid ? `
-                        <div class="ssl-details">
-                            <div><strong>Valid until:</strong> ${formatDate(data.ssl.valid_until)}</div>
-                            <div><strong>Issuer:</strong> ${data.ssl.issuer || 'Unknown'}</div>
-                            ${data.ssl.subject_alt_names ? `
-                                <div class="sans-list">
-                                    <strong>Subject Alternative Names:</strong>
-                                    ${data.ssl.subject_alt_names.map(san => `
-                                        <div class="san-item">
-                                            <i class="fas fa-check"></i>
-                                            ${san}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
+                    <strong>Last Scan Date</strong>
+                    <div>${new Date(webRisk.scan_date).toLocaleString()}</div>
                 </div>`;
         }
     }
-    
+
     html += '</div>';
-    element.innerHTML = html;
+    securityTab.innerHTML = html;
 }
