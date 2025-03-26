@@ -1133,42 +1133,27 @@ body {
 
 /* Hint text styles */
 .hint-text {
-    display: block;
     text-align: center;
     color: #6c757d;
-    margin: 2rem 0;
+    padding: 3rem 2rem;
+    font-style: normal;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
     font-size: 1.1rem;
+    transition: all 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
-/* Hide DNS elements by default */
-.dns-controls,
-.dns-resolvers,
-.dns-table-wrapper,
-.dns-table,
-#dns .nav-pills {
-    display: none;
-}
-
-/* Hide iframe elements by default */
-#iframe .results-container,
-#iframe .iframe-test-container {
-    display: none;
-}
-
-/* Show elements when domain is entered */
-body.domain-entered .dns-controls,
-body.domain-entered .dns-resolvers,
-body.domain-entered .dns-table-wrapper,
-body.domain-entered .dns-table,
-body.domain-entered #dns .nav-pills,
-body.domain-entered #iframe .results-container,
-body.domain-entered #iframe .iframe-test-container {
+.hint-text i {
     display: block;
-}
-
-/* Hide hint text when domain is entered */
-body.domain-entered .hint-text {
-    display: none;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #adb5bd;
 }
 
 /* DNS Records Tab */
@@ -1180,7 +1165,7 @@ body.domain-entered .hint-text {
     display: block !important;
 }
 
-/* DNS Controls and Resolvers */
+/* Hide DNS elements by default and when no domain is entered */
 .dns-controls,
 .dns-resolvers,
 .dns-table-wrapper,
@@ -1189,12 +1174,12 @@ body.domain-entered .hint-text {
     display: none !important;
 }
 
-/* Only show DNS elements when DNS tab is active */
-#dns.active.show .dns-controls,
-#dns.active.show .dns-resolvers,
-#dns.active.show .dns-table-wrapper,
-#dns.active.show .dns-table,
-#dns.active.show .nav-pills {
+/* Only show DNS elements when DNS tab is active AND domain is entered */
+body.domain-entered #dns.active.show .dns-controls,
+body.domain-entered #dns.active.show .dns-resolvers,
+body.domain-entered #dns.active.show .dns-table-wrapper,
+body.domain-entered #dns.active.show .dns-table,
+body.domain-entered #dns.active.show .nav-pills {
     display: block !important;
 }
 
@@ -1242,6 +1227,21 @@ body.domain-entered .hint-text {
     display: none !important;
 }
 
+/* Hide hint text when domain is entered */
+body.domain-entered .hint-text {
+    display: none !important;
+}
+
+/* Show hint text when no domain is entered */
+.hint-text {
+    display: block !important;
+}
+
+/* Remove any flex properties that might affect layout */
+.tab-pane {
+    width: 100%;
+}
+
 /* Ensure proper tab selection state */
 #dns-tab.active {
     color: #495057;
@@ -1253,9 +1253,4 @@ body.domain-entered .hint-text {
 #dns-tab:not(.active) {
     border-color: transparent;
     background-color: transparent;
-}
-
-/* Remove any flex properties that might affect layout */
-.tab-pane {
-    width: 100%;
 }
