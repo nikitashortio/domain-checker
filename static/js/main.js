@@ -538,7 +538,15 @@ function updateDNSResults(data) {
     const resolvers = ['cloudflare', 'google', 'quad9'];
     const selectedType = document.getElementById('dnsRecordType').value;
     const recordTypes = selectedType === 'all' ? ['a', 'aaaa', 'mx', 'ns', 'txt', 'cname', 'soa'] : [selectedType.toLowerCase()];
-    const domain = document.getElementById('domain').value.trim();
+    let domain = document.getElementById('domain').value.trim();
+    
+    // Extract root domain from URL
+    if (domain.startsWith(('http://', 'https://'))) {
+        domain = new URL(domain).hostname;
+    } else if (domain.includes('/')) {
+        domain = domain.split('/')[0];
+    }
+    domain = domain.split('?')[0].split('#')[0].trim();
     
     // Show DNS controls and resolvers
     const dnsControls = document.querySelector('.dns-controls');
