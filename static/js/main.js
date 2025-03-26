@@ -137,6 +137,11 @@ function activateTab(tabId) {
             dnsTabButton.classList.remove('active');
         }
     }
+
+    // Remove domain-entered class from body if not on DNS tab
+    if (tabId !== 'dns') {
+        document.body.classList.remove('domain-entered');
+    }
 }
 
 // Add this function to handle DNS resolver tab activation

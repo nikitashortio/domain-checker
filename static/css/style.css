@@ -1165,3 +1165,16 @@ body {
 .domain-entered .hint-text {
     display: none;
 }
+
+/* Ensure proper tab selection state */
+#dns-tab.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    border-bottom-color: #fff;
+}
+
+#dns-tab:not(.active) {
+    border-color: transparent;
+    background-color: transparent;
+}
