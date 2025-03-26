@@ -633,7 +633,21 @@ def check_domain():
         try:
             if update_type == 'all' or update_type == 'dns':
                 dns_record_type = data.get('dns_record_type', 'all')
-                result['dns'] = get_dns_records(domain, dns_record_type)
+                if dns_record_type == 'all':
+                    # If 'all' is specified, get all record types
+                    result['dns'] = {
+                        'a': get_dns_records(domain, 'A'),
+                        'aaaa': get_dns_records(domain, 'AAAA'),
+                        'mx': get_dns_records(domain, 'MX'),
+                        'ns': get_dns_records(domain, 'NS'),
+                        'txt': get_dns_records(domain, 'TXT'),
+                        'cname': get_dns_records(domain, 'CNAME'),
+                        'soa': get_dns_records(domain, 'SOA'),
+                        'caa': get_dns_records(domain, 'CAA')
+                    }
+                else:
+                    # Get specific record type
+                    result['dns'] = get_dns_records(domain, dns_record_type.upper())
             
             if update_type == 'all' or update_type == 'whois':
                 result['whois'] = get_whois_info(domain)
