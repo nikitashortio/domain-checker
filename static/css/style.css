@@ -875,102 +875,40 @@ body {
 
 .dns-resolvers,
 .dns-table-wrapper,
-.dns-controls,
-.nav-pills,
-.iframe-test-container,
-.iframe-info {
+.dns-controls {
     display: none !important;
 }
 
 .domain-entered .dns-resolvers,
 .domain-entered .dns-table-wrapper,
-.domain-entered .dns-controls,
-.domain-entered .nav-pills,
-.domain-entered .iframe-test-container,
-.domain-entered .iframe-info {
-    display: flex !important;
+.domain-entered .dns-controls {
+    display: block !important;
 }
 
 .domain-entered .dns-resolvers {
+    display: flex !important;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 20px;
 }
 
-.domain-entered .nav-pills {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 10px;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-/* Hide all tab content by default */
-.tab-pane {
-    display: none !important;
-}
-
-/* Only show tab content when domain is entered and tab is active */
-.domain-entered .tab-pane.active.show {
-    display: block !important;
-}
-
-/* Hide hint text when domain is entered */
-.domain-entered .hint-text {
+/* DNS Resolver Pills Navigation */
+.nav-pills {
     display: none;
 }
 
-.dns-resolver {
-    flex: 1;
-    min-width: 250px;
-    max-width: calc(33.33% - 10px);
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.dns-resolvers .nav-pills {
-    display: flex;
+.domain-entered .nav-pills {
+    display: flex !important;
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 10px;
     padding: 0;
-    margin: 0;
+    margin: 0 0 15px 0;
     list-style: none;
 }
 
-.dns-resolvers::-webkit-scrollbar {
-    height: 6px;
-}
-
-.dns-resolvers::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.dns-resolvers::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.dns-resolvers::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.nav-pills {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 10px;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-.nav-link {
+.nav-pills .nav-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -984,18 +922,27 @@ body {
     white-space: nowrap;
 }
 
-.nav-link:hover {
+.nav-pills .nav-link:hover {
     background-color: #e9ecef;
     color: #212529;
 }
 
-.nav-link.active {
+.nav-pills .nav-link.active {
     background-color: #007bff;
     color: white;
 }
 
-.nav-link i {
-    margin-right: 8px;
+/* DNS Records Table */
+.dns-table-wrapper {
+    margin-top: 1rem;
+}
+
+.tab-pane {
+    display: none !important;
+}
+
+.tab-pane.active.show {
+    display: block !important;
 }
 
 .loading {
