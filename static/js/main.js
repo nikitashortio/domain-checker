@@ -266,23 +266,9 @@ function getEndpointForTab(tabId) {
 }
 
 function updateTabResults(endpoint, data) {
-    console.log(`Updating ${endpoint} results with data:`, data);
+    console.log(`Updating ${endpoint} tab with data:`, data);
     
-    // Handle error case first
-    if (data.error) {
-        const element = document.getElementById(`${endpoint}-results`);
-        if (element) {
-            element.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    ${data.error}
-                </div>`;
-        }
-        return;
-    }
-
-    // Update results based on endpoint
-    switch (endpoint) {
+    switch(endpoint) {
         case 'dns':
             updateDNSResults(data);
             break;
@@ -311,84 +297,61 @@ function updateTabResults(endpoint, data) {
             updateSecurityResults(data);
             break;
         default:
-            console.warn(`Unknown endpoint: ${endpoint}`);
+            console.error(`Unknown endpoint: ${endpoint}`);
     }
-
-    // Store results in cache
-    tabResults[endpoint] = data;
 }
 
-async function checkDomain(updateType = 'all') {
-    const domain = document.getElementById('domain').value.trim();
+function checkDomain(domain, updateType = 'all') {
     if (!domain) {
-        alert('Please enter a domain name');
+        showAlert('Please enter a domain name', 'danger');
         return;
     }
 
-    // Show loading spinner
-    document.getElementById('loading').classList.remove('d-none');
-    
-    // Show DNS controls and add domain-entered class
-    document.querySelector('.dns-controls').style.display = 'block';
-    document.querySelector('.dns-resolvers').style.display = 'block';
-    document.body.classList.add('domain-entered');
-    
-    // Update hint message
-    document.getElementById('hint-message').textContent = `Checking domain: ${domain}`;
-    
-    try {
-        console.log('Making request to: /api/check');
-        const response = await fetch('/api/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                domain: domain,
-                update_type: updateType
-            })
-        });
-        
-        console.log('Request data:', {
+    // Show loading state
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('error').style.display = 'none';
+
+    // Make API request
+    fetch('/api/check', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
             domain: domain,
             update_type: updateType
-        });
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Received data:', data);
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (data.error) {
+            showAlert(data.error, 'danger');
+            return;
         }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        // Update results based on update type
+
+        // Update all tabs if updateType is 'all'
         if (updateType === 'all') {
-            // Update all results
             Object.entries(data).forEach(([endpoint, endpointData]) => {
-                if (endpoint !== 'error') {
-                    if (endpoint === 'dns') {
-                        updateDNSResults(endpointData);
-                    } else {
-                        updateTabResults(endpoint, endpointData);
-                    }
+                if (endpointData && typeof endpointData === 'object') {
+                    updateTabResults(endpoint, endpointData);
                 }
             });
-        } else {
+        } else if (data[updateType]) {
             // Update specific tab
-            if (updateType === 'dns') {
-                updateDNSResults(data[updateType]);
-            } else {
-                updateTabResults(updateType, data[updateType]);
-            }
+            updateTabResults(updateType, data[updateType]);
         }
-        
-    } catch (error) {
+
+        // Hide loading state
+        document.getElementById('loading').style.display = 'none';
+    })
+    .catch(error => {
         console.error('Error:', error);
-        showError(error.message);
-    } finally {
-        // Hide loading spinner
-        document.getElementById('loading').classList.add('d-none');
-    }
+        showAlert('An error occurred while checking the domain', 'danger');
+        document.getElementById('loading').style.display = 'none';
+    });
 }
 
 function updateDNSResults(data) {
