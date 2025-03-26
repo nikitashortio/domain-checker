@@ -13,12 +13,11 @@
         <h1 class="text-center mb-3">Domain Checker</h1>
         <p class="welcome-message text-center">Enter a domain name to check its DNS records, WHOIS information, SSL certificate, and more.</p>
         
-        <div class="input-group mb-4">
-            <span class="input-group-text">
-                <i class="bi bi-search"></i>
-            </span>
-            <input type="text" id="domain" class="form-control" placeholder="Enter domain (e.g., example.com)">
-            <button class="btn btn-dark" onclick="checkDomain()">Check</button>
+        <div class="input-group">
+            <input type="text" class="form-control" id="domain" placeholder="Enter domain name (e.g., example.com)" autocomplete="off">
+            <button class="btn btn-primary" type="button" onclick="checkDomain(document.getElementById('domain').value)">
+                <i class="fas fa-search"></i> Check
+            </button>
         </div>
 
         <div id="loading" class="loading d-none">
