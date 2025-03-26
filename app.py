@@ -75,11 +75,19 @@ def get_whois_info(domain):
         if not w.domain_name:
             return {'error': 'Domain not found in WHOIS database'}
         
-        # Convert datetime objects to strings
+        # Convert datetime objects to strings and clean status values
         info = {}
         for key, value in w.items():
             if isinstance(value, (datetime, date)):
                 info[key] = value.isoformat()
+            elif key == 'status':
+                # Clean status values to remove ICANN URLs
+                if isinstance(value, list):
+                    info[key] = [s.split()[0] if s else s for s in value]
+                elif value:
+                    info[key] = value.split()[0]
+                else:
+                    info[key] = value
             else:
                 info[key] = value
         return info
