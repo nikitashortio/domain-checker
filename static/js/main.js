@@ -995,88 +995,28 @@ function updateIframeResults(data) {
     
     html += '</div>';
     
-    // Add explanation section
-    html += `
-        <div class="policy-explanation">
-            <h5>What does this mean?</h5>
-            <p>${getIframeExplanation(data)}</p>
-        </div>`;
-    
     iframeResults.innerHTML = html;
 
     // Update the existing iframe preview
     const previewContainer = document.querySelector('.iframe-test-container');
     if (previewContainer) {
+        // Update preview URL
         const previewUrl = previewContainer.querySelector('.preview-url');
-        const previewFrame = previewContainer.querySelector('.preview-frame');
-        
         if (previewUrl) {
             previewUrl.textContent = url;
         }
+
+        // Create and append iframe
+        const previewContent = `
+            <div class="preview-url">${url}</div>
+            <div class="preview-frame">
+                <iframe src="${url}" 
+                        style="width: 100%; height: 500px; border: 1px solid #dee2e6; border-radius: 4px;"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            </div>`;
         
-        if (previewFrame) {
-            // Remove any existing iframe
-            previewFrame.innerHTML = '';
-            
-            // Create a new iframe with proper attributes
-            const iframe = document.createElement('iframe');
-            iframe.src = url;
-            iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
-            iframe.style.width = '100%';
-            iframe.style.height = '500px';
-            iframe.style.border = '1px solid #dee2e6';
-            iframe.style.borderRadius = '4px';
-            
-            // Add error handling
-            iframe.onerror = () => {
-                previewFrame.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Failed to load preview for ${url}
-                    </div>`;
-            };
-            
-            // Add load event handler
-            iframe.onload = () => {
-                // If the iframe loads successfully, we might want to adjust its height
-                // based on content or add additional functionality
-                console.log('Iframe loaded successfully');
-            };
-            
-            // Append the new iframe
-            previewFrame.appendChild(iframe);
-        }
+        previewContainer.innerHTML = previewContent;
     }
-}
-
-function getIframeExplanation(data) {
-    if (!data) return 'Unable to determine iframe embedding status.';
-
-    let explanation = '';
-    const headers = data.headers || {};
-    const xFrameOptions = headers['X-Frame-Options'];
-    const csp = data.frame_ancestors_directive;
-
-    if (data.allowed) {
-        explanation = 'This domain allows embedding in iframes. ';
-    } else {
-        explanation = 'This domain restricts embedding in iframes. ';
-        
-        if (xFrameOptions) {
-            explanation += `The X-Frame-Options header is set to "${xFrameOptions}", which `;
-            if (xFrameOptions.toLowerCase() === 'deny') {
-                explanation += 'prevents the page from being displayed in any iframe.';
-            } else if (xFrameOptions.toLowerCase() === 'sameorigin') {
-                explanation += 'only allows the page to be displayed in iframes on the same domain.';
-            }
-        }
-
-        if (csp && csp !== 'Not Set') {
-            explanation += ` Additionally, the Content Security Policy frame-ancestors directive "${csp}" provides more granular control over which domains can embed this content.`;
-        }
-    }
-
-    return explanation;
 }
 
 function updateRedirectsResults(data) {
