@@ -63,22 +63,6 @@ body {
     border-color: transparent;
 }
 
-/* Remove conflicting styles */
-.domain-entered .nav-tabs {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    border-bottom: 1px solid #dee2e6;
-    margin-bottom: 1rem;
-    padding: 0;
-    list-style: none;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start !important;
-    align-items: center;
-    gap: 0.25rem;
-}
-
 /* Tab content styles */
 .tab-content {
     display: block;
@@ -200,6 +184,22 @@ body {
 .security-info {
     padding: 1rem;
     margin: 0;
+}
+
+/* Remove all domain-entered class styles that affect DNS visibility */
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper,
+.domain-entered #dns .nav-pills {
+    display: none;
+}
+
+/* Ensure DNS elements are only visible when DNS tab is active */
+#dns.active.show .dns-controls,
+#dns.active.show .dns-resolvers,
+#dns.active.show .dns-table-wrapper,
+#dns.active.show .nav-pills {
+    display: block !important;
 }
 
 /* DNS Records */

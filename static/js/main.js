@@ -97,10 +97,15 @@ function activateTab(tabId) {
     }
 
     // Hide DNS elements if not on DNS tab
-    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper');
+    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, #dns .nav-pills');
     if (tabId !== 'dns') {
         dnsElements.forEach(element => {
             element.style.display = 'none';
+        });
+    } else {
+        // Show DNS elements only when DNS tab is active
+        dnsElements.forEach(element => {
+            element.style.display = 'block';
         });
     }
 }
