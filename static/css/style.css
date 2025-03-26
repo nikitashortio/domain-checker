@@ -12,30 +12,37 @@ body {
 }
 
 .nav-tabs {
-    margin-bottom: 0;
     border-bottom: 1px solid #dee2e6;
-    padding-bottom: 1px;
-    justify-content: center;
-    display: flex;
+    margin-bottom: 1rem;
 }
 
 .nav-tabs .nav-link {
-    color: #6c757d;
-    border: none;
-    border-bottom: 2px solid transparent;
+    color: #495057;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
     padding: 0.5rem 1rem;
     margin-bottom: -1px;
 }
 
 .nav-tabs .nav-link:hover {
     border-color: #e9ecef #e9ecef #dee2e6;
-    color: #495057;
+    isolation: isolate;
 }
 
 .nav-tabs .nav-link.active {
-    color: #000;
+    color: #495057;
     background-color: #fff;
     border-color: #dee2e6 #dee2e6 #fff;
+    border-bottom-color: #fff;
+}
+
+.nav-tabs .nav-link.disabled {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: transparent;
+    border-color: transparent;
 }
 
 /* Update tab content to original style */
