@@ -621,9 +621,16 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Only initialize DNS tab if we're on the DNS tab
+        // Activate DNS tab if no specific tab is active or if it's the first check
         const activeTab = document.querySelector('.tab-pane.active');
-        if (activeTab && activeTab.id === 'dns') {
+        if (!activeTab || updateType === 'all') {
+            // Get the DNS tab link and activate it
+            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
+            if (dnsTab) {
+                activateTab('dns');
+                dnsTab.classList.add('active');
+            }
+            // Initialize DNS tab
             initializeDNSTab();
         }
     })
