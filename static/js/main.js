@@ -104,6 +104,7 @@ function activateDnsTab(tabId) {
     // Remove active class from all tabs and panes
     dnsTabPanes.forEach(pane => {
         pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
     });
     
     dnsNavLinks.forEach(link => {
@@ -116,20 +117,12 @@ function activateDnsTab(tabId) {
     
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
+        selectedPane.style.display = 'block';
     }
     
     if (selectedLink) {
         selectedLink.classList.add('active');
     }
-    
-    // Make sure DNS resolvers and table stay visible
-    const dnsResolvers = document.querySelector('.dns-resolvers');
-    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
-    const dnsControls = document.querySelector('.dns-controls');
-    
-    if (dnsResolvers) dnsResolvers.style.display = 'flex';
-    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
-    if (dnsControls) dnsControls.style.display = 'block';
 }
 
 // Add event listeners for tab clicks
@@ -569,9 +562,14 @@ function updateDNSResults(data) {
         }
     });
 
-    // Show the DNS controls and resolvers
-    document.querySelector('.dns-controls').style.display = 'block';
-    document.querySelector('.dns-resolvers').style.display = 'block';
+    // Activate the first DNS resolver tab
+    const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
+    if (firstDnsTab) {
+        const target = firstDnsTab.getAttribute('data-bs-target');
+        if (target) {
+            activateDnsTab(target.replace('#', ''));
+        }
+    }
 }
 
 function updateWHOISResults(data) {
