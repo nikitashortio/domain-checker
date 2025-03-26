@@ -95,6 +95,31 @@ function activateTab(tabId) {
     }
 }
 
+// Add this function to handle DNS resolver tab activation
+function activateDnsTab(tabId) {
+    // Hide all DNS tab panes
+    document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+        pane.classList.remove('active', 'show');
+    });
+    
+    // Remove active class from all DNS nav links
+    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Show the selected DNS tab pane
+    const selectedPane = document.getElementById(tabId);
+    if (selectedPane) {
+        selectedPane.classList.add('active', 'show');
+    }
+    
+    // Add active class to the clicked nav link
+    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    }
+}
+
 // Add event listeners for tab clicks
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -248,6 +273,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (initialDomain) {
         document.body.classList.add('domain-entered');
     }
+
+    // Add event listeners for DNS resolver tab clicks
+    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-bs-target');
+            if (target) {
+                activateDnsTab(target.replace('#', ''));
+            }
+        });
+    });
 });
 
 function updateHintText(tabId) {

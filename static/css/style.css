@@ -881,6 +881,7 @@ body {
     display: none !important;
 }
 
+/* Show DNS elements when domain is entered */
 .domain-entered .dns-resolvers {
     display: flex !important;
     flex-direction: row;
@@ -894,6 +895,7 @@ body {
     display: block !important;
 }
 
+/* DNS Pills Navigation */
 .domain-entered .nav-pills {
     display: flex !important;
     flex-direction: row;
@@ -904,35 +906,11 @@ body {
     list-style: none;
 }
 
-.domain-entered .tab-pane.active.show {
+/* DNS Records Tab Content */
+.domain-entered #dns .tab-content {
     display: block !important;
 }
 
-.nav-pills .nav-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 120px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    background-color: #f8f9fa;
-    color: #495057;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.nav-pills .nav-link:hover {
-    background-color: #e9ecef;
-    color: #212529;
-}
-
-.nav-pills .nav-link.active {
-    background-color: #007bff;
-    color: white;
-}
-
-/* DNS Records Tab Content */
 .domain-entered #dns .tab-pane {
     display: none !important;
 }
@@ -960,6 +938,31 @@ body {
 
 .tab-pane.active.show {
     display: block !important;
+}
+
+/* DNS Pills Styling */
+.nav-pills .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #007bff;
+    color: white;
 }
 
 .loading {
