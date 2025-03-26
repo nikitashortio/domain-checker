@@ -90,10 +90,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const domainInput = document.getElementById('domain');
     domainInput.addEventListener('input', function() {
         const domain = this.value.trim();
-        const hasDomain = domain.length > 0;
-        
-        // Show/hide DNS controls and resolvers based on domain input
-        document.body.classList.toggle('domain-entered', hasDomain);
         
         // Clear DNS results cache when domain changes
         dnsResults = {
@@ -287,7 +283,7 @@ function updateTabResults(endpoint, data) {
     }
 }
 
-function checkDomain(updateType = 'all') {
+async function checkDomain() {
     const domain = document.getElementById('domain').value.trim();
     if (!domain) {
         alert('Please enter a domain name');
@@ -295,84 +291,99 @@ function checkDomain(updateType = 'all') {
     }
 
     // Show loading spinner
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.classList.remove('d-none');
-    }
-
-    // Add domain-entered class to show DNS controls
-    document.body.classList.add('domain-entered');
-
-    // Make the API request
-    const endpoint = getEndpointForTab(updateType);
-    console.log('Making request to:', endpoint);
+    document.getElementById('loading').classList.remove('d-none');
     
-    const requestData = {
-        domain: domain,
-        update_type: updateType
-    };
-    console.log('Request data:', requestData);
-
-    fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-    })
-    .then(response => response.json())
-    .then(data => {
+    // Show DNS controls and add domain-entered class
+    document.querySelector('.dns-controls').style.display = 'block';
+    document.querySelector('.dns-resolvers').style.display = 'block';
+    document.body.classList.add('domain-entered');
+    
+    // Update hint message
+    document.getElementById('hint-message').textContent = `Checking domain: ${domain}`;
+    
+    // Show all tabs
+    document.querySelectorAll('.nav-tabs .nav-link').forEach(tab => {
+        tab.style.display = 'block';
+    });
+    
+    try {
+        console.log('Making request to: /api/check');
+        const response = await fetch('/api/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                domain: domain,
+                update_type: 'all'
+            })
+        });
+        
+        console.log('Request data:', {
+            domain: domain,
+            update_type: 'all'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
         console.log('Response data:', data);
         
-        // Hide loading spinner
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
-
-        // Update results based on the update type
-        if (updateType === 'all' || updateType === 'dns') {
-            console.log('Processing DNS data:', data.dns);
+        // Update DNS results
+        if (data.dns) {
+            console.log('Updating DNS results with data:', data.dns);
             updateDNSResults(data.dns);
         }
-        if (updateType === 'all' || updateType === 'whois') {
+        
+        // Update WHOIS results
+        if (data.whois) {
             updateWHOISResults(data.whois);
         }
-        if (updateType === 'all' || updateType === 'ssl') {
+        
+        // Update SSL results
+        if (data.ssl) {
             updateSSLResults(data.ssl);
         }
-        if (updateType === 'all' || updateType === 'availability') {
+        
+        // Update availability results
+        if (data.availability) {
             updateAvailabilityResults(data.availability);
         }
-        if (updateType === 'all' || updateType === 'referrer') {
+        
+        // Update referrer results
+        if (data.referrer) {
             updateReferrerResults(data.referrer);
         }
-        if (updateType === 'all' || updateType === 'iframe') {
+        
+        // Update iframe results
+        if (data.iframe) {
             updateIframeResults(data.iframe);
         }
-        if (updateType === 'all' || updateType === 'redirects') {
+        
+        // Update redirects results
+        if (data.redirects) {
             updateRedirectsResults(data.redirects);
         }
-        if (updateType === 'all' || updateType === 'headers') {
+        
+        // Update headers results
+        if (data.headers) {
             updateHeadersResults(data.headers);
         }
-        if (updateType === 'all' || updateType === 'security') {
+        
+        // Update security results
+        if (data.security) {
             updateSecurityResults(data.security);
         }
-
-        // Store results in cache
-        if (updateType === 'all') {
-            tabResults = data;
-        } else {
-            tabResults[updateType] = data[updateType];
-        }
-    })
-    .catch(error => {
+        
+    } catch (error) {
         console.error('Error:', error);
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
         alert('An error occurred while checking the domain. Please try again.');
-    });
+    } finally {
+        // Hide loading spinner
+        document.getElementById('loading').classList.add('d-none');
+    }
 }
 
 function updateDNSResults(data) {
