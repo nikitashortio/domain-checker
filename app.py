@@ -651,6 +651,11 @@ def check_domain():
         if domain.startswith(('http://', 'https://')):
             parsed = urlparse(domain)
             domain = parsed.netloc
+        elif '/' in domain:  # Handle cases where URL is entered without protocol
+            domain = domain.split('/')[0]
+            
+        # Remove any remaining path components and query parameters
+        domain = domain.split('?')[0].split('#')[0].strip()
         
         try:
             if update_type == 'all' or update_type == 'dns':
