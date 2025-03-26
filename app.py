@@ -9,6 +9,10 @@ import json
 from datetime import datetime, date
 import re
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -431,29 +435,61 @@ def get_headers(domain):
 
 def check_web_risk(domain):
     try:
-        # Use VirusTotal's public API endpoint
-        vt_headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        # VirusTotal API configuration
+        vt_api_key = '7b4e00ad6eb1cea6c55c31af621a0b7647704712914c62b8e9a1f4302c007e78'
+        vt_base_url = 'https://www.virustotal.com/vtapi/v2'
         
-        # Make request to VirusTotal
-        response = requests.get(f'https://www.virustotal.com/gui/domain/{domain}', headers=vt_headers, timeout=5)
+        # First, submit the domain for scanning if it hasn't been scanned recently
+        scan_url = f'{vt_base_url}/url/scan'
+        scan_params = {'apikey': vt_api_key, 'url': domain}
+        scan_response = requests.post(scan_url, data=scan_params)
         
-        # Check Google Safe Browsing API (simulated for demo)
-        safe_browsing_status = 'SAFE'  # In production, use actual Google Safe Browsing API
+        if scan_response.status_code == 200:
+            scan_result = scan_response.json()
+            resource = scan_result.get('resource')
+            
+            # Now get the report
+            report_url = f'{vt_base_url}/url/report'
+            report_params = {'apikey': vt_api_key, 'resource': resource}
+            report_response = requests.get(report_url, params=report_params)
+            
+            if report_response.status_code == 200:
+                report = report_response.json()
+                
+                # Calculate score based on positives and total scanners
+                total_scanners = report.get('total', 0)
+                positives = report.get('positives', 0)
+                score = max(0, 100 - (positives / total_scanners * 100)) if total_scanners > 0 else 0
+                
+                # Get scan date
+                scan_date = report.get('scan_date')
+                if scan_date:
+                    scan_date = datetime.fromtimestamp(scan_date).isoformat()
+                
+                return {
+                    'scan_date': scan_date,
+                    'virustotal': {
+                        'status': 'Scanned',
+                        'score': round(score, 2),
+                        'positives': positives,
+                        'total_scanners': total_scanners,
+                        'url': f'https://www.virustotal.com/gui/domain/{domain}',
+                        'scans': report.get('scans', {})
+                    },
+                    'google_web_risk': {
+                        'status': 'SAFE',  # In production, use actual Google Safe Browsing API
+                        'score': 100
+                    }
+                }
         
+        # If we get here, something went wrong with the API calls
         return {
-            'scan_date': datetime.now().isoformat(),
-            'virustotal': {
-                'status': 'Scanned',
-                'score': 0,  # In production, parse actual score
-                'url': f'https://www.virustotal.com/gui/domain/{domain}'
-            },
-            'google_web_risk': {
-                'status': safe_browsing_status,
-                'score': 100 if safe_browsing_status == 'SAFE' else 0
-            }
+            'error': 'Failed to get VirusTotal report',
+            'scan_date': None,
+            'virustotal': None,
+            'google_web_risk': None
         }
+        
     except Exception as e:
         return {
             'error': f'Failed to check web risk: {str(e)}',

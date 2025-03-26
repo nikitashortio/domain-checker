@@ -1167,7 +1167,7 @@ function getHeaderClass(header) {
 }
 
 function updateSecurityResults(data) {
-    const securityTab = document.getElementById('security');
+    const securityTab = document.getElementById('security-tab');
     if (!securityTab) return;
 
     if (data.error) {
@@ -1177,43 +1177,64 @@ function updateSecurityResults(data) {
 
     let html = '<div class="security-info">';
 
-    // Add Web Risk Information
-    if (data.web_risk) {
-        const webRisk = data.web_risk;
-        const googleWebRisk = webRisk.google_web_risk || {};
-        const virusTotal = webRisk.virustotal || {};
-
-        // Google Web Risk Score
+    // Add VirusTotal Information
+    if (data.virustotal) {
+        const virusTotal = data.virustotal;
+        const scoreClass = virusTotal.score >= 80 ? 'text-success' : 
+                          virusTotal.score >= 60 ? 'text-warning' : 'text-danger';
+        
         html += `
-            <div class="security-field">
-                <strong>Google Web Risk Status</strong>
-                <div class="security-score ${googleWebRisk.status === 'SAFE' ? 'text-success' : 'text-danger'}">
-                    Status: ${googleWebRisk.status || 'N/A'}<br>
-                    Score: ${googleWebRisk.score || 0}/100
-                </div>
-            </div>`;
-
-        // VirusTotal Information
-        html += `
-            <div class="security-field">
-                <strong>VirusTotal Report</strong>
+            <div class="security-section">
+                <h3>VirusTotal Report</h3>
                 <div class="security-score">
-                    Status: ${virusTotal.status || 'N/A'}<br>
-                    Score: ${virusTotal.score || 0}/100<br>
-                    <a href="${virusTotal.url || '#'}" target="_blank" rel="noopener noreferrer">
+                    <div class="vt-score ${scoreClass}">
+                        <span class="score-value">${virusTotal.score}</span>
+                        <span class="score-label">/100</span>
+                    </div>
+                    <div class="vt-details">
+                        <div>Detections: ${virusTotal.positives}/${virusTotal.total_scanners} scanners</div>
+                        <div>Status: ${virusTotal.status}</div>
+                    </div>
+                </div>
+                <div class="vt-link">
+                    <a href="${virusTotal.url}" target="_blank" rel="noopener noreferrer">
                         View Full Report <i class="fas fa-external-link-alt"></i>
                     </a>
+                </div>`;
+
+        // Add detailed scan results if available
+        if (virusTotal.scans && Object.keys(virusTotal.scans).length > 0) {
+            html += `
+                <div class="scan-results">
+                    <h4>Scan Results</h4>`;
+            
+            Object.entries(virusTotal.scans).forEach(([scanner, result]) => {
+                const resultClass = result.detected ? 'text-danger' : 'text-success';
+                const resultIcon = result.detected ? 'fa-times-circle' : 'fa-check-circle';
+                
+                html += `
+                    <div class="scan-result-item">
+                        <div class="scanner-name">${scanner}</div>
+                        <div class="scanner-result ${resultClass}">
+                            <i class="fas ${resultIcon}"></i>
+                            ${result.detected ? result.result : 'Clean'}
+                        </div>
+                    </div>`;
+            });
+            
+            html += `</div>`;
+        }
+        html += `</div>`;
+    }
+
+    // Last Scan Date
+    if (data.scan_date) {
+        html += `
+            <div class="security-section">
+                <div class="scan-date">
+                    Last Scan: ${new Date(data.scan_date).toLocaleString()}
                 </div>
             </div>`;
-
-        // Last Scan Date
-        if (webRisk.scan_date) {
-            html += `
-                <div class="security-field">
-                    <strong>Last Scan Date</strong>
-                    <div>${new Date(webRisk.scan_date).toLocaleString()}</div>
-                </div>`;
-        }
     }
 
     html += '</div>';
