@@ -331,17 +331,29 @@ function checkDomain(updateType = 'all') {
     }
 
     // Show loading state
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('error').style.display = 'none';
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('d-none');
+    }
 
+    // Show results containers if they exist
+    const resultTabs = document.getElementById('resultTabs');
+    const resultTabsContent = document.getElementById('resultTabsContent');
+    if (resultTabs) resultTabs.style.display = 'block';
+    if (resultTabsContent) resultTabsContent.style.display = 'block';
+    
     // Show DNS controls and add domain-entered class
-    document.querySelector('.dns-controls').style.display = 'block';
-    document.querySelector('.dns-resolvers').style.display = 'block';
+    const dnsControls = document.querySelector('.dns-controls');
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    if (dnsControls) dnsControls.style.display = 'block';
+    if (dnsResolvers) dnsResolvers.style.display = 'block';
     document.body.classList.add('domain-entered');
     
     // Update hint message
-    document.getElementById('hint-message').textContent = `Checking domain: ${domain}`;
+    const hintMessage = document.getElementById('hint-message');
+    if (hintMessage) {
+        hintMessage.textContent = `Checking domain: ${domain}`;
+    }
 
     // Make API request
     fetch('/api/check', {
@@ -376,12 +388,16 @@ function checkDomain(updateType = 'all') {
         }
 
         // Hide loading state
-        document.getElementById('loading').style.display = 'none';
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
     })
     .catch(error => {
         console.error('Error:', error);
         showAlert('An error occurred while checking the domain', 'danger');
-        document.getElementById('loading').style.display = 'none';
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
     });
 }
 
