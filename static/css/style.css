@@ -813,60 +813,70 @@ body {
 }
 
 .dns-resolvers {
-    display: none;
-    margin-bottom: 1rem;
-}
-
-.dns-resolvers .nav-pills {
     display: flex;
     flex-direction: row;
-    gap: 0.5rem;
-    justify-content: flex-start;
-    margin-bottom: 1rem;
     flex-wrap: nowrap;
     overflow-x: auto;
-    padding-bottom: 0.5rem;
+    gap: 10px;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
-.dns-resolvers .nav-item {
-    flex: 0 0 auto;
-    margin: 0;
-}
-
-.dns-resolvers .nav-link {
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    color: #212529;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    white-space: nowrap;
-    text-align: center;
-    min-width: 100px;
-}
-
-.dns-resolvers .nav-link.active {
-    background-color: #212529;
-    color: white;
-    border-color: #212529;
-}
-
-/* Add scrollbar styling for the nav-pills */
-.dns-resolvers .nav-pills::-webkit-scrollbar {
+.dns-resolvers::-webkit-scrollbar {
     height: 6px;
 }
 
-.dns-resolvers .nav-pills::-webkit-scrollbar-track {
+.dns-resolvers::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
 }
 
-.dns-resolvers .nav-pills::-webkit-scrollbar-thumb {
+.dns-resolvers::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 3px;
 }
 
-.dns-resolvers .nav-pills::-webkit-scrollbar-thumb:hover {
+.dns-resolvers::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+.nav-pills {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.nav-link i {
+    margin-right: 8px;
 }
 
 .loading {
