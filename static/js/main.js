@@ -168,6 +168,7 @@ function switchDNSResolver(tabId) {
     // Remove active class from all tabs and panes
     dnsTabPanes.forEach(pane => {
         pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
     });
     
     dnsNavLinks.forEach(link => {
@@ -218,13 +219,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
-                activateTab(tabId);
                 
-                // Only check domain for iframe tab if we have a domain and no cached results
-                if (tabId === 'iframe') {
-                    const domain = document.getElementById('domain').value.trim();
-                    if (domain && !tabResults.iframe) {
-                        checkDomain('iframe');
+                // Check if this is a DNS resolver tab
+                const isDNSResolverTab = ['cloudflare', 'google', 'quad9'].some(resolver => 
+                    target.includes(resolver)
+                );
+                
+                if (isDNSResolverTab) {
+                    e.stopPropagation(); // Prevent event bubbling for DNS resolver tabs
+                    switchDNSResolver(tabId);
+                    updateDNSResults(dnsResults); // Re-render DNS results
+                } else {
+                    activateTab(tabId);
+                    
+                    // Only check domain for iframe tab if we have a domain and no cached results
+                    if (tabId === 'iframe') {
+                        const domain = document.getElementById('domain').value.trim();
+                        if (domain && !tabResults.iframe) {
+                            checkDomain('iframe');
+                        }
                     }
                 }
             }
@@ -297,32 +310,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listener for domain input changes
     const domainInput = document.getElementById('domain');
-    domainInput.addEventListener('input', function() {
-        const domain = this.value.trim();
-        
-        // Clear DNS results cache when domain changes
-        dnsResults = {
-            cloudflare: null,
-            google: null,
-            quad9: null
-        };
+    if (domainInput) {
+        domainInput.addEventListener('input', function() {
+            const domain = this.value.trim();
+            
+            // Clear DNS results cache when domain changes
+            dnsResults = {
+                cloudflare: null,
+                google: null,
+                quad9: null
+            };
 
-        const activeTab = document.querySelector('.tab-pane.active');
-        if (activeTab && activeTab.id === 'redirects') {
-            // Clear redirects cache to force a fresh request
-            tabResults.redirects = null;
-            // Show loader
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) {
-                loadingElement.classList.remove('d-none');
+            const activeTab = document.querySelector('.tab-pane.active');
+            if (activeTab && activeTab.id === 'redirects') {
+                // Clear redirects cache to force a fresh request
+                tabResults.redirects = null;
+                // Show loader
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.classList.remove('d-none');
+                }
+                // Add a small delay to avoid too many requests while typing
+                clearTimeout(this.checkTimeout);
+                this.checkTimeout = setTimeout(() => {
+                    checkDomain('redirects');
+                }, 500);
             }
-            // Add a small delay to avoid too many requests while typing
-            clearTimeout(this.checkTimeout);
-            this.checkTimeout = setTimeout(() => {
-                checkDomain('redirects');
-            }, 500);
-        }
-    });
+        });
+    }
 
     // Add event listener for Enter key in domain input
     domainInput.addEventListener('keypress', function(e) {
@@ -388,31 +403,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialDomain = domainInput.value.trim();
     if (initialDomain) {
         document.body.classList.add('domain-entered');
-    }
-
-    // Add event listeners for DNS resolver tab clicks
-    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent event bubbling
-            
-            const target = this.getAttribute('data-bs-target');
-            if (target) {
-                const tabId = target.replace('#', '');
-                activateDnsTab(tabId);
-            }
-        });
-    });
-    
-    // Initialize first DNS resolver tab if domain is entered
-    if (domainInput && domainInput.value.trim()) {
-        const firstDnsTab = document.querySelector('#dns .nav-pills .nav-link');
-        if (firstDnsTab) {
-            const target = firstDnsTab.getAttribute('data-bs-target');
-            if (target) {
-                activateDnsTab(target.replace('#', ''));
-            }
-        }
     }
 });
 
