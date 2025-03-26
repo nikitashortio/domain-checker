@@ -394,18 +394,22 @@ def check_domain_redirects(domain):
 
 def get_headers(domain):
     try:
-        # Add User-Agent to avoid being blocked
+        # Add User-Agent and other headers to avoid being blocked
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
         }
         
         # Make request with headers
-        response = requests.get(f'https://{domain}', headers=headers, timeout=5, allow_redirects=True)
+        response = requests.get(f'https://{domain}', headers=headers, timeout=10, allow_redirects=True, verify=True)
         
         # Get all headers
         response_headers = dict(response.headers)
         
-        # Convert all header values to strings to ensure JSON serialization
+        # Convert all header values to strings and ensure proper formatting
         headers_dict = {}
         for key, value in response_headers.items():
             if isinstance(value, (list, tuple)):
@@ -413,11 +417,17 @@ def get_headers(domain):
             else:
                 headers_dict[key] = str(value)
         
+        # Add response status code and message
+        headers_dict['Status-Code'] = str(response.status_code)
+        headers_dict['Status-Message'] = response.reason
+        
         return headers_dict
+    except requests.exceptions.SSLError as e:
+        return {'error': f'SSL Error: {str(e)}'}
     except requests.exceptions.RequestException as e:
-        return {'error': f'Failed to get headers: {str(e)}'}
+        return {'error': f'Request Error: {str(e)}'}
     except Exception as e:
-        return {'error': f'Unexpected error while getting headers: {str(e)}'}
+        return {'error': f'Unexpected error: {str(e)}'}
 
 def check_web_risk(domain):
     try:
