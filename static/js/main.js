@@ -397,12 +397,17 @@ async function checkDomain(updateType = 'all') {
 }
 
 function updateDNSResults(data) {
+    console.log('Starting updateDNSResults with data:', data);
     const resolvers = ['cloudflare', 'google', 'quad9'];
     const selectedType = document.getElementById('dnsRecordType').value;
     const recordTypes = selectedType === 'all' ? ['a', 'aaaa', 'mx', 'ns', 'txt', 'cname', 'soa'] : [selectedType.toLowerCase()];
     
+    console.log('Selected type:', selectedType);
+    console.log('Record types to process:', recordTypes);
+    
     // Handle error case
     if (data.error) {
+        console.log('Error in DNS data:', data.error);
         resolvers.forEach(resolver => {
             const container = document.getElementById(`dns-results-${resolver}`);
             if (container) {
@@ -415,6 +420,8 @@ function updateDNSResults(data) {
                             </div>
                         </td>
                     </tr>`;
+            } else {
+                console.log(`Container not found for resolver: ${resolver}`);
             }
         });
         return;
@@ -425,12 +432,17 @@ function updateDNSResults(data) {
     
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
+        console.log(`Processing resolver: ${resolver}`);
         let tableContent = '';
         recordTypes.forEach(type => {
+            console.log(`Processing record type: ${type}`);
             const records = data[type] || [];
+            console.log(`Found ${records.length} records for type ${type}`);
             if (records.length > 0) {
                 records.forEach(record => {
+                    console.log(`Processing record:`, record);
                     if (record.resolver === resolver) {
+                        console.log(`Adding record to table for ${resolver}`);
                         tableContent += `
                             <tr data-type="${type}">
                                 <td>${type.toUpperCase()}</td>
@@ -445,12 +457,17 @@ function updateDNSResults(data) {
         });
 
         const container = document.getElementById(`dns-results-${resolver}`);
+        console.log(`Container for ${resolver}:`, container);
         if (container) {
             if (tableContent) {
+                console.log(`Setting content for ${resolver}:`, tableContent);
                 container.innerHTML = tableContent;
             } else {
+                console.log(`No records found for ${resolver}`);
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
             }
+        } else {
+            console.log(`Container not found for resolver: ${resolver}`);
         }
     });
 }
