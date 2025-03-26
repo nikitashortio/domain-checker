@@ -82,20 +82,17 @@ body {
 
 /* Tab content styles */
 .tab-content {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: block;
     padding: 20px;
 }
 
 .domain-entered .tab-content {
     display: block;
+    padding: 20px;
 }
 
 .tab-pane {
-    flex: 1;
-    min-width: 300px;
+    display: none;
 }
 
 .tab-pane.active.show {
