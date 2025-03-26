@@ -70,6 +70,14 @@ body {
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
+    overflow-x: auto;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+    padding: 0;
+    list-style: none;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 /* Tab content styles */
@@ -859,6 +867,18 @@ body {
     padding: 10px 0;
     margin-bottom: 20px;
     -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.dns-resolvers .nav-pills {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 .dns-resolvers::-webkit-scrollbar {
@@ -1000,7 +1020,7 @@ body {
 
 /* Iframe Test Styles */
 .iframe-test-container {
-    margin-top: 2rem;
+    margin-top: 1rem;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -1029,9 +1049,11 @@ body {
 .iframe-wrapper {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: 800px;
     background: #fff;
     overflow: hidden;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
 }
 
 #domain-iframe {
