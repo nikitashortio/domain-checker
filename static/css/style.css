@@ -69,23 +69,19 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
     overflow-x: auto;
     border-bottom: 1px solid #dee2e6;
     margin-bottom: 1rem;
     padding: 0;
     list-style: none;
     -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
     align-items: center;
     gap: 0.25rem;
 }
 
 /* Tab content styles */
-.tab-content {
-    display: block;
-    padding: 20px;
-}
-
+.tab-content,
 .domain-entered .tab-content {
     display: block;
     padding: 20px;
@@ -95,8 +91,15 @@ body {
     display: none;
 }
 
-.tab-pane.active.show {
+.tab-pane.active.show,
+.domain-entered .tab-pane.active.show {
     display: block;
+}
+
+/* Remove any flex properties from tab panes */
+.tab-pane,
+.domain-entered .tab-pane {
+    width: 100%;
 }
 
 .input-group {
