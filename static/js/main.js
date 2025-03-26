@@ -1027,6 +1027,20 @@ function updateRedirectsResults(data) {
                 </div>`;
         } else {
             data.redirect_chain.forEach((step, index) => {
+                // Extract status code number
+                const statusCode = parseInt(step.status.split(' ')[0]);
+                // Determine status color based on code
+                let statusClass = '';
+                if (statusCode >= 200 && statusCode < 300) {
+                    statusClass = 'text-success';  // green for 2xx
+                } else if (statusCode >= 300 && statusCode < 400) {
+                    statusClass = 'text-warning';  // yellow for 3xx
+                } else if (statusCode >= 400 && statusCode < 500) {
+                    statusClass = 'text-danger';   // red for 4xx
+                } else if (statusCode >= 500) {
+                    statusClass = 'text-dark';     // black for 5xx
+                }
+                
                 html += `
                     <div class="redirect-step">
                         <div class="step-number">${index + 1}</div>
@@ -1035,7 +1049,7 @@ function updateRedirectsResults(data) {
                                 <strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong>
                                 <a href="${step.url}" target="_blank">${step.url}</a>
                             </div>
-                            <div class="step-status">Status: ${step.status}</div>
+                            <div class="step-status ${statusClass}">Status: ${step.status}</div>
                         </div>
                     </div>`;
             });
