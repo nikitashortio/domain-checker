@@ -826,7 +826,7 @@ def check_domain_security():
 
 if __name__ == '__main__':
     # For local development
-    if os.environ.get('PYTHONANYWHERE_SITE') is None:
+    if os.environ.get('FLASK_ENV') == 'development':
         app.run(debug=True, port=3000)
     # For production deployment
     else:
