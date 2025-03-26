@@ -128,7 +128,9 @@ def check_ssl_certificate(domain):
                 if cert.get('issuer'):
                     for field in cert['issuer']:
                         for key, value in field:
-                            # Map common SSL certificate field names to readable names
+                            # Store the original key for direct access
+                            issuer[key] = value
+                            # Also store with mapped name for display
                             field_map = {
                                 'organizationName': 'Organization',
                                 'commonName': 'Common Name',
@@ -137,8 +139,8 @@ def check_ssl_certificate(domain):
                                 'stateOrProvinceName': 'State',
                                 'localityName': 'City'
                             }
-                            # Use mapped name if available, otherwise use original
-                            issuer[field_map.get(key, key)] = value
+                            if key in field_map:
+                                issuer[field_map[key]] = value
 
                 # Get validity dates
                 valid_from = datetime.strptime(cert['notBefore'], '%b %d %H:%M:%S %Y %Z')

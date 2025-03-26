@@ -718,22 +718,33 @@ function updateSSLResults(data) {
         if (data.issuer && Object.keys(data.issuer).length > 0) {
             const issuerParts = [];
             
-            // Organization Name (O) is typically the most important
-            if (data.issuer.O) {
-                issuerParts.push(data.issuer.O);
+            // Try to get organization name (both original and mapped keys)
+            const orgName = data.issuer.organizationName || data.issuer.Organization;
+            if (orgName) {
+                issuerParts.push(orgName);
             }
             
-            // Common Name (CN) often contains the issuer's domain
-            if (data.issuer.CN && (!data.issuer.O || !data.issuer.CN.includes(data.issuer.O))) {
-                issuerParts.push(data.issuer.CN);
+            // Try to get common name (both original and mapped keys)
+            const commonName = data.issuer.commonName || data.issuer['Common Name'];
+            if (commonName && (!orgName || !commonName.includes(orgName))) {
+                issuerParts.push(commonName);
             }
             
-            // Organizational Unit (OU) can provide additional context
-            if (data.issuer.OU && !issuerParts.some(part => part.includes(data.issuer.OU))) {
-                issuerParts.push(data.issuer.OU);
+            // Try to get organizational unit (both original and mapped keys)
+            const orgUnit = data.issuer.organizationalUnitName || data.issuer.Unit;
+            if (orgUnit && !issuerParts.some(part => part.includes(orgUnit))) {
+                issuerParts.push(orgUnit);
             }
             
-            issuerDisplay = issuerParts.join(' - ') || 'Unknown';
+            // If we have any parts, join them, otherwise show all available issuer information
+            if (issuerParts.length > 0) {
+                issuerDisplay = issuerParts.join(' - ');
+            } else {
+                // Show all available issuer information as a fallback
+                issuerDisplay = Object.entries(data.issuer)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+            }
         }
 
         const daysLeft = getDaysLeft(data.valid_until);
