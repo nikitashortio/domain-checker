@@ -505,35 +505,35 @@ body {
 
 /* Record type colors */
 .dns-table tbody tr[data-type="A"] td:first-child {
-    border-left-color: #28a745;
+    border-left: 3px solid #28a745;
 }
 
 .dns-table tbody tr[data-type="AAAA"] td:first-child {
-    border-left-color: #17a2b8;
+    border-left: 3px solid #17a2b8;
 }
 
 .dns-table tbody tr[data-type="MX"] td:first-child {
-    border-left-color: #dc3545;
+    border-left: 3px solid #dc3545;
 }
 
 .dns-table tbody tr[data-type="NS"] td:first-child {
-    border-left-color: #fd7e14;
+    border-left: 3px solid #fd7e14;
 }
 
 .dns-table tbody tr[data-type="TXT"] td:first-child {
-    border-left-color: #6f42c1;
+    border-left: 3px solid #6f42c1;
 }
 
 .dns-table tbody tr[data-type="CNAME"] td:first-child {
-    border-left-color: #20c997;
+    border-left: 3px solid #20c997;
 }
 
 .dns-table tbody tr[data-type="SOA"] td:first-child {
-    border-left-color: #e83e8c;
+    border-left: 3px solid #e83e8c;
 }
 
 .dns-table tbody tr[data-type="CAA"] td:first-child {
-    color: #fd7e14;
+    border-left: 3px solid #fd7e14;
 }
 
 /* Empty state */
@@ -543,6 +543,22 @@ body {
     padding: 2rem;
     font-style: italic;
     border-bottom: none;
+}
+
+/* Error state */
+.dns-table tbody tr.error-row td {
+    padding: 1rem;
+}
+
+.dns-table tbody tr.error-row .alert {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dns-table tbody tr.error-row .alert i {
+    font-size: 1.25rem;
 }
 
 @media (max-width: 768px) {
