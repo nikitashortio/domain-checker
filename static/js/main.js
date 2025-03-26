@@ -828,6 +828,18 @@ function updateIframeResults(data) {
                     ${getIframeExplanation(iframeAllowed)}
                 </div>
             </div>`;
+
+        // Add live preview
+        const domain = document.getElementById('domain').value.trim();
+        if (domain) {
+            html += `
+                <div class="iframe-field">
+                    <strong>Live Preview:</strong>
+                    <div class="iframe-preview">
+                        <iframe src="https://${domain}" frameborder="0" width="100%" height="400px"></iframe>
+                    </div>
+                </div>`;
+        }
     }
     
     html += '</div>';
@@ -891,14 +903,6 @@ function updateRedirectsResults(data) {
         const statusElement = document.createElement('div');
         statusElement.className = 'step-status';
         statusElement.textContent = step.status;
-        
-        // Add headers if available
-        if (step.headers) {
-            const headersElement = document.createElement('div');
-            headersElement.className = 'step-headers';
-            headersElement.innerHTML = `<pre class="headers-pre">${JSON.stringify(step.headers, null, 2)}</pre>`;
-            stepDetails.appendChild(headersElement);
-        }
         
         // Assemble the step
         stepDetails.appendChild(urlElement);
@@ -1049,6 +1053,51 @@ function updateSecurityResults(data) {
                 <strong>Security Score:</strong>
                 <span class="${scoreClass}">${score}/100</span>
             </div>`;
+
+        // Google Web Risk Score
+        if (data.web_risk) {
+            const webRiskClass = data.web_risk.score === 'LOW' ? 'text-success' : 
+                               data.web_risk.score === 'MEDIUM' ? 'text-warning' : 'text-danger';
+            
+            html += `
+                <div class="security-field">
+                    <strong>Google Web Risk Score:</strong>
+                    <span class="${webRiskClass}">${data.web_risk.score}</span>
+                    ${data.web_risk.threats ? `
+                        <div class="threats-list">
+                            <strong>Threats detected:</strong>
+                            <ul>
+                                ${data.web_risk.threats.map(threat => `
+                                    <li class="text-danger">${threat}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>`;
+        }
+
+        // VirusTotal Score
+        if (data.virus_total) {
+            const vtScore = data.virus_total.positives || 0;
+            const vtTotal = data.virus_total.total || 0;
+            const vtClass = vtScore === 0 ? 'text-success' : 'text-danger';
+            
+            html += `
+                <div class="security-field">
+                    <strong>VirusTotal Score:</strong>
+                    <span class="${vtClass}">${vtScore}/${vtTotal} engines detected threats</span>
+                    ${vtScore > 0 ? `
+                        <div class="threats-list">
+                            <strong>Threats detected:</strong>
+                            <ul>
+                                ${data.virus_total.threats.map(threat => `
+                                    <li class="text-danger">${threat}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>`;
+        }
 
         // Security Headers Status
         if (data.headers) {
