@@ -1102,7 +1102,7 @@ function updateHeadersResults(data) {
         
         // Sort headers into categories
         const sortedHeaders = {};
-        Object.entries(data.headers || {}).forEach(([header, value]) => {
+        Object.entries(data).forEach(([header, value]) => {
             let categorized = false;
             for (const [category, headerList] of Object.entries(categories)) {
                 if (headerList.includes(header)) {
