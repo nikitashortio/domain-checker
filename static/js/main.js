@@ -97,7 +97,7 @@ function activateTab(tabId) {
     }
 
     // Hide DNS elements if not on DNS tab
-    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, #dns .nav-pills');
+    const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, #dns .nav-pills, .dns-table');
     if (tabId !== 'dns') {
         dnsElements.forEach(element => {
             element.style.display = 'none';
@@ -106,6 +106,11 @@ function activateTab(tabId) {
         document.querySelectorAll('.dns-table').forEach(table => {
             table.style.display = 'none';
         });
+        // Remove active class from DNS tab button
+        const dnsTabButton = document.getElementById('dns-tab');
+        if (dnsTabButton) {
+            dnsTabButton.classList.remove('active');
+        }
     } else {
         // Show DNS elements only when DNS tab is active
         dnsElements.forEach(element => {

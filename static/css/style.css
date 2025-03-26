@@ -55,6 +55,12 @@ body {
     color: #495057;
     background-color: #fff;
     border-color: #dee2e6 #dee2e6 #fff;
+    border-bottom-color: #fff;
+}
+
+.nav-tabs .nav-link:not(.active) {
+    border-color: transparent;
+    background-color: transparent;
 }
 
 .nav-tabs .nav-link.disabled {
@@ -94,7 +100,8 @@ body {
 .dns-controls,
 .dns-resolvers,
 .dns-table-wrapper,
-.dns-table {
+.dns-table,
+#dns .nav-pills {
     display: none;
 }
 
@@ -102,7 +109,8 @@ body {
 #dns.active.show .dns-controls,
 #dns.active.show .dns-resolvers,
 #dns.active.show .dns-table-wrapper,
-#dns.active.show .dns-table {
+#dns.active.show .dns-table,
+#dns.active.show .nav-pills {
     display: block !important;
 }
 
@@ -168,63 +176,14 @@ body {
     display: block !important;
 }
 
-/* DNS Resolver Pills */
-#dns .nav-pills {
-    display: none;
-    margin-bottom: 1rem;
+/* Iframe tab specific styles */
+#iframe .tab-content {
+    display: block;
 }
 
-#dns.active.show .nav-pills {
-    display: flex !important;
-    gap: 10px;
-}
-
-/* DNS Resolver Tab Content */
-#dns .tab-content .tab-pane {
-    display: none;
-}
-
-#dns .tab-content .tab-pane.active.show {
-    display: block !important;
-}
-
-/* DNS Table */
-.dns-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0;
-}
-
-.dns-table th,
-.dns-table td {
-    padding: 0.75rem;
-    border: 1px solid #dee2e6;
-    text-align: left;
-}
-
-.dns-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-/* Remove any flex properties that might affect layout */
-.tab-pane {
-    width: 100%;
-}
-
-/* Results content */
-.results-content {
-    padding: 1rem;
-    margin: 0;
-}
-
-/* Remove extra spacing from card */
-.card {
-    margin: 0;
-}
-
-.card-body {
-    padding: 1rem;
+#iframe .results-container,
+#iframe .iframe-test-container {
+    display: block;
 }
 
 /* DNS Records */
@@ -249,16 +208,6 @@ body {
 .security-info {
     padding: 1rem;
     margin: 0;
-}
-
-/* Iframe tab specific styles */
-#iframe .tab-content {
-    display: block;
-}
-
-#iframe .results-container,
-#iframe .iframe-test-container {
-    display: block;
 }
 
 /* DNS Records */
@@ -1179,4 +1128,9 @@ body {
 
 .domain-entered .hint-text {
     display: none;
+}
+
+/* Remove any flex properties that might affect layout */
+.tab-pane {
+    width: 100%;
 }
