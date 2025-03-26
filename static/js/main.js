@@ -160,44 +160,22 @@ function activateDnsTab(tabId) {
 }
 
 // Add this function to handle DNS resolver tab switching
-function switchDNSResolver(tabId) {
-    // Get all DNS resolver tabs and panes
-    const dnsTabPanes = document.querySelectorAll('#dns .tab-pane');
-    const dnsNavLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
-    
-    // Remove active class from all tabs and panes
-    dnsTabPanes.forEach(pane => {
-        pane.classList.remove('active', 'show');
-        pane.style.display = 'none';
+function switchDNSResolver(resolver) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.dns-resolver-tabs .tab').forEach(tab => {
+        tab.classList.remove('active');
     });
     
-    dnsNavLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Activate the selected tab and pane
-    const selectedPane = document.getElementById(tabId);
-    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
-    
-    if (selectedPane) {
-        selectedPane.classList.add('active', 'show');
-        selectedPane.style.display = 'block';
+    // Add active class to selected tab
+    const selectedTab = document.querySelector(`.dns-resolver-tabs .tab[data-resolver="${resolver}"]`);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+        selectedTab.style.color = '#000';
+        selectedTab.style.borderBottom = '2px solid #000';
     }
     
-    if (selectedLink) {
-        selectedLink.classList.add('active');
-    }
-
-    // Ensure parent DNS tab and its elements remain visible
-    const dnsTab = document.getElementById('dns');
-    const dnsControls = document.querySelector('.dns-controls');
-    const dnsResolvers = document.querySelector('.dns-resolvers');
-    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
-    
-    if (dnsTab) dnsTab.style.display = 'block';
-    if (dnsControls) dnsControls.style.display = 'block';
-    if (dnsResolvers) dnsResolvers.style.display = 'block';
-    if (dnsTableWrapper) dnsTableWrapper.style.display = 'block';
+    // Update DNS results
+    updateDNSResults(resolver);
 }
 
 // Add event listeners for tab clicks
