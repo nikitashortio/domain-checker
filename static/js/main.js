@@ -1177,6 +1177,26 @@ function updateSecurityResults(data) {
 
     let html = '<div class="security-info">';
 
+    // Add overall security score
+    if (data.score !== undefined) {
+        const scoreClass = data.score >= 80 ? 'text-success' : 
+                          data.score >= 60 ? 'text-warning' : 'text-danger';
+        
+        html += `
+            <div class="security-section">
+                <h3>Overall Security Score</h3>
+                <div class="security-score">
+                    <div class="vt-score ${scoreClass}">
+                        <span class="score-value">${data.score}</span>
+                        <span class="score-label">/100</span>
+                    </div>
+                    <div class="vt-details">
+                        <div>Risk Level: ${data.risk_level || 'Unknown'}</div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
     // Add VirusTotal Information
     if (data.virustotal) {
         const virusTotal = data.virustotal;
@@ -1225,6 +1245,27 @@ function updateSecurityResults(data) {
             html += `</div>`;
         }
         html += `</div>`;
+    }
+
+    // Add security issues and recommendations if available
+    if (data.issues && data.issues.length > 0) {
+        html += `
+            <div class="security-section">
+                <h3>Security Issues</h3>
+                <div class="security-issues">
+                    ${data.issues.map(issue => `<div class="issue-item">${issue}</div>`).join('')}
+                </div>
+            </div>`;
+    }
+
+    if (data.recommendations && data.recommendations.length > 0) {
+        html += `
+            <div class="security-section">
+                <h3>Recommendations</h3>
+                <div class="security-recommendations">
+                    ${data.recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('')}
+                </div>
+            </div>`;
     }
 
     // Last Scan Date
@@ -1332,7 +1373,7 @@ function checkDomain(updateType = 'all') {
             updateTabResults(updateType, data[updateType]);
         }
 
-        // Activate DNS tab if no specific tab is active or if it is the first check
+        // Activate DNS tab if no specific tab is active or if it's the first check
         if (!activeTab || updateType === 'all') {
             // Get the DNS tab link and activate it
             const dnsTab = document.querySelector('[data-bs-target="#dns"]');

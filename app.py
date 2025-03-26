@@ -691,6 +691,11 @@ def check_domain():
             if update_type in ['all', 'security']:
                 print(f"Checking security for {base_domain}")
                 security_info = check_security(base_domain)
+                # Add web risk data to security info
+                web_risk = check_web_risk(base_domain)
+                if 'error' not in web_risk:
+                    security_info['virustotal'] = web_risk.get('virustotal')
+                    security_info['scan_date'] = web_risk.get('scan_date')
                 result['security'] = security_info
                 print("Security check completed")
         except Exception as e:
