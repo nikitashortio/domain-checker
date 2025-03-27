@@ -1651,3 +1651,8 @@ body.domain-entered #dns.active.show .dns-table-wrapper {
 #dnsResolversContent {
     width: 100%;
 }
+
+/* Override Bootstrap's default text-warning color */
+.text-warning {
+    color: #1e40af !important;
+}
