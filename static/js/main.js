@@ -858,3 +858,60 @@ function extractFrameAncestors(csp) {
     const frameAncestorsMatch = csp.match(/frame-ancestors\s+([^;]+)/i);
     return frameAncestorsMatch ? frameAncestorsMatch[1] : 'none';
 }
+
+async function checkDomain() {
+    const domainInput = document.getElementById('domain');
+    const domain = domainInput.value.trim();
+    
+    if (!domain) {
+        showAlert('Please enter a domain name', 'warning');
+        return;
+    }
+
+    // Show loading state
+    const checkButton = document.querySelector('button[onclick="checkDomain()"]');
+    const originalText = checkButton.innerHTML;
+    checkButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+    checkButton.disabled = true;
+
+    try {
+        // Add domain-entered class to body
+        document.body.classList.add('domain-entered');
+
+        // Get the current active tab
+        const activeTab = document.querySelector('.nav-link.active');
+        const tabId = activeTab ? activeTab.getAttribute('data-bs-target').replace('#', '') : 'dns';
+        
+        // Get the endpoint based on the active tab
+        const endpoint = getEndpointForTab(tabId);
+        
+        // Make the API request
+        const response = await fetch(`/api/check/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ domain })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Update the results for the current tab
+        updateTabResults(endpoint, data);
+        
+        // Show success message
+        showAlert('Domain check completed successfully', 'success');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert(error.message || 'An error occurred while checking the domain', 'danger');
+    } finally {
+        // Restore button state
+        checkButton.innerHTML = originalText;
+        checkButton.disabled = false;
+    }
+}
