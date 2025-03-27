@@ -171,18 +171,38 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dnsTableWrapper) dnsTableWrapper.style.display = 'none';
     if (dnsNavPills) dnsNavPills.style.display = 'none';
 
-    // Add event listeners for tab clicks
-    document.querySelectorAll('.nav-link[data-bs-toggle="tab"]').forEach(link => {
-        link.addEventListener('click', function(e) {
+    // Add event listeners for main tab clicks
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
             const target = this.getAttribute('data-bs-target');
-            if (target) {
-                const tabId = target.replace('#', '');
-                activateTab(tabId);
-                
-                // Update hint text for the clicked tab
-                updateHintText(tabId);
+            if (!target) return;
+            
+            const tabId = target.replace('#', '');
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+                pane.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate clicked tab
+            const selectedPane = document.getElementById(tabId);
+            if (selectedPane) {
+                selectedPane.classList.add('active', 'show');
+                selectedPane.style.display = 'block';
             }
+            
+            this.classList.add('active');
+            
+            // Update hint text for the clicked tab
+            updateHintText(tabId);
         });
     });
 
@@ -190,11 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
                 if (document.body.classList.contains('domain-entered')) {
-                    e.stopPropagation();
                     switchDNSResolver(tabId);
                     updateDNSResults(dnsResults);
                 }
