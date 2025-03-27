@@ -150,10 +150,16 @@ function switchDNSResolver(resolver) {
 
 // Add event listeners for tab clicks
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize with no active tab
+    // Initialize with no active tab and hide all tab content
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
         pane.style.display = 'none';
+        
+        // Hide all content sections within tab panes until domain is entered
+        const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section');
+        contentSections.forEach(section => {
+            section.style.display = 'none';
+        });
     });
     
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -200,6 +206,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedPane) {
                 selectedPane.classList.add('active', 'show');
                 selectedPane.style.display = 'block';
+                
+                // Show/hide content sections based on whether domain is entered
+                const contentSections = selectedPane.querySelectorAll('.content-section, .live-preview, .results-section');
+                contentSections.forEach(section => {
+                    section.style.display = document.body.classList.contains('domain-entered') ? 'block' : 'none';
+                });
             }
             
             this.classList.add('active');
@@ -1121,121 +1133,19 @@ function updateSecurityResults(data) {
     securityTab.innerHTML = html;
 }
 
-function checkDomain(updateType = 'all') {
-    const domain = document.getElementById('domain').value.trim();
-    
-    if (!domain) {
-        showAlert('Please enter a domain name', 'danger');
-        return Promise.reject('No domain provided');
-    }
-
-    // Show loading state
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.classList.remove('d-none');
-    }
-
-    // Show results containers if they exist
-    const resultTabs = document.getElementById('resultTabs');
-    const resultTabsContent = document.getElementById('resultTabsContent');
-    if (resultTabs) resultTabs.style.display = 'block';
-    if (resultTabsContent) resultTabsContent.style.display = 'block';
-    
-    // Add domain-entered class
-    document.body.classList.add('domain-entered');
-    
-    // Hide hint message
-    const hintMessage = document.getElementById('hint-message');
-    if (hintMessage) {
-        hintMessage.style.display = 'none';
-    }
-
-    // Get current active tab
-    const activeTab = document.querySelector('.tab-pane.active');
-    const isFirstCheck = !activeTab;
-
-    // Show appropriate elements based on active tab
-    if (activeTab) {
-        if (activeTab.id === 'dns') {
-            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
-            dnsElements.forEach(element => {
-                element.style.display = 'block';
-            });
-        } else if (activeTab.id === 'iframe') {
-            const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
-            iframeElements.forEach(element => {
-                element.style.display = 'block';
+// Update the checkDomain function to show content sections when domain is entered
+const originalCheckDomain = window.checkDomain;
+window.checkDomain = function(updateType = 'all') {
+    return originalCheckDomain(updateType).then(data => {
+        if (data && !data.error) {
+            // Show all content sections when domain check is successful
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section');
+                contentSections.forEach(section => {
+                    section.style.display = 'block';
+                });
             });
         }
-    }
-
-    // Check if we have cached results for the requested update type
-    if (updateType !== 'all' && tabResults[updateType]) {
-        updateTabResults(updateType, tabResults[updateType]);
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
-        return Promise.resolve({ [updateType]: tabResults[updateType] });
-    }
-
-    // Make API request
-    return fetch('/api/check', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            domain: domain,
-            update_type: updateType
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Received data:', data);
-        
-        if (data.error) {
-            showAlert(data.error, 'danger');
-            return data;
-        }
-
-        // Update all tabs if updateType is 'all'
-        if (updateType === 'all') {
-            Object.entries(data).forEach(([endpoint, endpointData]) => {
-                if (endpointData && typeof endpointData === 'object') {
-                    updateTabResults(endpoint, endpointData);
-                }
-            });
-        } else if (data[updateType]) {
-            // Update specific tab
-            updateTabResults(updateType, data[updateType]);
-        }
-
-        // If this is the first check, activate the DNS tab after loading
-        if (isFirstCheck) {
-            activateTab('dns');
-            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
-            if (dnsTab) {
-                dnsTab.classList.add('active');
-            }
-            initializeDNSTab();
-        }
-
         return data;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert(error.message, 'danger');
-        throw error;
-    })
-    .finally(() => {
-        // Hide loading state
-        if (loadingElement) {
-            loadingElement.classList.add('d-none');
-        }
     });
-}
+};
