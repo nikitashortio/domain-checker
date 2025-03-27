@@ -114,6 +114,16 @@ function activateTab(tabId) {
                     cloudflarePane.style.display = 'block';
                 }
             }
+        } else {
+            // If a resolver is already active, make sure its pane is visible
+            const target = activeResolver.getAttribute('data-bs-target');
+            if (target) {
+                const resolverPane = document.getElementById(target.replace('#', ''));
+                if (resolverPane) {
+                    resolverPane.classList.add('active', 'show');
+                    resolverPane.style.display = 'block';
+                }
+            }
         }
 
         // If we have DNS results, update them
@@ -1202,12 +1212,35 @@ function checkDomain(updateType = 'all') {
     const isFirstCheck = !activeTab;
 
     // Show appropriate elements based on active tab
-    if (activeTab) {
-        if (activeTab.id === 'dns') {
-            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
-            dnsElements.forEach(element => {
-                element.style.display = 'block';
-            });
+    if (activeTab && activeTab.id === 'dns') {
+        // Show DNS controls and resolvers
+        const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+        dnsElements.forEach(element => {
+            element.style.display = 'block';
+        });
+
+        // Get the currently active resolver or default to cloudflare
+        let activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
+        if (!activeResolver) {
+            activeResolver = document.querySelector('[data-bs-target="#cloudflare"]');
+            if (activeResolver) {
+                activeResolver.classList.add('active');
+                const cloudflarePane = document.getElementById('cloudflare');
+                if (cloudflarePane) {
+                    cloudflarePane.classList.add('active', 'show');
+                    cloudflarePane.style.display = 'block';
+                }
+            }
+        } else {
+            // If a resolver is already active, make sure its pane is visible
+            const target = activeResolver.getAttribute('data-bs-target');
+            if (target) {
+                const resolverPane = document.getElementById(target.replace('#', ''));
+                if (resolverPane) {
+                    resolverPane.classList.add('active', 'show');
+                    resolverPane.style.display = 'block';
+                }
+            }
         }
     }
 
@@ -1264,7 +1297,6 @@ function checkDomain(updateType = 'all') {
             if (dnsTab) {
                 dnsTab.classList.add('active');
             }
-            initializeDNSTab();
         }
 
         // Show all content sections when domain check is successful
