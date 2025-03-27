@@ -1392,3 +1392,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Function to refresh DNS records
+function refreshDNS() {
+    const domain = document.getElementById('domain').value.trim();
+    if (!domain) {
+        showAlert('Please enter a domain name', 'danger');
+        return;
+    }
+
+    // Show loading state
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('d-none');
+    }
+
+    // Clear the DNS results cache
+    dnsResults = null;
+
+    // Make API request specifically for DNS records
+    fetch('/api/check', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            domain: domain,
+            update_type: 'dns',
+            dns_record_type: document.getElementById('dnsRecordType').value
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            showAlert(data.error, 'danger');
+            return;
+        }
+        if (data.dns) {
+            // Update DNS results
+            updateDNSResults(data.dns);
+        }
+    })
+    .catch(error => {
+        showAlert('Error refreshing DNS records: ' + error.message, 'danger');
+    })
+    .finally(() => {
+        // Hide loading state
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+    });
+}
