@@ -886,7 +886,7 @@ async function checkDomain() {
         const endpoint = getEndpointForTab(tabId);
         
         // Make the API request
-        const response = await fetch(`/api/check/${endpoint}`, {
+        const response = await fetch(`/api/check_${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
