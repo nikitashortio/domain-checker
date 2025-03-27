@@ -172,27 +172,31 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dnsNavPills) dnsNavPills.style.display = 'none';
 
     // Add event listeners for tab clicks
-    document.querySelectorAll('.nav-link').forEach(link => {
+    document.querySelectorAll('.nav-link[data-bs-toggle="tab"]').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
+                activateTab(tabId);
                 
-                // Check if this is a DNS resolver tab
-                const isDNSResolverTab = ['cloudflare', 'google', 'quad9'].some(resolver => 
-                    target.includes(resolver)
-                );
-                
-                if (isDNSResolverTab) {
-                    // Only allow DNS resolver tab switching if domain has been entered
-                    if (document.body.classList.contains('domain-entered')) {
-                        e.stopPropagation(); // Prevent event bubbling for DNS resolver tabs
-                        switchDNSResolver(tabId);
-                        updateDNSResults(dnsResults); // Re-render DNS results
-                    }
-                } else {
-                    activateTab(tabId);
+                // Update hint text for the clicked tab
+                updateHintText(tabId);
+            }
+        });
+    });
+
+    // Add event listeners for DNS resolver tab clicks
+    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-bs-target');
+            if (target) {
+                const tabId = target.replace('#', '');
+                if (document.body.classList.contains('domain-entered')) {
+                    e.stopPropagation();
+                    switchDNSResolver(tabId);
+                    updateDNSResults(dnsResults);
                 }
             }
         });
