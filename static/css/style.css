@@ -101,7 +101,8 @@ body {
 .dns-resolvers,
 .dns-table-wrapper,
 .dns-table,
-#dns .nav-pills {
+#dns .nav-pills,
+#dnsResolvers {
     display: none !important;
 }
 
@@ -111,7 +112,8 @@ body.domain-entered #dns.active.show .dns-resolvers,
 body.domain-entered #dns.active.show .dns-table-wrapper,
 body.domain-entered #dns.active.show .dns-table,
 body.domain-entered #dns.active.show .nav-pills {
-    display: block !important;
+    display: flex !important;
+    flex-direction: row !important;
 }
 
 /* Remove any domain-entered class styles that affect DNS visibility */
@@ -842,7 +844,7 @@ body.domain-entered #dns.active.show .nav-pills {
 
 /* DNS Pills Navigation */
 .nav-pills {
-    display: flex !important;
+    display: none !important; /* Hide by default */
     flex-direction: row !important;
     justify-content: flex-start !important;
     gap: 0.5rem;
@@ -878,21 +880,27 @@ body.domain-entered #dns.active.show .nav-pills {
     color: white;
 }
 
-/* Override any display:none styles for DNS resolvers */
-body.domain-entered #dns.active.show .nav-pills {
-    display: flex !important;
-    flex-direction: row !important;
+/* Ensure table wrapper is block when displayed */
+body.domain-entered #dns.active.show .dns-table-wrapper {
+    display: block !important;
 }
 
-/* Remove any conflicting styles */
-#dns .nav-pills {
-    display: flex !important;
-    flex-direction: row !important;
+/* Hide all content sections until domain is entered */
+.content-section,
+.live-preview,
+.results-section,
+.iframe-info,
+.iframe-test-container {
+    display: none !important;
 }
 
-.domain-entered #dns .nav-pills {
-    display: flex !important;
-    flex-direction: row !important;
+/* Show content sections only when domain is entered */
+body.domain-entered .content-section,
+body.domain-entered .live-preview,
+body.domain-entered .results-section,
+body.domain-entered .iframe-info,
+body.domain-entered .iframe-test-container {
+    display: block !important;
 }
 
 .loading {
