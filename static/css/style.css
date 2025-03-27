@@ -819,41 +819,38 @@ body.domain-entered #dns.active.show .nav-pills {
 
 .step-status {
     display: inline-block;
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 1rem;
     border-radius: 0.375rem;
     font-family: monospace;
-    font-size: 0.9rem;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Status colors */
+/* Status colors with improved contrast */
 .step-status.text-success {
-    color: #0d6832;
-    background-color: #e6f4ea;
-    border-color: #c3e6cb;
-    font-weight: 500;
+    color: #0a5239;
+    background-color: #d1fadf;
+    border-color: #a6f4c5;
 }
 
 .step-status.text-warning {
-    color: #664d03;
-    background-color: #fff4d4;
-    border-color: #ffeeba;
-    font-weight: 500;
+    color: #854d0e;
+    background-color: #fef3c7;
+    border-color: #fde68a;
 }
 
 .step-status.text-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-    font-weight: 500;
+    color: #991b1b;
+    background-color: #fee2e2;
+    border-color: #fecaca;
 }
 
 .step-status.text-dark {
-    color: #1a1e21;
-    background-color: #e2e3e5;
-    border-color: #d3d6d8;
-    font-weight: 500;
+    color: #1f2937;
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
 }
 
 .redirect-summary {
