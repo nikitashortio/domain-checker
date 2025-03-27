@@ -501,32 +501,29 @@ function updateDNSResults(data) {
         let tableContent = '';
         let hasRecords = false;
         
-        // Filter records for the current resolver
-        const resolverRecords = data.filter(record => record.resolver === resolver);
-        
-        if (resolverRecords.length > 0) {
+        // Get records for the current resolver
+        const resolverData = data[resolver];
+        if (resolverData && typeof resolverData === 'object') {
             hasRecords = true;
-            // Group records by type
-            const recordsByType = {};
-            resolverRecords.forEach(record => {
-                const type = record.type || 'Unknown';
-                if (!recordsByType[type]) {
-                    recordsByType[type] = [];
-                }
-                recordsByType[type].push(record);
-            });
             
             // Create table rows for each record type
-            Object.entries(recordsByType).forEach(([type, records]) => {
+            Object.entries(resolverData).forEach(([type, records]) => {
+                if (!Array.isArray(records)) {
+                    console.log(`Invalid records format for type ${type}:`, records);
+                    return;
+                }
+                
                 if (selectedType === 'all' || type.toLowerCase() === selectedType.toLowerCase()) {
                     records.forEach(record => {
-                        tableContent += `
-                            <tr data-type="${type}">
-                                <td>${type}</td>
-                                <td>${domain}</td>
-                                <td>${record.value || ''}</td>
-                                <td>${record.ttl || ''}</td>
-                            </tr>`;
+                        if (record && record.value) {
+                            tableContent += `
+                                <tr data-type="${type}">
+                                    <td>${type.toUpperCase()}</td>
+                                    <td>${domain}</td>
+                                    <td>${record.value}</td>
+                                    <td>${record.ttl || ''}</td>
+                                </tr>`;
+                        }
                     });
                 }
             });
