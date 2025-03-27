@@ -335,7 +335,7 @@ body.domain-entered #dns.active.show .nav-pills {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    max-width: 1000px;
+    max-width: 800px;
 }
 
 .dns-table-wrapper table {
@@ -374,7 +374,7 @@ body.domain-entered #dns.active.show .nav-pills {
 /* Record type column */
 .dns-table-wrapper td:first-child,
 .dns-table-wrapper th:first-child {
-    width: 80px;
+    width: 60px;
 }
 
 .dns-table-wrapper td:first-child {
@@ -417,14 +417,14 @@ body.domain-entered #dns.active.show .nav-pills {
 /* Domain column */
 .dns-table-wrapper td:nth-child(2),
 .dns-table-wrapper th:nth-child(2) {
-    width: 140px;
+    width: 120px;
 }
 
 /* Value column - let it take the remaining space but with max-width */
 .dns-table-wrapper td:nth-child(3),
 .dns-table-wrapper th:nth-child(3) {
     width: auto;
-    max-width: 600px;
+    max-width: 500px;
 }
 
 /* Value column content */
@@ -438,7 +438,7 @@ body.domain-entered #dns.active.show .nav-pills {
 /* TTL column */
 .dns-table-wrapper td:last-child,
 .dns-table-wrapper th:last-child {
-    width: 80px;
+    width: 60px;
     text-align: right;
 }
 
