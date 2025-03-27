@@ -1264,3 +1264,52 @@ body:not(.domain-entered) .hint-text {
     border-bottom: 2px solid #000;
     color: #000;
 }
+
+/* Security tab styles */
+#security {
+    display: none !important;
+}
+
+#security.active.show {
+    display: block !important;
+}
+
+/* Hide VirusTotal report by default */
+.virustotal-report,
+.security-info,
+#security .results-container {
+    display: none !important;
+}
+
+/* Only show VirusTotal report when domain is entered AND security tab is active */
+body.domain-entered #security.active.show .virustotal-report,
+body.domain-entered #security.active.show .security-info,
+body.domain-entered #security.active.show .results-container {
+    display: block !important;
+}
+
+/* Override any other styles that might show security elements */
+#security:not(.active) .virustotal-report,
+#security:not(.active) .security-info,
+#security:not(.active) .results-container {
+    display: none !important;
+}
+
+/* Remove any domain-entered class styles that affect security visibility */
+.domain-entered .virustotal-report,
+.domain-entered .security-info,
+.domain-entered #security .results-container {
+    display: none !important;
+}
+
+/* Ensure security elements are hidden in all other tabs */
+#dns .virustotal-report,
+#whois .virustotal-report,
+#ssl .virustotal-report,
+#availability .virustotal-report,
+#referrer .virustotal-report,
+#iframe .virustotal-report,
+#redirects .virustotal-report,
+#headers .virustotal-report {
+    display: none !important;
+}

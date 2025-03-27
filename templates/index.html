@@ -198,22 +198,17 @@
             <div class="tab-pane fade" id="headers" role="tabpanel" aria-labelledby="headers-tab">
                 <div id="headers-results"></div>
             </div>
-            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-                <div class="results-container">
-                    <div class="security-info">
-                        <div class="security-section">
-                            <h3>VirusTotal Report</h3>
-                            <div class="security-score">
-                                <div class="vt-score">
-                                    <span class="score-value">-</span>
-                                    <span class="score-label">/100</span>
-                                </div>
-                                <div class="vt-details">
-                                    <div>Status: Checking...</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="tab-pane fade" id="security" role="tabpanel">
+                <div class="hint-text">
+                    <i class="bi bi-shield-lock"></i>
+                    Enter a domain name to check security status
+                </div>
+                <div class="virustotal-report">
+                    <h3>VirusTotal Report</h3>
+                    <div class="vt-score">-/100</div>
+                    <div class="vt-status">Status: Checking...</div>
+                    <div class="vt-details"></div>
+                    <div class="scan-results"></div>
                 </div>
             </div>
         </div>
