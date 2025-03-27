@@ -102,26 +102,39 @@ function activateTab(tabId) {
             element.style.display = 'block';
         });
 
-        // Get the currently active resolver or default to cloudflare
+        // Get the currently active resolver
         const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
-        const currentResolver = activeResolver ? activeResolver.getAttribute('data-bs-target').replace('#', '') : 'cloudflare';
         
-        // If no resolver is active, activate cloudflare
+        // If no resolver is active, activate cloudflare and show its results
         if (!activeResolver) {
             const cloudflareTab = document.querySelector('[data-bs-target="#cloudflare"]');
             if (cloudflareTab) {
                 cloudflareTab.classList.add('active');
+                const cloudflarePane = document.getElementById('cloudflare');
+                if (cloudflarePane) {
+                    cloudflarePane.classList.add('active', 'show');
+                    cloudflarePane.style.display = 'block';
+                }
+                // Update DNS results with the cached data
+                if (dnsResults) {
+                    updateDNSResults(dnsResults);
+                }
             }
-            const cloudflarePane = document.getElementById('cloudflare');
-            if (cloudflarePane) {
-                cloudflarePane.classList.add('active', 'show');
-                cloudflarePane.style.display = 'block';
+        } else {
+            // If a resolver is already active, just update its results
+            const target = activeResolver.getAttribute('data-bs-target');
+            if (target) {
+                const tabId = target.replace('#', '');
+                const tabPane = document.getElementById(tabId);
+                if (tabPane) {
+                    tabPane.classList.add('active', 'show');
+                    tabPane.style.display = 'block';
+                }
+                // Update DNS results with the cached data
+                if (dnsResults) {
+                    updateDNSResults(dnsResults);
+                }
             }
-        }
-
-        // Update DNS results if we have them
-        if (dnsResults[currentResolver]) {
-            updateDNSResults(dnsResults);
         }
     }
 }
