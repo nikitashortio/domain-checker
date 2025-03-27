@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pane.style.display = 'none';
         
         // Hide all content sections within tab panes until domain is entered
-        const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section');
+        const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
         contentSections.forEach(section => {
             section.style.display = 'none';
         });
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedPane.style.display = 'block';
                 
                 // Show/hide content sections based on whether domain is entered
-                const contentSections = selectedPane.querySelectorAll('.content-section, .live-preview, .results-section');
+                const contentSections = selectedPane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
                 contentSections.forEach(section => {
                     section.style.display = document.body.classList.contains('domain-entered') ? 'block' : 'none';
                 });
@@ -1140,7 +1140,7 @@ window.checkDomain = function(updateType = 'all') {
         if (data && !data.error) {
             // Show all content sections when domain check is successful
             document.querySelectorAll('.tab-pane').forEach(pane => {
-                const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section');
+                const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
                 contentSections.forEach(section => {
                     section.style.display = 'block';
                 });
