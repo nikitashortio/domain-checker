@@ -72,61 +72,31 @@ function clearRedirectResults() {
 
 // Add this function to handle tab activation
 function activateTab(tabId) {
-    // Hide all main tab panes
-    document.querySelectorAll('#resultTabsContent > .tab-pane').forEach(pane => {
+    // Remove active class from all tabs and panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
         pane.style.display = 'none';
     });
     
-    // Remove active class from all main nav links
-    document.querySelectorAll('#resultTabs .nav-link').forEach(link => {
+    document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
     
-    // Show the selected tab pane
+    // Activate the selected tab and pane
     const selectedPane = document.getElementById(tabId);
+    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
         selectedPane.style.display = 'block';
     }
     
-    // Add active class to the clicked nav link
-    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
     if (selectedLink) {
         selectedLink.classList.add('active');
     }
 
-    // Get the domain value
-    const domain = document.getElementById('domain').value.trim();
-    const hasDomain = domain.length > 0;
-
-    // Handle DNS tab elements
-    if (tabId === 'dns') {
-        const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
-        dnsElements.forEach(element => {
-            element.style.display = hasDomain ? 'block' : 'none';
-        });
-    }
-
-    // Handle iframe tab elements
-    if (tabId === 'iframe') {
-        const iframeElements = document.querySelectorAll('#iframe .results-container, #iframe .iframe-test-container');
-        iframeElements.forEach(element => {
-            element.style.display = hasDomain ? 'block' : 'none';
-        });
-    }
-
-    // Update hint message visibility
-    const hintMessage = document.getElementById('hint-message');
-    if (hintMessage) {
-        hintMessage.style.display = hasDomain ? 'none' : 'block';
-        updateHintText(tabId);
-    }
-
-    // Remove domain-entered class if no domain
-    if (!hasDomain) {
-        document.body.classList.remove('domain-entered');
-    }
+    // Update hint text for the selected tab
+    updateHintText(tabId);
 }
 
 // Add this function to handle DNS resolver tab activation
@@ -223,18 +193,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 } else {
                     activateTab(tabId);
-                    
-                    // Only check domain for iframe tab if we have a domain and no cached results
-                    if (tabId === 'iframe') {
-                        const domain = document.getElementById('domain').value.trim();
-                        if (domain && !tabResults.iframe) {
-                            checkDomain('iframe');
-                        }
-                    }
                 }
             }
         });
     });
+
+    // Set initial hint text based on the default active tab
+    const activeTab = document.querySelector('.tab-pane.active');
+    if (activeTab) {
+        updateHintText(activeTab.id);
+    } else {
+        updateHintText('dns'); // Default to DNS if no tab is active
+    }
 
     // Initialize tab change handler
     const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
@@ -400,20 +370,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateHintText(tabId) {
     const hintMessage = document.getElementById('hint-message');
+    if (!hintMessage) return;
+
     const messages = {
-        'dns-tab': 'DNS records',
-        'whois-tab': 'WHOIS information',
-        'ssl-tab': 'SSL certificate',
-        'availability-tab': 'domain availability',
-        'referrer-tab': 'referrer policy',
-        'iframe-tab': 'iframe policy',
-        'redirects-tab': 'redirect chain',
-        'headers-tab': 'HTTP headers',
-        'security-tab': 'security status'
+        'dns': 'Enter a domain name to check DNS records',
+        'whois': 'Enter a domain name to check WHOIS information',
+        'ssl': 'Enter a domain name to check SSL certificate',
+        'availability': 'Enter a domain name to check domain availability',
+        'referrer': 'Enter a domain name to check referrer policy',
+        'iframe': 'Enter a domain name to check iframe policy',
+        'redirects': 'Enter a domain name to check redirect chain',
+        'headers': 'Enter a domain name to check HTTP headers',
+        'security': 'Enter a domain name to check security status'
     };
     
-    const selectedText = messages[tabId] || 'DNS records';
-    hintMessage.textContent = `Enter a domain name to check ${selectedText}`;
+    hintMessage.textContent = messages[tabId] || messages['dns'];
 }
 
 // Helper function for date formatting and validation
