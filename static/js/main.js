@@ -171,54 +171,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dnsTableWrapper) dnsTableWrapper.style.display = 'none';
     if (dnsNavPills) dnsNavPills.style.display = 'none';
 
-    // Add event listeners for main tab clicks
+    // Add event listeners for tab switching
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const target = this.getAttribute('data-bs-target');
-            if (!target) return;
-            
-            const tabId = target.replace('#', '');
-            
-            // Remove active class from all tabs and panes
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('active', 'show');
-                pane.style.display = 'none';
-            });
-            
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Activate clicked tab
-            const selectedPane = document.getElementById(tabId);
-            if (selectedPane) {
-                selectedPane.classList.add('active', 'show');
-                selectedPane.style.display = 'block';
-            }
-            
-            this.classList.add('active');
-            
-            // Update hint text for the clicked tab
-            updateHintText(tabId);
+        tab.addEventListener('shown.bs.tab', function(event) {
+            // Get the newly activated tab's ID
+            const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
+            updateHintText(targetId);
         });
     });
 
     // Add event listeners for DNS resolver tab clicks
     document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            if (!document.body.classList.contains('domain-entered')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
             
             const target = this.getAttribute('data-bs-target');
             if (target) {
                 const tabId = target.replace('#', '');
-                if (document.body.classList.contains('domain-entered')) {
-                    switchDNSResolver(tabId);
-                    updateDNSResults(dnsResults);
-                }
+                switchDNSResolver(tabId);
+                updateDNSResults(dnsResults);
             }
         });
     });
@@ -379,8 +354,14 @@ function updateHintText(tabId) {
         'headers': 'Enter a domain name to check HTTP headers',
         'security': 'Enter a domain name to check security status'
     };
-    
-    hintMessage.textContent = messages[tabId] || messages['dns'];
+
+    const message = messages[tabId];
+    if (message && !document.body.classList.contains('domain-entered')) {
+        hintMessage.style.display = 'block';
+        hintMessage.textContent = message;
+    } else {
+        hintMessage.style.display = 'none';
+    }
 }
 
 // Helper function for date formatting and validation
