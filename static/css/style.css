@@ -799,7 +799,7 @@ body.domain-entered #dns.active.show .nav-pills {
 }
 
 .step-url a {
-    color: #0d6efd;
+    color: #212529;
     text-decoration: none;
     font-family: monospace;
     font-size: 1rem;
@@ -813,7 +813,7 @@ body.domain-entered #dns.active.show .nav-pills {
 }
 
 .step-url a:hover {
-    color: #0a58ca;
+    color: #000;
     background-color: #e9ecef;
 }
 
