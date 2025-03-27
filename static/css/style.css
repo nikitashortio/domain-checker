@@ -241,6 +241,22 @@ body {
 }
 
 /* DNS Records */
+.dns-controls,
+.dns-resolvers,
+.dns-table-wrapper {
+    display: none !important;
+}
+
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper {
+    display: flex !important;
+}
+
+.domain-entered .dns-table-wrapper {
+    display: block !important;
+}
+
 .dns-section {
     display: grid;
     grid-template-columns: 120px 1fr;
@@ -266,54 +282,12 @@ body {
 }
 
 /* Update DNS controls and resolvers visibility */
-.dns-controls,
-.dns-resolvers {
-    display: none;
-}
-
-.domain-entered .dns-controls,
-.domain-entered .dns-resolvers {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-/* Add styles for DNS tab content */
-#dns {
-    display: none;
-}
-
-#dns.active.show {
-    display: block;
-}
-
-/* Add styles for DNS resolver tabs */
-#dns .tab-pane {
-    display: none;
-}
-
-#dns .tab-pane.active.show {
-    display: block;
-}
-
-/* Ensure DNS table wrapper is visible */
-.dns-table-wrapper {
-    display: none;
-}
-
-.domain-entered .dns-table-wrapper {
-    display: block;
-}
-
-/* Add styles for DNS resolver pills */
 #dns .nav-pills {
-    display: none;
+    display: none !important;
 }
 
 .domain-entered #dns .nav-pills {
-    display: flex;
+    display: flex !important;
     gap: 10px;
     margin-bottom: 15px;
 }

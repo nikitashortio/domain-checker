@@ -190,6 +190,17 @@ document.addEventListener('DOMContentLoaded', function() {
         link.classList.remove('active');
     });
 
+    // Hide DNS controls initially
+    const dnsControls = document.querySelector('.dns-controls');
+    const dnsResolvers = document.querySelector('.dns-resolvers');
+    const dnsTableWrapper = document.querySelector('.dns-table-wrapper');
+    const dnsNavPills = document.querySelector('#dns .nav-pills');
+    
+    if (dnsControls) dnsControls.style.display = 'none';
+    if (dnsResolvers) dnsResolvers.style.display = 'none';
+    if (dnsTableWrapper) dnsTableWrapper.style.display = 'none';
+    if (dnsNavPills) dnsNavPills.style.display = 'none';
+
     // Add event listeners for tab clicks
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -204,9 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
                 
                 if (isDNSResolverTab) {
-                    e.stopPropagation(); // Prevent event bubbling for DNS resolver tabs
-                    switchDNSResolver(tabId);
-                    updateDNSResults(dnsResults); // Re-render DNS results
+                    // Only allow DNS resolver tab switching if domain has been entered
+                    if (document.body.classList.contains('domain-entered')) {
+                        e.stopPropagation(); // Prevent event bubbling for DNS resolver tabs
+                        switchDNSResolver(tabId);
+                        updateDNSResults(dnsResults); // Re-render DNS results
+                    }
                 } else {
                     activateTab(tabId);
                     
