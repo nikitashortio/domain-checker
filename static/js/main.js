@@ -500,49 +500,51 @@ function updateDNSResults(data) {
     // Store the new results
     dnsResults = data;
     
+    // Create a map to store records by resolver
+    const recordsByResolver = {
+        cloudflare: [],
+        google: [],
+        quad9: []
+    };
+    
+    // Organize records by resolver
+    Object.entries(data).forEach(([type, records]) => {
+        if (Array.isArray(records) && records.length > 0) {
+            records.forEach(record => {
+                if (record.resolver && recordsByResolver.hasOwnProperty(record.resolver)) {
+                    recordsByResolver[record.resolver].push({
+                        type: type.toUpperCase(),
+                        value: record.value,
+                        ttl: record.ttl
+                    });
+                }
+            });
+        }
+    });
+    
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
         console.log(`Processing resolver: ${resolver}`);
         let tableContent = '';
-        let hasRecords = false;
+        const resolverRecords = recordsByResolver[resolver];
         
-        // Get records for the current resolver
-        const resolverData = data[resolver];
-        console.log(`Resolver ${resolver} data:`, resolverData);
-        
-        if (resolverData && typeof resolverData === 'object') {
-            // Create table rows for each record type
-            Object.entries(resolverData).forEach(([type, records]) => {
-                console.log(`Processing record type: ${type}`, records);
-                // Skip if records is not an array or is empty
-                if (!Array.isArray(records) || records.length === 0) {
-                    console.log(`Skipping invalid or empty records for type ${type}`);
-                    return;
-                }
-                
-                if (selectedType === 'all' || type.toLowerCase() === selectedType.toLowerCase()) {
-                    records.forEach(record => {
-                        if (record) {
-                            console.log(`Adding record:`, record);
-                            hasRecords = true;
-                            tableContent += `
-                                <tr data-type="${type}">
-                                    <td>${type.toUpperCase()}</td>
-                                    <td>${domain}</td>
-                                    <td>${record.value || record}</td>
-                                    <td>${record.ttl || ''}</td>
-                                </tr>`;
-                        }
-                    });
+        if (resolverRecords.length > 0) {
+            resolverRecords.forEach(record => {
+                if (selectedType === 'all' || record.type.toLowerCase() === selectedType.toLowerCase()) {
+                    tableContent += `
+                        <tr data-type="${record.type}">
+                            <td>${record.type}</td>
+                            <td>${domain}</td>
+                            <td>${record.value}</td>
+                            <td>${record.ttl || ''}</td>
+                        </tr>`;
                 }
             });
-        } else {
-            console.log(`No valid data for resolver ${resolver}`);
         }
 
         const container = document.getElementById(`dns-results-${resolver}`);
         if (container) {
-            if (hasRecords) {
+            if (tableContent) {
                 console.log(`Setting table content for ${resolver}`);
                 container.innerHTML = tableContent;
             } else {
