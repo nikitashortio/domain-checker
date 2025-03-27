@@ -82,21 +82,48 @@ function activateTab(tabId) {
         link.classList.remove('active');
     });
     
-    // Activate the selected tab and pane
+    // Activate the selected tab
     const selectedPane = document.getElementById(tabId);
-    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    const selectedTab = document.querySelector(`[data-bs-target="#${tabId}"]`);
     
     if (selectedPane) {
         selectedPane.classList.add('active', 'show');
         selectedPane.style.display = 'block';
     }
-    
-    if (selectedLink) {
-        selectedLink.classList.add('active');
+    if (selectedTab) {
+        selectedTab.classList.add('active');
     }
 
-    // Update hint text for the selected tab
-    updateHintText(tabId);
+    // If switching to DNS tab and domain is entered, ensure records are displayed
+    if (tabId === 'dns' && document.body.classList.contains('domain-entered')) {
+        // Show DNS controls and resolvers
+        const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+        dnsElements.forEach(element => {
+            element.style.display = 'block';
+        });
+
+        // Get the currently active resolver or default to cloudflare
+        const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
+        const currentResolver = activeResolver ? activeResolver.getAttribute('data-bs-target').replace('#', '') : 'cloudflare';
+        
+        // If no resolver is active, activate cloudflare
+        if (!activeResolver) {
+            const cloudflareTab = document.querySelector('[data-bs-target="#cloudflare"]');
+            if (cloudflareTab) {
+                cloudflareTab.classList.add('active');
+            }
+            const cloudflarePane = document.getElementById('cloudflare');
+            if (cloudflarePane) {
+                cloudflarePane.classList.add('active', 'show');
+                cloudflarePane.style.display = 'block';
+            }
+        }
+
+        // Update DNS results if we have them
+        if (dnsResults[currentResolver]) {
+            updateDNSResults(dnsResults);
+        }
+    }
 }
 
 // Add this function to handle DNS resolver tab activation
@@ -130,22 +157,33 @@ function activateDnsTab(tabId) {
 }
 
 // Add this function to handle DNS resolver tab switching
-function switchDNSResolver(resolver) {
-    // Remove active class from all tabs
-    document.querySelectorAll('.dns-resolver-tabs .tab').forEach(tab => {
-        tab.classList.remove('active');
+function switchDNSResolver(resolverId) {
+    // Remove active class from all resolver tabs and panes
+    document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+        pane.classList.remove('active', 'show');
+        pane.style.display = 'none';
     });
     
-    // Add active class to selected tab
-    const selectedTab = document.querySelector(`.dns-resolver-tabs .tab[data-resolver="${resolver}"]`);
+    document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Activate the selected resolver tab
+    const selectedPane = document.getElementById(resolverId);
+    const selectedTab = document.querySelector(`[data-bs-target="#${resolverId}"]`);
+    
+    if (selectedPane) {
+        selectedPane.classList.add('active', 'show');
+        selectedPane.style.display = 'block';
+    }
     if (selectedTab) {
         selectedTab.classList.add('active');
-        selectedTab.style.color = '#000';
-        selectedTab.style.borderBottom = '2px solid #000';
     }
-    
-    // Update DNS results with the cached data
-    updateDNSResults(dnsResults);
+
+    // Update DNS results if we have them
+    if (dnsResults[resolverId]) {
+        updateDNSResults(dnsResults);
+    }
 }
 
 // Add event listeners for tab clicks
@@ -1251,6 +1289,24 @@ function checkDomain(updateType = 'all') {
         // Hide loading state
         if (loadingElement) {
             loadingElement.classList.add('d-none');
+        }
+    });
+}
+
+// Add event listener for DNS record type selector
+const dnsRecordType = document.getElementById('dnsRecordType');
+if (dnsRecordType) {
+    dnsRecordType.addEventListener('change', function() {
+        const domain = document.getElementById('domain').value.trim();
+        if (domain) {
+            // Get the currently active resolver
+            const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
+            const currentResolver = activeResolver ? activeResolver.getAttribute('data-bs-target').replace('#', '') : 'cloudflare';
+            
+            // Update the display for the current resolver
+            if (dnsResults[currentResolver]) {
+                updateDNSResults(dnsResults);
+            }
         }
     });
 }
