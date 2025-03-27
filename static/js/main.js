@@ -297,17 +297,17 @@ function getDaysLeft(dateStr) {
 
 function getEndpointForTab(tabId) {
     const endpoints = {
-        'dns-tab': 'dns',
-        'whois-tab': 'whois',
-        'ssl-tab': 'ssl',
-        'availability-tab': 'availability',
-        'referrer-tab': 'referrer',
-        'iframe-tab': 'iframe',
-        'redirects-tab': 'redirects',
-        'headers-tab': 'headers',
-        'security-tab': 'security'
+        'dns': 'dns',
+        'whois': 'whois',
+        'ssl': 'ssl',
+        'availability': 'availability',
+        'referrer': 'referrer',
+        'iframe': 'iframe',
+        'redirects': 'redirects',
+        'headers': 'headers',
+        'security': 'security'
     };
-    return endpoints[tabId] || 'all';
+    return endpoints[tabId] || 'dns'; // Default to 'dns' if tabId not found
 }
 
 function updateTabResults(endpoint, data) {
