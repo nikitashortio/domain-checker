@@ -483,26 +483,33 @@ function updateDNSResults(data) {
         return;
     }
     
+    // Store the new results
+    dnsResults = data;
+    
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
         let tableContent = '';
         let hasRecords = false;
         
         recordTypes.forEach(type => {
-            if (!data[resolver] || !Array.isArray(data[resolver][type])) {
-                console.log(`No ${type} records found for ${resolver}`);
+            const records = data[type];
+            // Skip if records is not an array or is undefined
+            if (!Array.isArray(records)) {
+                console.log(`No records found for type ${type}`);
                 return;
             }
             
-            data[resolver][type].forEach(record => {
-                hasRecords = true;
-                tableContent += `
-                    <tr data-type="${type.toUpperCase()}">
-                        <td>${type.toUpperCase()}</td>
-                        <td>${domain}</td>
-                        <td>${record.value || ''}</td>
-                        <td>${record.ttl || ''}</td>
-                    </tr>`;
+            records.forEach(record => {
+                if (record && record.resolver === resolver) {
+                    hasRecords = true;
+                    tableContent += `
+                        <tr data-type="${type.toUpperCase()}">
+                            <td>${type.toUpperCase()}</td>
+                            <td>${domain}</td>
+                            <td>${record.value || ''}</td>
+                            <td>${record.ttl || ''}</td>
+                        </tr>`;
+                }
             });
         });
 
