@@ -332,70 +332,106 @@ body.domain-entered #dns.active.show .nav-pills {
     width: 100%;
     margin-bottom: 1rem;
     background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
-.dns-table {
+.dns-table-wrapper table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin: 0;
-    background-color: #fff;
 }
 
-.dns-table thead {
-    background-color: #f8f9fa;
-}
-
-.dns-table th,
-.dns-table td {
-    padding: 0.75rem;
+.dns-table-wrapper th,
+.dns-table-wrapper td {
+    padding: 12px 16px;
     text-align: left;
-    border: 1px solid #dee2e6;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
 }
 
-.dns-table th {
+.dns-table-wrapper th {
+    background-color: #f8f9fa;
     font-weight: 600;
     color: #495057;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
 }
 
-/* Define column widths */
-.dns-table th:nth-child(1), /* Type */
-.dns-table td:nth-child(1) {
-    width: 10%;
+.dns-table-wrapper tr:last-child td {
+    border-bottom: none;
 }
 
-.dns-table th:nth-child(2), /* Name */
-.dns-table td:nth-child(2) {
-    width: 20%;
-}
-
-.dns-table th:nth-child(3), /* Value */
-.dns-table td:nth-child(3) {
-    width: 60%;
-}
-
-.dns-table th:nth-child(4), /* TTL */
-.dns-table td:nth-child(4) {
-    width: 10%;
-}
-
-.dns-table tbody tr:hover {
+.dns-table-wrapper tr:hover {
     background-color: #f8f9fa;
 }
 
-/* Add styles for no records message */
-.no-records {
-    text-align: center;
-    color: #6c757d;
-    padding: 1rem;
+/* Record type column */
+.dns-table-wrapper td:first-child {
+    font-weight: 600;
+    color: #0d6efd;
+    width: 100px;
 }
 
-/* Add styles for error messages */
-.error-row td {
-    padding: 1rem;
-    color: #dc3545;
+/* Domain column */
+.dns-table-wrapper td:nth-child(2) {
+    color: #495057;
+    width: 200px;
+}
+
+/* Value column */
+.dns-table-wrapper td:nth-child(3) {
+    font-family: monospace;
+    color: #212529;
+    word-break: break-all;
+}
+
+/* TTL column */
+.dns-table-wrapper td:last-child {
+    color: #6c757d;
+    width: 100px;
+    text-align: right;
+}
+
+/* No records message styling */
+.dns-table-wrapper tr.no-records td {
+    text-align: center;
+    color: #6c757d;
+    padding: 24px;
+    font-style: italic;
+}
+
+/* Error message styling */
+.dns-table-wrapper tr.error-row td {
+    padding: 16px;
+}
+
+.dns-table-wrapper .alert-danger {
+    margin: 0;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dns-table-wrapper th,
+    .dns-table-wrapper td {
+        padding: 8px 12px;
+    }
+    
+    .dns-table-wrapper td:first-child {
+        width: 80px;
+    }
+    
+    .dns-table-wrapper td:nth-child(2) {
+        width: 160px;
+    }
+    
+    .dns-table-wrapper td:last-child {
+        width: 80px;
+    }
 }
 
 /* WHOIS Info */
