@@ -504,23 +504,22 @@ function updateDNSResults(data) {
         // Get records for the current resolver
         const resolverData = data[resolver];
         if (resolverData && typeof resolverData === 'object') {
-            hasRecords = true;
-            
             // Create table rows for each record type
             Object.entries(resolverData).forEach(([type, records]) => {
-                if (!Array.isArray(records)) {
-                    console.log(`Invalid records format for type ${type}:`, records);
+                // Skip if records is not an array or is empty
+                if (!Array.isArray(records) || records.length === 0) {
                     return;
                 }
                 
                 if (selectedType === 'all' || type.toLowerCase() === selectedType.toLowerCase()) {
                     records.forEach(record => {
-                        if (record && record.value) {
+                        if (record) {
+                            hasRecords = true;
                             tableContent += `
                                 <tr data-type="${type}">
                                     <td>${type.toUpperCase()}</td>
                                     <td>${domain}</td>
-                                    <td>${record.value}</td>
+                                    <td>${record.value || record}</td>
                                     <td>${record.ttl || ''}</td>
                                 </tr>`;
                         }
@@ -531,7 +530,7 @@ function updateDNSResults(data) {
 
         const container = document.getElementById(`dns-results-${resolver}`);
         if (container) {
-            if (hasRecords && tableContent) {
+            if (hasRecords) {
                 container.innerHTML = tableContent;
             } else {
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
