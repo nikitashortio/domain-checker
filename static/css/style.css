@@ -96,7 +96,7 @@ body {
     display: block !important;
 }
 
-/* DNS Controls and Resolvers */
+/* Hide DNS elements by default */
 .dns-controls,
 .dns-resolvers,
 .dns-table-wrapper,
@@ -105,16 +105,48 @@ body {
     display: none !important;
 }
 
-/* Only show DNS elements when DNS tab is active */
-#dns.active.show .dns-controls,
-#dns.active.show .dns-resolvers,
-#dns.active.show .dns-table-wrapper,
-#dns.active.show .dns-table,
-#dns.active.show .nav-pills {
+/* Only show DNS elements when both domain is entered AND DNS tab is active */
+body.domain-entered #dns.active.show .dns-controls,
+body.domain-entered #dns.active.show .dns-resolvers,
+body.domain-entered #dns.active.show .dns-table-wrapper,
+body.domain-entered #dns.active.show .dns-table,
+body.domain-entered #dns.active.show .nav-pills {
     display: block !important;
 }
 
-/* Hide DNS elements in all other tabs */
+/* Remove any domain-entered class styles that affect DNS visibility */
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers,
+.domain-entered .dns-table-wrapper,
+.domain-entered .dns-table,
+.domain-entered #dns .nav-pills {
+    display: none !important;
+}
+
+/* Override any other styles that might show DNS elements */
+#dns:not(.active) .dns-controls,
+#dns:not(.active) .dns-resolvers,
+#dns:not(.active) .dns-table-wrapper,
+#dns:not(.active) .dns-table,
+#dns:not(.active) .nav-pills {
+    display: none !important;
+}
+
+/* Remove any flex display overrides */
+.domain-entered .dns-controls,
+.domain-entered .dns-resolvers {
+    display: none !important;
+}
+
+.domain-entered #dns.active.show .dns-controls {
+    display: flex !important;
+}
+
+.domain-entered #dns.active.show .dns-resolvers {
+    display: flex !important;
+}
+
+/* Ensure DNS elements are hidden in all other tabs */
 #iframe .dns-controls,
 #iframe .dns-resolvers,
 #iframe .dns-table-wrapper,
@@ -158,24 +190,6 @@ body {
     display: none !important;
 }
 
-/* Remove all domain-entered class styles that affect DNS visibility */
-.domain-entered .dns-controls,
-.domain-entered .dns-resolvers,
-.domain-entered .dns-table-wrapper,
-.domain-entered .dns-table,
-.domain-entered #dns .nav-pills {
-    display: none !important;
-}
-
-/* Ensure DNS elements are only visible when DNS tab is active */
-#dns.active.show .dns-controls,
-#dns.active.show .dns-resolvers,
-#dns.active.show .dns-table-wrapper,
-#dns.active.show .dns-table,
-#dns.active.show .nav-pills {
-    display: block !important;
-}
-
 /* Iframe tab specific styles */
 #iframe .tab-content {
     display: block;
@@ -202,29 +216,6 @@ body {
 /* Remove any flex properties that might affect layout */
 .tab-pane {
     width: 100%;
-}
-
-/* Override any domain-entered class styles for DNS visibility */
-.domain-entered #dns.active.show .dns-controls,
-.domain-entered #dns.active.show .dns-resolvers,
-.domain-entered #dns.active.show .dns-table-wrapper,
-.domain-entered #dns.active.show .dns-table,
-.domain-entered #dns.active.show .nav-pills {
-    display: block !important;
-}
-
-/* Ensure DNS elements are hidden in iframe tab */
-#iframe .dns-controls,
-#iframe .dns-resolvers,
-#iframe .dns-table-wrapper,
-#iframe .nav-pills,
-#iframe .dns-table {
-    display: none !important;
-}
-
-/* Remove any margin from tab panes */
-.tab-pane {
-    margin: 0;
 }
 
 /* Add padding only to specific content areas */
@@ -1128,82 +1119,6 @@ body {
     font-size: 2rem;
     margin-bottom: 1rem;
     color: #adb5bd;
-}
-
-/* DNS Records Tab */
-#dns {
-    display: none;
-}
-
-#dns.active.show {
-    display: block !important;
-}
-
-/* Hide DNS elements by default and when no domain is entered */
-.dns-controls,
-.dns-resolvers,
-.dns-table-wrapper,
-.dns-table,
-#dns .nav-pills {
-    display: none !important;
-}
-
-/* Only show DNS elements when DNS tab is active AND domain is entered */
-body.domain-entered #dns.active.show .dns-controls,
-body.domain-entered #dns.active.show .dns-resolvers,
-body.domain-entered #dns.active.show .dns-table-wrapper,
-body.domain-entered #dns.active.show .dns-table,
-body.domain-entered #dns.active.show .nav-pills {
-    display: block !important;
-}
-
-/* Hide DNS elements in all other tabs */
-#iframe .dns-controls,
-#iframe .dns-resolvers,
-#iframe .dns-table-wrapper,
-#iframe .nav-pills,
-#iframe .dns-table,
-#whois .dns-controls,
-#whois .dns-resolvers,
-#whois .dns-table-wrapper,
-#whois .nav-pills,
-#whois .dns-table,
-#ssl .dns-controls,
-#ssl .dns-resolvers,
-#ssl .dns-table-wrapper,
-#ssl .nav-pills,
-#ssl .dns-table,
-#availability .dns-controls,
-#availability .dns-resolvers,
-#availability .dns-table-wrapper,
-#availability .nav-pills,
-#availability .dns-table,
-#referrer .dns-controls,
-#referrer .dns-resolvers,
-#referrer .dns-table-wrapper,
-#referrer .nav-pills,
-#referrer .dns-table,
-#redirects .dns-controls,
-#redirects .dns-resolvers,
-#redirects .dns-table-wrapper,
-#redirects .nav-pills,
-#redirects .dns-table,
-#headers .dns-controls,
-#headers .dns-resolvers,
-#headers .dns-table-wrapper,
-#headers .nav-pills,
-#headers .dns-table,
-#security .dns-controls,
-#security .dns-resolvers,
-#security .dns-table-wrapper,
-#security .nav-pills,
-#security .dns-table {
-    display: none !important;
-}
-
-/* Hide hint text when domain is entered */
-body.domain-entered .hint-text {
-    display: none !important;
 }
 
 /* Show hint text when no domain is entered */
