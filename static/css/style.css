@@ -144,6 +144,34 @@ body.domain-entered #dns.active.show .nav-pills {
 
 .domain-entered #dns.active.show .dns-resolvers {
     display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 0.5rem;
+}
+
+.domain-entered #dns.active.show .dns-resolvers .nav-item {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.domain-entered #dns.active.show .dns-resolvers .nav-link {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+}
+
+.domain-entered #dns.active.show .dns-resolvers .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.domain-entered #dns.active.show .dns-resolvers .nav-link.active {
+    background-color: #212529;
+    border-color: #212529;
+    color: #fff;
 }
 
 /* Ensure DNS elements are hidden in all other tabs */
