@@ -71,9 +71,17 @@ def get_whois_info(domain):
         # Set a default timeout for the entire function
         socket.setdefaulttimeout(10)
         
-        w = whois.whois(domain)
+        try:
+            w = whois.whois(domain)
+        except whois.parser.PywhoisError as e:
+            error_msg = str(e).lower()
+            if "not found" in error_msg:
+                return {'error': 'Information not available for this domain'}
+            return {'error': f'WHOIS lookup failed: {str(e)}'}
+        
+        # Check if domain exists
         if not w.domain_name:
-            return {'error': 'Domain not found in WHOIS database'}
+            return {'error': 'Information not available for this domain'}
         
         # Convert datetime objects to strings and clean status values
         info = {}
@@ -204,7 +212,7 @@ def check_availability(domain):
                 # Domain might exist but WHOIS info is not available
                 return {
                     'available': None,
-                    'message': 'Unable to determine availability - WHOIS information not available for this domain',
+                    'message': 'Information not available for this domain',
                     'creation_date': None,
                     'expiration_date': None,
                     'registrar': None,
@@ -219,8 +227,8 @@ def check_availability(domain):
         # Check if domain exists
         if not w.domain_name:
             return {
-                'available': True,
-                'message': 'Domain is available for registration',
+                'available': None,
+                'message': 'Information not available for this domain',
                 'creation_date': None,
                 'expiration_date': None,
                 'registrar': None,
