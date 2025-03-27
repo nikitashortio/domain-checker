@@ -1313,3 +1313,22 @@ body.domain-entered #security.active.show .results-container {
 #headers .virustotal-report {
     display: none !important;
 }
+
+.input-group {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+    border-right: none;
+}
+
+.input-group .btn {
+    border-left: none;
+}
