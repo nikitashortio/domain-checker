@@ -102,42 +102,23 @@ function activateTab(tabId) {
             element.style.display = 'block';
         });
 
-        // Get the currently active resolver
+        // Get the currently active resolver or default to cloudflare
         let activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
-        
-        // If no resolver is active, activate cloudflare
         if (!activeResolver) {
-            const cloudflareTab = document.querySelector('[data-bs-target="#cloudflare"]');
-            if (cloudflareTab) {
-                cloudflareTab.classList.add('active');
-                activeResolver = cloudflareTab;
+            activeResolver = document.querySelector('[data-bs-target="#cloudflare"]');
+            if (activeResolver) {
+                activeResolver.classList.add('active');
+                const cloudflarePane = document.getElementById('cloudflare');
+                if (cloudflarePane) {
+                    cloudflarePane.classList.add('active', 'show');
+                    cloudflarePane.style.display = 'block';
+                }
             }
         }
 
-        // Get the resolver ID and activate its pane
-        if (activeResolver) {
-            const target = activeResolver.getAttribute('data-bs-target');
-            if (target) {
-                const resolverId = target.replace('#', '');
-                const resolverPane = document.getElementById(resolverId);
-                
-                // Remove active class from all resolver panes
-                document.querySelectorAll('#dns .tab-pane').forEach(pane => {
-                    pane.classList.remove('active', 'show');
-                    pane.style.display = 'none';
-                });
-                
-                // Activate the resolver pane
-                if (resolverPane) {
-                    resolverPane.classList.add('active', 'show');
-                    resolverPane.style.display = 'block';
-                }
-                
-                // Update DNS results if we have them
-                if (dnsResults) {
-                    updateDNSResults(dnsResults);
-                }
-            }
+        // If we have DNS results, update them
+        if (dnsResults) {
+            updateDNSResults(dnsResults);
         }
     }
 }
@@ -197,7 +178,7 @@ function switchDNSResolver(resolverId) {
     }
 
     // Update DNS results if we have them
-    if (dnsResults[resolverId]) {
+    if (dnsResults) {
         updateDNSResults(dnsResults);
     }
 }
