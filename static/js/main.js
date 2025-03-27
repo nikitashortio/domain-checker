@@ -770,14 +770,28 @@ function updateAvailabilityResults(data) {
         return;
     }
     
+    let statusClass = '';
+    let statusIcon = '';
+    
+    if (data.available === true) {
+        statusClass = 'available';
+        statusIcon = 'fa-check-circle';
+    } else if (data.available === false) {
+        statusClass = 'unavailable';
+        statusIcon = 'fa-times-circle';
+    } else {
+        statusClass = 'unknown';
+        statusIcon = 'fa-question-circle';
+    }
+    
     let html = `
         <div class="availability-info">
-            <div class="availability-status ${data.available ? 'available' : 'unavailable'}">
-                <i class="fas ${data.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                ${data.message || (data.available ? 'Domain is available for registration' : 'Domain is already registered')}
+            <div class="availability-status ${statusClass}">
+                <i class="fas ${statusIcon}"></i>
+                ${data.message || 'Domain availability status unknown'}
             </div>`;
     
-    if (!data.available) {
+    if (data.available === false) {
         html += `
             <div class="availability-details">
                 <div class="detail-row">
