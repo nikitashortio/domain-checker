@@ -452,7 +452,6 @@ function updateDNSResults(data) {
     console.log('Starting updateDNSResults with data:', data);
     const resolvers = ['cloudflare', 'google', 'quad9'];
     const selectedType = document.getElementById('dnsRecordType').value;
-    const recordTypes = selectedType === 'all' ? ['a', 'aaaa', 'mx', 'ns', 'txt', 'cname', 'soa'] : [selectedType.toLowerCase()];
     let domain = document.getElementById('domain').value.trim();
     
     // Extract root domain from URL
@@ -502,31 +501,40 @@ function updateDNSResults(data) {
         let tableContent = '';
         let hasRecords = false;
         
-        recordTypes.forEach(type => {
-            const records = data[type];
-            // Skip if records is not an array or is undefined
-            if (!Array.isArray(records)) {
-                console.log(`No records found for type ${type}`);
-                return;
-            }
+        // Filter records for the current resolver
+        const resolverRecords = data.filter(record => record.resolver === resolver);
+        
+        if (resolverRecords.length > 0) {
+            hasRecords = true;
+            // Group records by type
+            const recordsByType = {};
+            resolverRecords.forEach(record => {
+                const type = record.type || 'Unknown';
+                if (!recordsByType[type]) {
+                    recordsByType[type] = [];
+                }
+                recordsByType[type].push(record);
+            });
             
-            records.forEach(record => {
-                if (record && record.resolver === resolver) {
-                    hasRecords = true;
-                    tableContent += `
-                        <tr data-type="${type.toUpperCase()}">
-                            <td>${type.toUpperCase()}</td>
-                            <td>${domain}</td>
-                            <td>${record.value || ''}</td>
-                            <td>${record.ttl || ''}</td>
-                        </tr>`;
+            // Create table rows for each record type
+            Object.entries(recordsByType).forEach(([type, records]) => {
+                if (selectedType === 'all' || type.toLowerCase() === selectedType.toLowerCase()) {
+                    records.forEach(record => {
+                        tableContent += `
+                            <tr data-type="${type}">
+                                <td>${type}</td>
+                                <td>${domain}</td>
+                                <td>${record.value || ''}</td>
+                                <td>${record.ttl || ''}</td>
+                            </tr>`;
+                    });
                 }
             });
-        });
+        }
 
         const container = document.getElementById(`dns-results-${resolver}`);
         if (container) {
-            if (hasRecords) {
+            if (hasRecords && tableContent) {
                 container.innerHTML = tableContent;
             } else {
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
