@@ -465,7 +465,7 @@ function updateDNSResults(data) {
     if (dnsTab) dnsTab.style.display = 'block';
     
     // Handle error case
-    if (data.error) {
+    if (!data || data.error) {
         resolvers.forEach(resolver => {
             const container = document.getElementById(`dns-results-${resolver}`);
             if (container) {
@@ -474,7 +474,7 @@ function updateDNSResults(data) {
                         <td colspan="4">
                             <div class="alert alert-danger">
                                 <i class="fas fa-exclamation-circle"></i>
-                                ${data.error}
+                                ${data?.error || 'No DNS data available'}
                             </div>
                         </td>
                     </tr>`;
@@ -483,33 +483,26 @@ function updateDNSResults(data) {
         return;
     }
     
-    // Store the new results
-    dnsResults = data;
-    
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
         let tableContent = '';
         let hasRecords = false;
         
         recordTypes.forEach(type => {
-            const records = data[type];
-            // Skip if records is not an array or is undefined
-            if (!Array.isArray(records)) {
-                console.log(`No records found for type ${type}`);
+            if (!data[resolver] || !Array.isArray(data[resolver][type])) {
+                console.log(`No ${type} records found for ${resolver}`);
                 return;
             }
             
-            records.forEach(record => {
-                if (record && record.resolver === resolver) {
-                    hasRecords = true;
-                    tableContent += `
-                        <tr data-type="${type.toUpperCase()}">
-                            <td>${type.toUpperCase()}</td>
-                            <td>${domain}</td>
-                            <td>${record.value || ''}</td>
-                            <td>${record.ttl || ''}</td>
-                        </tr>`;
-                }
+            data[resolver][type].forEach(record => {
+                hasRecords = true;
+                tableContent += `
+                    <tr data-type="${type.toUpperCase()}">
+                        <td>${type.toUpperCase()}</td>
+                        <td>${domain}</td>
+                        <td>${record.value || ''}</td>
+                        <td>${record.ttl || ''}</td>
+                    </tr>`;
             });
         });
 
@@ -1294,19 +1287,14 @@ function checkDomain(updateType = 'all') {
 }
 
 // Add event listener for DNS record type selector
-const dnsRecordType = document.getElementById('dnsRecordType');
-if (dnsRecordType) {
-    dnsRecordType.addEventListener('change', function() {
-        const domain = document.getElementById('domain').value.trim();
-        if (domain) {
-            // Get the currently active resolver
-            const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
-            const currentResolver = activeResolver ? activeResolver.getAttribute('data-bs-target').replace('#', '') : 'cloudflare';
-            
-            // Update the display for the current resolver
-            if (dnsResults[currentResolver]) {
+document.addEventListener('DOMContentLoaded', function() {
+    const dnsRecordType = document.getElementById('dnsRecordType');
+    if (dnsRecordType) {
+        dnsRecordType.addEventListener('change', function() {
+            const domain = document.getElementById('domain').value.trim();
+            if (domain && dnsResults) {
                 updateDNSResults(dnsResults);
             }
-        }
-    });
-}
+        });
+    }
+});
