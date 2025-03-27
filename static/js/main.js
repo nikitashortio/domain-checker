@@ -103,34 +103,37 @@ function activateTab(tabId) {
         });
 
         // Get the currently active resolver
-        const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
+        let activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
         
-        // If no resolver is active, activate cloudflare and show its results
+        // If no resolver is active, activate cloudflare
         if (!activeResolver) {
             const cloudflareTab = document.querySelector('[data-bs-target="#cloudflare"]');
             if (cloudflareTab) {
                 cloudflareTab.classList.add('active');
-                const cloudflarePane = document.getElementById('cloudflare');
-                if (cloudflarePane) {
-                    cloudflarePane.classList.add('active', 'show');
-                    cloudflarePane.style.display = 'block';
-                }
-                // Update DNS results with the cached data
-                if (dnsResults) {
-                    updateDNSResults(dnsResults);
-                }
+                activeResolver = cloudflareTab;
             }
-        } else {
-            // If a resolver is already active, just update its results
+        }
+
+        // Get the resolver ID and activate its pane
+        if (activeResolver) {
             const target = activeResolver.getAttribute('data-bs-target');
             if (target) {
-                const tabId = target.replace('#', '');
-                const tabPane = document.getElementById(tabId);
-                if (tabPane) {
-                    tabPane.classList.add('active', 'show');
-                    tabPane.style.display = 'block';
+                const resolverId = target.replace('#', '');
+                const resolverPane = document.getElementById(resolverId);
+                
+                // Remove active class from all resolver panes
+                document.querySelectorAll('#dns .tab-pane').forEach(pane => {
+                    pane.classList.remove('active', 'show');
+                    pane.style.display = 'none';
+                });
+                
+                // Activate the resolver pane
+                if (resolverPane) {
+                    resolverPane.classList.add('active', 'show');
+                    resolverPane.style.display = 'block';
                 }
-                // Update DNS results with the cached data
+                
+                // Update DNS results if we have them
                 if (dnsResults) {
                     updateDNSResults(dnsResults);
                 }
