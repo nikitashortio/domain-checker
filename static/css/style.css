@@ -829,21 +829,31 @@ body.domain-entered #dns.active.show .nav-pills {
 
 /* Status colors */
 .step-status.text-success {
-    color: #198754;
-    background-color: #d1e7dd;
-    border-color: #badbcc;
+    color: #0d6832;
+    background-color: #e6f4ea;
+    border-color: #c3e6cb;
+    font-weight: 500;
 }
 
 .step-status.text-warning {
-    color: #997404;
-    background-color: #fff3cd;
-    border-color: #ffe69c;
+    color: #664d03;
+    background-color: #fff4d4;
+    border-color: #ffeeba;
+    font-weight: 500;
 }
 
 .step-status.text-danger {
-    color: #842029;
+    color: #721c24;
     background-color: #f8d7da;
     border-color: #f5c2c7;
+    font-weight: 500;
+}
+
+.step-status.text-dark {
+    color: #1a1e21;
+    background-color: #e2e3e5;
+    border-color: #d3d6d8;
+    font-weight: 500;
 }
 
 .redirect-summary {
