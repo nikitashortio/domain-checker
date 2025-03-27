@@ -1302,7 +1302,7 @@ body:not(.domain-entered) .hint-text {
     display: block !important;
 }
 
-/* Hide VirusTotal report by default */
+/* Hide VirusTotal report - by default */
 .virustotal-report,
 .security-info,
 #security .results-container {
