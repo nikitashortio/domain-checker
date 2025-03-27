@@ -994,9 +994,25 @@ function updateRedirectsResults(data) {
             html += `
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
-                    No redirects found
+                    No redirects found for this URL
+                </div>
+                <div class="redirect-step">
+                    <div class="step-number">1</div>
+                    <div class="step-details">
+                        <div class="step-url">
+                            <strong>Direct Access URL</strong>
+                            <a href="${data.final_url}" target="_blank">${data.final_url}</a>
+                        </div>
+                        <div class="step-status text-success">Status: 200 OK</div>
+                    </div>
                 </div>`;
         } else {
+            // Count actual redirects (3xx responses)
+            const redirectCount = data.redirect_chain.filter(step => {
+                const statusCode = parseInt(step.status.split(' ')[0]);
+                return statusCode >= 300 && statusCode < 400;
+            }).length;
+
             data.redirect_chain.forEach((step, index) => {
                 // Extract status code number
                 const statusCode = parseInt(step.status.split(' ')[0]);
@@ -1011,13 +1027,22 @@ function updateRedirectsResults(data) {
                 } else if (statusCode >= 500) {
                     statusClass = 'text-dark';     // black for 5xx
                 }
+
+                let stepLabel = '';
+                if (index === 0) {
+                    stepLabel = 'Initial URL';
+                } else if (index === data.redirect_chain.length - 1) {
+                    stepLabel = 'Final Destination';
+                } else {
+                    stepLabel = 'Redirects to';
+                }
                 
                 html += `
                     <div class="redirect-step">
                         <div class="step-number">${index + 1}</div>
                         <div class="step-details">
                             <div class="step-url">
-                                <strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong>
+                                <strong>${stepLabel}</strong>
                                 <a href="${step.url}" target="_blank">${step.url}</a>
                             </div>
                             <div class="step-status ${statusClass}">Status: ${step.status}</div>
@@ -1025,13 +1050,15 @@ function updateRedirectsResults(data) {
                     </div>`;
             });
 
-            html += `
-                <div class="redirect-summary">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        Found ${data.redirect_chain.length} redirect${data.redirect_chain.length === 1 ? '' : 's'} in the chain
-                    </div>
-                </div>`;
+            if (redirectCount > 0) {
+                html += `
+                    <div class="redirect-summary">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Found ${redirectCount} redirect${redirectCount === 1 ? '' : 's'} in the chain
+                        </div>
+                    </div>`;
+            }
         }
     }
     

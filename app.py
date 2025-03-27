@@ -359,14 +359,7 @@ def check_domain_redirects(domain):
         # Build redirect chain
         redirect_chain = []
         
-        # Add initial request
-        redirect_chain.append({
-            'url': domain,
-            'status': f"{response.status_code} {response.reason}",
-            'headers': dict(response.request.headers)
-        })
-        
-        # Add each redirect step
+        # Add redirects from history first
         for r in response.history:
             redirect_chain.append({
                 'url': r.url,
@@ -374,8 +367,8 @@ def check_domain_redirects(domain):
                 'headers': dict(r.headers)
             })
         
-        # Add final response
-        if response.history:
+        # Add final response only if there were redirects or if it's not a redirect status
+        if redirect_chain or response.status_code < 300 or response.status_code >= 400:
             redirect_chain.append({
                 'url': response.url,
                 'status': f"{response.status_code} {response.reason}",
