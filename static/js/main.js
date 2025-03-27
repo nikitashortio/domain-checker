@@ -128,31 +128,23 @@ function activateTab(tabId) {
 
 // Add this function to handle DNS resolver tab activation
 function activateDnsTab(tabId) {
-    // Get all DNS resolver tabs and panes
-    const dnsTabPanes = document.querySelectorAll('#dns .tab-pane');
-    const dnsNavLinks = document.querySelectorAll('#dns .nav-pills .nav-link');
-    
-    // Remove active class from all tabs and panes
-    dnsTabPanes.forEach(pane => {
-        pane.classList.remove('active', 'show');
-        pane.style.display = 'none';
+    // Remove active class from all resolver tabs
+    document.querySelectorAll('#dnsResolvers .nav-link').forEach(tab => {
+        tab.classList.remove('active');
+        const target = tab.getAttribute('data-bs-target');
+        if (target) {
+            document.querySelector(target).classList.remove('active', 'show');
+        }
     });
-    
-    dnsNavLinks.forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Activate the selected tab and pane
-    const selectedPane = document.getElementById(tabId);
-    const selectedLink = document.querySelector(`[data-bs-target="#${tabId}"]`);
-    
-    if (selectedPane) {
-        selectedPane.classList.add('active', 'show');
-        selectedPane.style.display = 'block';
-    }
-    
-    if (selectedLink) {
-        selectedLink.classList.add('active');
+
+    // Activate the selected tab
+    const selectedTab = document.querySelector(`[data-bs-target="#${tabId}"]`);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+        const targetPane = document.querySelector(`#${tabId}`);
+        if (targetPane) {
+            targetPane.classList.add('active', 'show');
+        }
     }
 }
 
@@ -291,6 +283,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set initial hint text based on the default active tab or DNS tab
     const activeTab = document.querySelector('.tab-pane.active');
     updateHintText(activeTab ? activeTab.id : 'dns');
+
+    // Add event listener for tab switching
+    document.querySelectorAll('.nav-link[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            const targetId = event.target.getAttribute('href') || event.target.getAttribute('data-bs-target');
+            const tabId = targetId.replace('#', '');
+            
+            // Update hint text
+            updateHintText(tabId);
+            
+            // If switching to DNS tab, ensure results are visible
+            if (tabId === 'dns' && dnsResults) {
+                // Find the active resolver tab or default to the first one
+                const activeResolverTab = document.querySelector('#dnsResolvers .nav-link.active');
+                if (activeResolverTab) {
+                    const target = activeResolverTab.getAttribute('data-bs-target');
+                    if (target) {
+                        const resolverId = target.replace('#', '');
+                        activateDnsTab(resolverId);
+                    }
+                } else {
+                    // If no active resolver tab, activate the first one
+                    const firstResolverTab = document.querySelector('#dnsResolvers .nav-link');
+                    if (firstResolverTab) {
+                        const target = firstResolverTab.getAttribute('data-bs-target');
+                        if (target) {
+                            const resolverId = target.replace('#', '');
+                            activateDnsTab(resolverId);
+                            // Activate the tab visually
+                            firstResolverTab.classList.add('active');
+                        }
+                    }
+                }
+            }
+        });
+    });
 });
 
 function updateHintText(tabId) {
