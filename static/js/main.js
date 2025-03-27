@@ -171,12 +171,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dnsTableWrapper) dnsTableWrapper.style.display = 'none';
     if (dnsNavPills) dnsNavPills.style.display = 'none';
 
-    // Add event listeners for tab switching
+    // Add event listeners for main tab clicks
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(event) {
-            // Get the newly activated tab's ID
-            const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
-            updateHintText(targetId);
+        // Remove Bootstrap's event listener
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
+        
+        // Add our own click handler
+        newTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-bs-target');
+            if (!target) return;
+            
+            const tabId = target.replace('#', '');
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+                pane.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate clicked tab
+            const selectedPane = document.getElementById(tabId);
+            if (selectedPane) {
+                selectedPane.classList.add('active', 'show');
+                selectedPane.style.display = 'block';
+            }
+            
+            this.classList.add('active');
+            
+            // Update hint text for the clicked tab
+            updateHintText(tabId);
         });
     });
 
@@ -198,145 +227,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Set initial hint text based on the default active tab
+    // Set initial hint text based on the default active tab or DNS tab
     const activeTab = document.querySelector('.tab-pane.active');
-    if (activeTab) {
-        updateHintText(activeTab.id);
-    } else {
-        updateHintText('dns'); // Default to DNS if no tab is active
-    }
-
-    // Remove the Bootstrap tab event handler that was causing conflicts
-    const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
-    tabElements.forEach(tab => {
-        const newTab = tab.cloneNode(true);
-        tab.parentNode.replaceChild(newTab, tab);
-    });
-
-    // Initialize tab change handler for iframe tab
-    const iframeTab = document.querySelector('[data-bs-target="#iframe"]');
-    if (iframeTab) {
-        const oldListener = iframeTab.getAttribute('data-listener');
-        if (oldListener) {
-            iframeTab.removeEventListener('shown.bs.tab', window[oldListener]);
-        }
-    }
-
-    // Update the checkDomain function to store results in cache
-    const originalCheckDomain = checkDomain;
-    window.checkDomain = function(updateType = 'all') {
-        return originalCheckDomain(updateType).then(data => {
-            if (data && !data.error) {
-                if (updateType === 'all') {
-                    Object.entries(data).forEach(([endpoint, endpointData]) => {
-                        if (endpointData && typeof endpointData === 'object') {
-                            tabResults[endpoint] = endpointData;
-                        }
-                    });
-                } else if (data[updateType]) {
-                    tabResults[updateType] = data[updateType];
-                }
-            }
-            return data;
-        });
-    };
-
-    // Add event listener for domain input changes
-    const domainInput = document.getElementById('domain');
-    if (domainInput) {
-        domainInput.addEventListener('input', function() {
-            const domain = this.value.trim();
-            
-            // Clear DNS results cache when domain changes
-            dnsResults = {
-                cloudflare: null,
-                google: null,
-                quad9: null
-            };
-
-            const activeTab = document.querySelector('.tab-pane.active');
-            if (activeTab && activeTab.id === 'redirects') {
-                // Clear redirects cache to force a fresh request
-                tabResults.redirects = null;
-                // Show loader
-                const loadingElement = document.getElementById('loading');
-                if (loadingElement) {
-                    loadingElement.classList.remove('d-none');
-                }
-                // Add a small delay to avoid too many requests while typing
-                clearTimeout(this.checkTimeout);
-                this.checkTimeout = setTimeout(() => {
-                    checkDomain('redirects');
-                }, 500);
-            }
-        });
-    }
-
-    // Add event listener for Enter key in domain input
-    domainInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            // Clear DNS results cache when Enter is pressed
-            dnsResults = {
-                cloudflare: null,
-                google: null,
-                quad9: null
-            };
-
-            const activeTab = document.querySelector('.tab-pane.active');
-            if (activeTab && activeTab.id === 'redirects') {
-                // Clear redirects cache to force a fresh request
-                tabResults.redirects = null;
-                // Show loader
-                const loadingElement = document.getElementById('loading');
-                if (loadingElement) {
-                    loadingElement.classList.remove('d-none');
-                }
-                checkDomain('redirects');
-            } else {
-                checkDomain();
-            }
-        }
-    });
-
-    // Add event listener for DNS record type selector
-    const dnsRecordType = document.getElementById('dnsRecordType');
-    if (dnsRecordType) {
-        dnsRecordType.addEventListener('change', function() {
-            const domain = document.getElementById('domain').value.trim();
-            if (domain) {
-                // Clear DNS results cache to force a fresh request
-                dnsResults = {
-                    cloudflare: null,
-                    google: null,
-                    quad9: null
-                };
-                checkDomain('dns');
-            }
-        });
-    }
-
-    // Add event listener for refresh button
-    const refreshButton = document.querySelector('.dns-controls button');
-    if (refreshButton) {
-        refreshButton.addEventListener('click', function() {
-            const domain = document.getElementById('domain').value.trim();
-            if (domain) {
-                // Clear stored results
-                dnsResults = {
-                    cloudflare: null,
-                    google: null,
-                    quad9: null
-                };
-                checkDomain('dns');
-            }
-        });
-    }
-
-    // Initialize DNS tables if there's a domain in the input
-    const initialDomain = domainInput.value.trim();
-    if (initialDomain) {
-        document.body.classList.add('domain-entered');
-    }
+    updateHintText(activeTab ? activeTab.id : 'dns');
 });
 
 function updateHintText(tabId) {
@@ -355,10 +248,9 @@ function updateHintText(tabId) {
         'security': 'Enter a domain name to check security status'
     };
 
-    const message = messages[tabId];
-    if (message && !document.body.classList.contains('domain-entered')) {
+    if (!document.body.classList.contains('domain-entered')) {
         hintMessage.style.display = 'block';
-        hintMessage.textContent = message;
+        hintMessage.textContent = messages[tabId] || messages['dns'];
     } else {
         hintMessage.style.display = 'none';
     }
