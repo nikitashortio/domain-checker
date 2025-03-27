@@ -1410,6 +1410,9 @@ function refreshDNS() {
     // Clear the DNS results cache
     dnsResults = null;
 
+    // Get the selected record type
+    const selectedType = document.getElementById('dnsRecordType').value;
+
     // Make API request specifically for DNS records
     fetch('/api/check', {
         method: 'POST',
@@ -1419,7 +1422,7 @@ function refreshDNS() {
         body: JSON.stringify({
             domain: domain,
             update_type: 'dns',
-            dns_record_type: document.getElementById('dnsRecordType').value
+            dns_record_type: selectedType
         })
     })
     .then(response => {
@@ -1434,8 +1437,16 @@ function refreshDNS() {
             return;
         }
         if (data.dns) {
+            // For specific record types, convert the response to match the expected format
+            if (selectedType !== 'all') {
+                dnsResults = {
+                    [selectedType.toLowerCase()]: data.dns
+                };
+            } else {
+                dnsResults = data.dns;
+            }
             // Update DNS results
-            updateDNSResults(data.dns);
+            updateDNSResults(dnsResults);
         }
     })
     .catch(error => {
