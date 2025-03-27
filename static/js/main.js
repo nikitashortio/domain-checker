@@ -206,43 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
         updateHintText('dns'); // Default to DNS if no tab is active
     }
 
-    // Initialize tab change handler
-    const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
-    tabs.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(event) {
-            updateHintText(event.target.id);
-            
-            const domain = document.getElementById('domain').value.trim();
-            if (!domain) return;
-
-            // Check if this is a DNS resolver tab switch
-            const isDNSResolverTab = ['cloudflare', 'google', 'quad9'].some(resolver => 
-                event.target.getAttribute('data-bs-target')?.includes(resolver)
-            );
-            
-            if (isDNSResolverTab) {
-                // For DNS resolver tabs, just update the UI from cache
-                updateDNSResults(dnsResults);
-            } else {
-                // For main tabs, check cache first
-                const endpoint = getEndpointForTab(event.target.id);
-                if (endpoint === 'dns') {
-                    // Always use cached results for DNS tab
-                    updateDNSResults(dnsResults);
-                } else if (endpoint === 'redirects') {
-                    // Always use cached results for redirects tab
-                    if (tabResults.redirects) {
-                        updateRedirectsResults(tabResults.redirects);
-                    }
-                } else if (endpoint !== 'all' && tabResults[endpoint]) {
-                    // Use cached results for other tabs without showing loader
-                    updateTabResults(endpoint, tabResults[endpoint]);
-                }
-            }
-        });
+    // Remove the Bootstrap tab event handler that was causing conflicts
+    const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabElements.forEach(tab => {
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
     });
 
-    // Remove the separate iframe tab event listener since we handle it in the main tab click handler
+    // Initialize tab change handler for iframe tab
     const iframeTab = document.querySelector('[data-bs-target="#iframe"]');
     if (iframeTab) {
         const oldListener = iframeTab.getAttribute('data-listener');
