@@ -1431,6 +1431,13 @@ body:not(.domain-entered) .hint-text {
     background-color: #fff;
     border-radius: 4px;
     margin-bottom: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.scan-result-item.flagged {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+    margin-left: -4px;
 }
 
 .scan-result-item:last-child {

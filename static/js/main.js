@@ -1231,8 +1231,19 @@ function updateSecurityResults(data) {
                 <div class="scan-results">
                     <h4>Scan Results</h4>`;
             
-            // Sort scanners alphabetically
-            const sortedScanners = Object.keys(virusTotal.scans).sort();
+            // Sort scanners by detection status (flagged first) and then alphabetically
+            const sortedScanners = Object.keys(virusTotal.scans).sort((a, b) => {
+                const resultA = virusTotal.scans[a];
+                const resultB = virusTotal.scans[b];
+                
+                // If one is detected and the other isn't, sort detected first
+                if (resultA.detected !== resultB.detected) {
+                    return resultB.detected - resultA.detected;
+                }
+                
+                // If both have the same detection status, sort alphabetically
+                return a.localeCompare(b);
+            });
             
             sortedScanners.forEach(scanner => {
                 const result = virusTotal.scans[scanner];
@@ -1240,7 +1251,7 @@ function updateSecurityResults(data) {
                 const resultIcon = result.detected ? 'fa-times-circle' : 'fa-check-circle';
                 
                 html += `
-                    <div class="scan-result-item">
+                    <div class="scan-result-item ${result.detected ? 'flagged' : ''}">
                         <div class="scanner-info">
                             <div class="scanner-name">${scanner}</div>
                             ${result.version ? `<div class="scanner-version">v${result.version}</div>` : ''}
