@@ -449,7 +449,7 @@ function initializeDNSTab() {
 }
 
 function updateDNSResults(data) {
-    console.log('Starting updateDNSResults with data:', data);
+    console.log('Starting updateDNSResults with detailed data:', JSON.stringify(data, null, 2));
     const resolvers = ['cloudflare', 'google', 'quad9'];
     const selectedType = document.getElementById('dnsRecordType').value;
     let domain = document.getElementById('domain').value.trim();
@@ -461,6 +461,9 @@ function updateDNSResults(data) {
         domain = domain.split('/')[0];
     }
     domain = domain.split('?')[0].split('#')[0].trim();
+    
+    console.log('Processing domain:', domain);
+    console.log('Selected record type:', selectedType);
     
     // Show DNS controls and resolvers
     const dnsControls = document.querySelector('.dns-controls');
@@ -476,6 +479,7 @@ function updateDNSResults(data) {
     
     // Handle error case
     if (!data || data.error) {
+        console.log('Error in DNS data:', data?.error || 'No DNS data available');
         resolvers.forEach(resolver => {
             const container = document.getElementById(`dns-results-${resolver}`);
             if (container) {
@@ -498,22 +502,28 @@ function updateDNSResults(data) {
     
     // Update the UI for each resolver
     resolvers.forEach(resolver => {
+        console.log(`Processing resolver: ${resolver}`);
         let tableContent = '';
         let hasRecords = false;
         
         // Get records for the current resolver
         const resolverData = data[resolver];
+        console.log(`Resolver ${resolver} data:`, resolverData);
+        
         if (resolverData && typeof resolverData === 'object') {
             // Create table rows for each record type
             Object.entries(resolverData).forEach(([type, records]) => {
+                console.log(`Processing record type: ${type}`, records);
                 // Skip if records is not an array or is empty
                 if (!Array.isArray(records) || records.length === 0) {
+                    console.log(`Skipping invalid or empty records for type ${type}`);
                     return;
                 }
                 
                 if (selectedType === 'all' || type.toLowerCase() === selectedType.toLowerCase()) {
                     records.forEach(record => {
                         if (record) {
+                            console.log(`Adding record:`, record);
                             hasRecords = true;
                             tableContent += `
                                 <tr data-type="${type}">
@@ -526,13 +536,17 @@ function updateDNSResults(data) {
                     });
                 }
             });
+        } else {
+            console.log(`No valid data for resolver ${resolver}`);
         }
 
         const container = document.getElementById(`dns-results-${resolver}`);
         if (container) {
             if (hasRecords) {
+                console.log(`Setting table content for ${resolver}`);
                 container.innerHTML = tableContent;
             } else {
+                console.log(`No records found for ${resolver}`);
                 container.innerHTML = `<tr class="no-records"><td colspan="4">No ${selectedType === 'all' ? '' : selectedType.toUpperCase() + ' '}records found</td></tr>`;
             }
         }
