@@ -99,14 +99,28 @@ function activateTab(tabId) {
         // Show DNS controls and resolvers
         const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
         dnsElements.forEach(element => {
-            if (element) element.style.display = 'block';
+            element.style.display = 'block';
         });
 
-        // Always switch to Cloudflare resolver when activating DNS tab
-        switchDNSResolver('cloudflare');
+        // Get the currently active resolver or default to cloudflare
+        const activeResolver = document.querySelector('#dns .nav-pills .nav-link.active');
+        const currentResolver = activeResolver ? activeResolver.getAttribute('data-bs-target').replace('#', '') : 'cloudflare';
         
-        // If we have DNS results stored, update the display
-        if (dnsResults) {
+        // If no resolver is active, activate cloudflare
+        if (!activeResolver) {
+            const cloudflareTab = document.querySelector('[data-bs-target="#cloudflare"]');
+            if (cloudflareTab) {
+                cloudflareTab.classList.add('active');
+            }
+            const cloudflarePane = document.getElementById('cloudflare');
+            if (cloudflarePane) {
+                cloudflarePane.classList.add('active', 'show');
+                cloudflarePane.style.display = 'block';
+            }
+        }
+
+        // Update DNS results if we have them
+        if (dnsResults[currentResolver]) {
             updateDNSResults(dnsResults);
         }
     }
@@ -167,7 +181,7 @@ function switchDNSResolver(resolverId) {
     }
 
     // Update DNS results if we have them
-    if (dnsResults) {
+    if (dnsResults[resolverId]) {
         updateDNSResults(dnsResults);
     }
 }
@@ -178,6 +192,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active', 'show');
         pane.style.display = 'none';
+        
+        // Hide all content sections within tab panes until domain is entered
+        const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
+        contentSections.forEach(section => {
+            section.style.display = 'none';
+        });
     });
     
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -197,15 +217,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners for main tab clicks
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('click', function(e) {
+        // Remove Bootstrap's event listener
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
+        
+        // Add our own click handler
+        newTab.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            
             const target = this.getAttribute('data-bs-target');
             if (!target) return;
             
             const tabId = target.replace('#', '');
-            activateTab(tabId);
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active', 'show');
+                pane.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate clicked tab
+            const selectedPane = document.getElementById(tabId);
+            if (selectedPane) {
+                selectedPane.classList.add('active', 'show');
+                selectedPane.style.display = 'block';
+                
+                // Show/hide content sections based on whether domain is entered
+                const contentSections = selectedPane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
+                contentSections.forEach(section => {
+                    section.style.display = document.body.classList.contains('domain-entered') ? 'block' : 'none';
+                });
+            }
+            
+            this.classList.add('active');
+            
+            // Update hint text for the clicked tab
             updateHintText(tabId);
         });
     });
@@ -213,10 +262,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for DNS resolver tab clicks
     document.querySelectorAll('#dns .nav-pills .nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
             if (!document.body.classList.contains('domain-entered')) {
+                e.preventDefault();
+                e.stopPropagation();
                 return;
             }
             
@@ -224,12 +272,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (target) {
                 const tabId = target.replace('#', '');
                 switchDNSResolver(tabId);
+                updateDNSResults(dnsResults);
             }
         });
     });
 
-    // Set initial hint text
-    updateHintText('dns');
+    // Set initial hint text based on the default active tab or DNS tab
+    const activeTab = document.querySelector('.tab-pane.active');
+    updateHintText(activeTab ? activeTab.id : 'dns');
 });
 
 function updateHintText(tabId) {
@@ -297,17 +347,17 @@ function getDaysLeft(dateStr) {
 
 function getEndpointForTab(tabId) {
     const endpoints = {
-        'dns': 'dns',
-        'whois': 'whois',
-        'ssl': 'ssl',
-        'availability': 'availability',
-        'referrer': 'referrer',
-        'iframe': 'iframe',
-        'redirects': 'redirects',
-        'headers': 'headers',
-        'security': 'security'
+        'dns-tab': 'dns',
+        'whois-tab': 'whois',
+        'ssl-tab': 'ssl',
+        'availability-tab': 'availability',
+        'referrer-tab': 'referrer',
+        'iframe-tab': 'iframe',
+        'redirects-tab': 'redirects',
+        'headers-tab': 'headers',
+        'security-tab': 'security'
     };
-    return endpoints[tabId] || 'dns'; // Default to 'dns' if tabId not found
+    return endpoints[tabId] || 'all';
 }
 
 function updateTabResults(endpoint, data) {
@@ -829,89 +879,429 @@ function updateIframeResults(data) {
             <strong>X-Frame-Options:</strong>
             <span>${headers['X-Frame-Options'] || 'Not Set'}</span>
         </div>`;
-
-    // Add CSP and Connection Status
-    html += `
-        <div class="iframe-field">
-            <strong>Content Security Policy frame-ancestors:</strong>
-            <span>${headers['Content-Security-Policy'] ? extractFrameAncestors(headers['Content-Security-Policy']) : 'Not Set'}</span>
-        </div>
-        <div class="iframe-field">
-            <strong>Connection Status:</strong>
-            <span>${connectionStatus}</span>
-        </div>
-    </div>`;
-
-    // Add live preview section
-    html += `
-        <div class="iframe-test-container">
-            <h4>Live Preview Test</h4>
-            <div class="iframe-preview">
-                <iframe src="${url}" sandbox="allow-same-origin allow-scripts"></iframe>
-            </div>
-        </div>`;
-
-    iframeResults.innerHTML = html;
-}
-
-function extractFrameAncestors(csp) {
-    const frameAncestorsMatch = csp.match(/frame-ancestors\s+([^;]+)/i);
-    return frameAncestorsMatch ? frameAncestorsMatch[1] : 'none';
-}
-
-async function checkDomain() {
-    const domainInput = document.getElementById('domain');
-    const domain = domainInput.value.trim();
     
-    if (!domain) {
-        showAlert('Please enter a domain name', 'warning');
+    // Add CSP frame-ancestors
+    html += `
+        <div class="iframe-field">
+            <strong>CSP frame-ancestors:</strong>
+            <span>${data.frame_ancestors_directive || 'Not Set'}</span>
+        </div>`;
+    
+    // Add Connection header
+    html += `
+        <div class="iframe-field">
+            <strong>Connection:</strong>
+            <span>${connectionStatus}</span>
+        </div>`;
+    
+    // Add iframe status message
+    html += `
+        <div class="iframe-field">
+            <strong>Status:</strong>
+            <span class="${data.allowed ? 'text-success' : 'text-danger'}">${data.message}</span>
+        </div>`;
+    
+    html += '</div>';
+    
+    iframeResults.innerHTML = html;
+
+    // Update the existing iframe preview
+    const previewContainer = document.querySelector('.iframe-test-container');
+    if (previewContainer) {
+        // Create and append iframe
+        const previewContent = `
+            <div class="preview-frame">
+                <iframe src="${url}" 
+                        style="width: 100%; height: 500px; border: 1px solid #dee2e6; border-radius: 4px;"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            </div>`;
+        
+        previewContainer.innerHTML = previewContent;
+    }
+}
+
+function updateRedirectsResults(data) {
+    const element = document.getElementById('redirects-results');
+    let html = '<div class="redirects-info">';
+    
+    if (data.error) {
+        html += `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                ${data.error}
+            </div>`;
+    } else {
+        if (!data.redirect_chain || data.redirect_chain.length === 0) {
+            html += `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No redirects found
+                </div>`;
+        } else {
+            data.redirect_chain.forEach((step, index) => {
+                // Extract status code number
+                const statusCode = parseInt(step.status.split(' ')[0]);
+                // Determine status color based on code
+                let statusClass = '';
+                if (statusCode >= 200 && statusCode < 300) {
+                    statusClass = 'text-success';  // green for 2xx
+                } else if (statusCode >= 300 && statusCode < 400) {
+                    statusClass = 'text-warning';  // yellow for 3xx
+                } else if (statusCode >= 400 && statusCode < 500) {
+                    statusClass = 'text-danger';   // red for 4xx
+                } else if (statusCode >= 500) {
+                    statusClass = 'text-dark';     // black for 5xx
+                }
+                
+                html += `
+                    <div class="redirect-step">
+                        <div class="step-number">${index + 1}</div>
+                        <div class="step-details">
+                            <div class="step-url">
+                                <strong>${index === 0 ? 'Initial URL' : index === data.redirect_chain.length - 1 ? 'Final URL' : 'Redirects to'}:</strong>
+                                <a href="${step.url}" target="_blank">${step.url}</a>
+                            </div>
+                            <div class="step-status ${statusClass}">Status: ${step.status}</div>
+                        </div>
+                    </div>`;
+            });
+
+            html += `
+                <div class="redirect-summary">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Found ${data.redirect_chain.length} redirect${data.redirect_chain.length === 1 ? '' : 's'} in the chain
+                    </div>
+                </div>`;
+        }
+    }
+    
+    html += '</div>';
+    element.innerHTML = html;
+}
+
+function updateHeadersResults(data) {
+    const element = document.getElementById('headers-results');
+    let html = '<div class="headers-info">';
+    
+    if (data.error) {
+        html += `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                ${data.error}
+            </div>`;
+    } else {
+        // Group headers by category
+        const categories = {
+            'Security Headers': [
+                'X-Frame-Options',
+                'X-Content-Type-Options',
+                'X-XSS-Protection',
+                'Content-Security-Policy',
+                'Strict-Transport-Security',
+                'Referrer-Policy'
+            ],
+            'Server Information': [
+                'Server',
+                'X-Powered-By',
+                'X-AspNet-Version',
+                'X-AspNetMvc-Version'
+            ],
+            'Content Information': [
+                'Content-Type',
+                'Content-Length',
+                'Content-Language',
+                'Content-Encoding'
+            ],
+            'Caching': [
+                'Cache-Control',
+                'Expires',
+                'Last-Modified',
+                'ETag'
+            ],
+            'Other Headers': [] // Will contain headers not in other categories
+        };
+        
+        // Sort headers into categories
+        const sortedHeaders = {};
+        Object.entries(data).forEach(([header, value]) => {
+            let categorized = false;
+            for (const [category, headerList] of Object.entries(categories)) {
+                if (headerList.includes(header)) {
+                    if (!sortedHeaders[category]) {
+                        sortedHeaders[category] = {};
+                    }
+                    sortedHeaders[category][header] = value;
+                    categorized = true;
+                    break;
+                }
+            }
+            if (!categorized) {
+                if (!sortedHeaders['Other Headers']) {
+                    sortedHeaders['Other Headers'] = {};
+                }
+                sortedHeaders['Other Headers'][header] = value;
+            }
+        });
+        
+        // Display headers by category
+        Object.entries(sortedHeaders).forEach(([category, headers]) => {
+            if (Object.keys(headers).length > 0) {
+                html += `
+                    <div class="headers-category">
+                        <h4>${category}</h4>
+                        <div class="headers-list">`;
+                
+                Object.entries(headers).forEach(([header, value]) => {
+                    const headerClass = getHeaderClass(header);
+                    html += `
+                        <div class="header-item ${headerClass}">
+                            <div class="header-name">${header}</div>
+                            <div class="header-value">${value}</div>
+                        </div>`;
+                });
+                
+                html += `</div></div>`;
+            }
+        });
+    }
+    
+    html += '</div>';
+    element.innerHTML = html;
+}
+
+function getHeaderClass(header) {
+    // Add specific classes for security-related headers
+    const securityHeaders = [
+        'X-Frame-Options',
+        'X-Content-Type-Options',
+        'X-XSS-Protection',
+        'Content-Security-Policy',
+        'Strict-Transport-Security',
+        'Referrer-Policy'
+    ];
+    
+    if (securityHeaders.includes(header)) {
+        return 'security-header';
+    }
+    
+    return '';
+}
+
+function updateSecurityResults(data) {
+    const securityTab = document.getElementById('security');
+    if (!securityTab) return;
+
+    if (data.error) {
+        securityTab.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
         return;
     }
 
+    let html = '<div class="results-container"><div class="security-info">';
+
+    // Add VirusTotal Information
+    if (data.virustotal) {
+        const virusTotal = data.virustotal;
+        const scoreClass = virusTotal.score >= 80 ? 'text-success' : 
+                          virusTotal.score >= 60 ? 'text-warning' : 'text-danger';
+        
+        html += `
+            <div class="security-section">
+                <h3>VirusTotal Report</h3>
+                <div class="security-score">
+                    <div class="vt-score ${scoreClass}">
+                        <span class="score-value">${virusTotal.score}</span>
+                        <span class="score-label">/100</span>
+                    </div>
+                    <div class="vt-details">
+                        <div>Detections: ${virusTotal.positives}/${virusTotal.total_scanners} scanners</div>
+                        <div>Status: ${virusTotal.status}</div>
+                        <div>Google Safe Browsing: ${virusTotal.scans['Google Safe Browsing']?.detected ? virusTotal.scans['Google Safe Browsing'].result : 'Clean'}</div>
+                    </div>
+                </div>
+                <div class="vt-link">
+                    <a href="${virusTotal.url}" target="_blank" rel="noopener noreferrer">
+                        View Full Report <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>`;
+
+        // Add detailed scan results if available
+        if (virusTotal.scans && Object.keys(virusTotal.scans).length > 0) {
+            html += `
+                <div class="scan-results">
+                    <h4>Scan Results</h4>`;
+            
+            // Sort scanners alphabetically
+            const sortedScanners = Object.keys(virusTotal.scans).sort();
+            
+            sortedScanners.forEach(scanner => {
+                const result = virusTotal.scans[scanner];
+                const resultClass = result.detected ? 'text-danger' : 'text-success';
+                const resultIcon = result.detected ? 'fa-times-circle' : 'fa-check-circle';
+                
+                html += `
+                    <div class="scan-result-item">
+                        <div class="scanner-info">
+                            <div class="scanner-name">${scanner}</div>
+                            ${result.version ? `<div class="scanner-version">v${result.version}</div>` : ''}
+                        </div>
+                        <div class="scanner-result ${resultClass}">
+                            <i class="fas ${resultIcon}"></i>
+                            ${result.detected ? result.result : 'Clean'}
+                        </div>
+                    </div>`;
+            });
+            
+            html += `</div>`;
+        }
+        html += `</div>`;
+    }
+
+    // Last Scan Date
+    if (data.scan_date) {
+        html += `
+            <div class="security-section">
+                <div class="scan-date">
+                    Last Scan: ${new Date(data.scan_date).toLocaleString()}
+                </div>
+            </div>`;
+    }
+
+    html += '</div></div>';
+    securityTab.innerHTML = html;
+}
+
+function checkDomain(updateType = 'all') {
+    const domain = document.getElementById('domain').value.trim();
+    
+    if (!domain) {
+        showAlert('Please enter a domain name', 'danger');
+        return Promise.reject('No domain provided');
+    }
+
     // Show loading state
-    const checkButton = document.querySelector('button[onclick="checkDomain()"]');
-    const originalText = checkButton.innerHTML;
-    checkButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-    checkButton.disabled = true;
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('d-none');
+    }
 
-    try {
-        // Add domain-entered class to body
-        document.body.classList.add('domain-entered');
+    // Show results containers if they exist
+    const resultTabs = document.getElementById('resultTabs');
+    const resultTabsContent = document.getElementById('resultTabsContent');
+    if (resultTabs) resultTabs.style.display = 'block';
+    if (resultTabsContent) resultTabsContent.style.display = 'block';
+    
+    // Add domain-entered class
+    document.body.classList.add('domain-entered');
+    
+    // Hide hint message
+    const hintMessage = document.getElementById('hint-message');
+    if (hintMessage) {
+        hintMessage.style.display = 'none';
+    }
 
-        // Get the current active tab
-        const activeTab = document.querySelector('.nav-link.active');
-        const tabId = activeTab ? activeTab.getAttribute('data-bs-target').replace('#', '') : 'dns';
-        
-        // Get the endpoint based on the active tab
-        const endpoint = getEndpointForTab(tabId);
-        
-        // Make the API request
-        const response = await fetch(`/api/check_${endpoint}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ domain })
-        });
+    // Get current active tab
+    const activeTab = document.querySelector('.tab-pane.active');
+    const isFirstCheck = !activeTab;
 
+    // Show appropriate elements based on active tab
+    if (activeTab) {
+        if (activeTab.id === 'dns') {
+            const dnsElements = document.querySelectorAll('.dns-controls, .dns-resolvers, .dns-table-wrapper, .dns-table, #dns .nav-pills');
+            dnsElements.forEach(element => {
+                element.style.display = 'block';
+            });
+        }
+    }
+
+    // Check if we have cached results for the requested update type
+    if (updateType !== 'all' && tabResults[updateType]) {
+        updateTabResults(updateType, tabResults[updateType]);
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+        return Promise.resolve({ [updateType]: tabResults[updateType] });
+    }
+
+    // Make API request
+    return fetch('/api/check', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            domain: domain,
+            update_type: updateType
+        })
+    })
+    .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received data:', data);
+        
+        if (data.error) {
+            showAlert(data.error, 'danger');
+            return data;
+        }
 
-        const data = await response.json();
-        
-        // Update the results for the current tab
-        updateTabResults(endpoint, data);
-        
-        // Show success message
-        showAlert('Domain check completed successfully', 'success');
-        
-    } catch (error) {
+        // Update all tabs if updateType is 'all'
+        if (updateType === 'all') {
+            Object.entries(data).forEach(([endpoint, endpointData]) => {
+                if (endpointData && typeof endpointData === 'object') {
+                    updateTabResults(endpoint, endpointData);
+                }
+            });
+        } else if (data[updateType]) {
+            // Update specific tab
+            updateTabResults(updateType, data[updateType]);
+        }
+
+        // If this is the first check, activate the DNS tab after loading
+        if (isFirstCheck) {
+            activateTab('dns');
+            const dnsTab = document.querySelector('[data-bs-target="#dns"]');
+            if (dnsTab) {
+                dnsTab.classList.add('active');
+            }
+            initializeDNSTab();
+        }
+
+        // Show all content sections when domain check is successful
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            const contentSections = pane.querySelectorAll('.content-section, .live-preview, .results-section, .iframe-info, .iframe-test-container');
+            contentSections.forEach(section => {
+                section.style.display = 'block';
+            });
+        });
+
+        return data;
+    })
+    .catch(error => {
         console.error('Error:', error);
-        showAlert(error.message || 'An error occurred while checking the domain', 'danger');
-    } finally {
-        // Restore button state
-        checkButton.innerHTML = originalText;
-        checkButton.disabled = false;
-    }
+        showAlert(error.message, 'danger');
+        throw error;
+    })
+    .finally(() => {
+        // Hide loading state
+        if (loadingElement) {
+            loadingElement.classList.add('d-none');
+        }
+    });
 }
+
+// Add event listener for DNS record type selector
+document.addEventListener('DOMContentLoaded', function() {
+    const dnsRecordType = document.getElementById('dnsRecordType');
+    if (dnsRecordType) {
+        dnsRecordType.addEventListener('change', function() {
+            const domain = document.getElementById('domain').value.trim();
+            if (domain && dnsResults) {
+                updateDNSResults(dnsResults);
+            }
+        });
+    }
+});
