@@ -335,6 +335,7 @@ body.domain-entered #dns.active.show .nav-pills {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    max-width: 1000px;
 }
 
 .dns-table-wrapper table {
@@ -342,6 +343,7 @@ body.domain-entered #dns.active.show .nav-pills {
     border-collapse: separate;
     border-spacing: 0;
     margin: 0;
+    table-layout: fixed;
 }
 
 .dns-table-wrapper th,
@@ -369,10 +371,14 @@ body.domain-entered #dns.active.show .nav-pills {
     background-color: #f8f9fa;
 }
 
-/* Record type column with different colors per type */
+/* Record type column */
+.dns-table-wrapper td:first-child,
+.dns-table-wrapper th:first-child {
+    width: 80px;
+}
+
 .dns-table-wrapper td:first-child {
     font-weight: 600;
-    width: 80px;
 }
 
 /* Colors for different record types */
@@ -409,21 +415,29 @@ body.domain-entered #dns.active.show .nav-pills {
 }
 
 /* Domain column */
-.dns-table-wrapper td:nth-child(2) {
-    color: #495057;
-    width: 160px;
+.dns-table-wrapper td:nth-child(2),
+.dns-table-wrapper th:nth-child(2) {
+    width: 140px;
 }
 
-/* Value column */
+/* Value column - let it take the remaining space but with max-width */
+.dns-table-wrapper td:nth-child(3),
+.dns-table-wrapper th:nth-child(3) {
+    width: auto;
+    max-width: 600px;
+}
+
+/* Value column content */
 .dns-table-wrapper td:nth-child(3) {
     font-family: monospace;
     color: #212529;
     word-break: break-all;
+    white-space: pre-wrap;
 }
 
 /* TTL column */
-.dns-table-wrapper td:last-child {
-    color: #6c757d;
+.dns-table-wrapper td:last-child,
+.dns-table-wrapper th:last-child {
     width: 80px;
     text-align: right;
 }
@@ -448,20 +462,22 @@ body.domain-entered #dns.active.show .nav-pills {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .dns-table-wrapper th,
-    .dns-table-wrapper td {
-        padding: 6px 8px;
+    .dns-table-wrapper {
+        max-width: 100%;
     }
-    
-    .dns-table-wrapper td:first-child {
+
+    .dns-table-wrapper td:first-child,
+    .dns-table-wrapper th:first-child {
         width: 60px;
     }
     
-    .dns-table-wrapper td:nth-child(2) {
-        width: 120px;
+    .dns-table-wrapper td:nth-child(2),
+    .dns-table-wrapper th:nth-child(2) {
+        width: 100px;
     }
     
-    .dns-table-wrapper td:last-child {
+    .dns-table-wrapper td:last-child,
+    .dns-table-wrapper th:last-child {
         width: 60px;
     }
 }
