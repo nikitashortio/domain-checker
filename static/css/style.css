@@ -1322,13 +1322,18 @@ body.domain-entered #security.active.show .results-container {
 .input-group-text {
     background-color: #f8f9fa;
     border-right: none;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
 }
 
 .input-group .form-control {
     border-left: none;
     border-right: none;
+    border-radius: 0;
 }
 
 .input-group .btn {
     border-left: none;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
 }
