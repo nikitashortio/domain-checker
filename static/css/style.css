@@ -329,56 +329,86 @@ body.domain-entered #dns.active.show .nav-pills {
 
 /* DNS Table Styles */
 .dns-table-wrapper {
-    width: 100%;
+    overflow-x: auto;
     margin-bottom: 1rem;
-    background-color: #fff;
+    background: white;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    max-width: 800px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dns-table-wrapper table {
+.dns-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    table-layout: fixed;
+    border-collapse: collapse;
+    margin-bottom: 0;
 }
 
-.dns-table-wrapper th,
-.dns-table-wrapper td {
-    padding: 8px 12px;
+.dns-table th,
+.dns-table td {
+    padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #e9ecef;
-    font-size: 14px;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
 }
 
-.dns-table-wrapper th {
+.dns-table th {
     background-color: #f8f9fa;
     font-weight: 600;
     color: #495057;
-    text-transform: uppercase;
-    font-size: 12px;
-    letter-spacing: 0.5px;
 }
 
-.dns-table-wrapper tr:last-child td {
+.dns-table td {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+/* Column widths */
+.dns-table th:nth-child(1),
+.dns-table td:nth-child(1) {
+    width: 10%;
+    min-width: 80px;
+}
+
+.dns-table th:nth-child(2),
+.dns-table td:nth-child(2) {
+    width: 30%;
+    min-width: 200px;
+}
+
+.dns-table th:nth-child(3),
+.dns-table td:nth-child(3) {
+    width: 50%;
+    min-width: 300px;
+}
+
+.dns-table th:nth-child(4),
+.dns-table td:nth-child(4) {
+    width: 10%;
+    min-width: 80px;
+}
+
+.dns-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.dns-table-wrapper tr:hover {
+.dns-table tbody tr:hover {
     background-color: #f8f9fa;
 }
 
-/* Record type column */
-.dns-table-wrapper td:first-child,
-.dns-table-wrapper th:first-child {
-    width: 60px;
+/* Add tooltip-like behavior for truncated text */
+.dns-table td {
+    position: relative;
 }
 
-.dns-table-wrapper td:first-child {
-    font-weight: 600;
+.dns-table td:hover {
+    overflow: visible;
+    white-space: normal;
+    word-break: break-all;
+    background-color: #fff;
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Colors for different record types */
